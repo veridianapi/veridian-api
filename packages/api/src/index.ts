@@ -5,6 +5,7 @@ import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
 import { healthRoutes } from "./routes/health.js";
 import { verificationRoutes } from "./routes/verifications.js";
+import { billingRoutes } from "./routes/billing.js";
 
 const app = Fastify({ logger: true });
 
@@ -17,6 +18,7 @@ await app.register(rateLimit, {
 
 await app.register(healthRoutes);
 await app.register(verificationRoutes);
+await app.register(billingRoutes);
 
 const port = Number(process.env.PORT) || 3001;
 
