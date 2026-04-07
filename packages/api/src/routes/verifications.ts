@@ -4,6 +4,7 @@ import { randomUUID } from "crypto";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { s3 as s3Client } from "../lib/aws.js";
 import { supabase } from "../lib/supabase.js";
+import { addVerificationJob } from "../lib/queue.js";
 import { authenticate } from "../middleware/auth.js";
 
 const VerificationSchema = z.object({
@@ -34,6 +35,7 @@ async function uploadToS3(
 }
 
 export async function verificationRoutes(app: FastifyInstance): Promise<void> {
+  // POST /v1/verifications
   app.post<{ Body: VerificationBody }>(
     "/v1/verifications",
     { preHandler: authenticate },
@@ -76,10 +78,46 @@ export async function verificationRoutes(app: FastifyInstance): Promise<void> {
         return;
       }
 
+      await addVerificationJob({
+        verification_id: verificationId,
+        customer_id: request.customerId,
+        document_type: body.document_type,
+        s3_prefix: prefix,
+        webhook_url: body.webhook_url ?? null,
+      });
+
       reply.status(202).send({
         verification_id: verificationId,
         status: "pending",
       });
+    }
+  );
+
+  // GET /v1/verifications/:id
+  app.get<{ Params: { id: string } }>(
+    "/v1/verifications/:id",
+    { preHandler: authenticate },
+    async (request, reply) => {
+      const { id } = request.params;
+
+      const { data, error } = await supabase
+        .from("verifications")
+        .select(
+          `id, status, document_type, risk_score, face_match_score,
+           sanctions_hit, full_name, date_of_birth, document_number,
+           expiry_date, nationality, webhook_url, metadata,
+           created_at, processed_at`
+        )
+        .eq("id", id)
+        .eq("customer_id", request.customerId)
+        .single();
+
+      if (error || !data) {
+        reply.status(404).send({ error: "Verification not found" });
+        return;
+      }
+
+      reply.send(data);
     }
   );
 }
