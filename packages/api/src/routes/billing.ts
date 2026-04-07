@@ -58,7 +58,7 @@ export async function billingRoutes(app: FastifyInstance): Promise<void> {
         reply.send({ checkout_url: checkoutUrl });
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
-        request.log.error(err);
+        request.log.error({ err }, "Checkout creation failed");
         reply.status(500).send({ error: "Failed to create checkout", detail: message });
       }
     }
@@ -101,7 +101,7 @@ export async function billingRoutes(app: FastifyInstance): Promise<void> {
     scope.post("/v1/billing/webhook", async (request, reply) => {
       const webhookSecret = process.env.PADDLE_WEBHOOK_SECRET;
       if (!webhookSecret) {
-        request.log.error("PADDLE_WEBHOOK_SECRET is not set");
+        request.log.error({}, "PADDLE_WEBHOOK_SECRET is not set");
         reply.status(500).send({ error: "Webhook secret not configured" });
         return;
       }
@@ -170,7 +170,7 @@ export async function billingRoutes(app: FastifyInstance): Promise<void> {
             request.log.info(`Unhandled Paddle event: ${event.eventType}`);
         }
       } catch (err) {
-        request.log.error("Error processing Paddle webhook:", err);
+        request.log.error({ err }, "Error processing Paddle webhook");
         // Still return 200 — Paddle will retry on non-2xx, and DB errors
         // shouldn't cause unnecessary retries for already-verified events.
       }
