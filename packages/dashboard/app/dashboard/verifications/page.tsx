@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase-server";
 
 const PAGE_SIZE = 20;
@@ -66,6 +67,8 @@ export default async function VerificationsPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  if (!user) redirect("/login");
 
   let query = supabase
     .from("verifications")

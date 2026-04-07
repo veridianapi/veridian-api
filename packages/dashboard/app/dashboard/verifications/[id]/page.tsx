@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase-server";
 
@@ -53,6 +53,8 @@ export default async function VerificationDetailPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  if (!user) redirect("/login");
 
   const { data: v } = await supabase
     .from("verifications")

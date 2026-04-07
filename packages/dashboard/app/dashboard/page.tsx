@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase-server";
 
 function StatusBadge({ status }: { status: string }) {
@@ -66,6 +67,8 @@ export default async function DashboardPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  if (!user) redirect("/login");
 
   const [{ data: customer }, { data: verifications }] = await Promise.all([
     supabase.from("customers").select("plan").eq("id", user!.id).single(),

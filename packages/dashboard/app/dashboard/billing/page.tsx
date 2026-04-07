@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase-server";
 
 const PLANS = [
@@ -55,6 +56,8 @@ export default async function BillingPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  if (!user) redirect("/login");
 
   const [{ data: customer }, { count: usageCount }] = await Promise.all([
     supabase
