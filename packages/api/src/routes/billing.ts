@@ -118,7 +118,7 @@ export async function billingRoutes(app: FastifyInstance): Promise<void> {
       try {
         event = await paddle.webhooks.unmarshal(rawBody, webhookSecret, signature);
       } catch (err) {
-        request.log.warn("Paddle webhook signature verification failed:", err);
+        request.log.warn({ err }, "Paddle webhook signature verification failed");
         reply.status(400).send({ error: "Invalid webhook signature" });
         return;
       }
