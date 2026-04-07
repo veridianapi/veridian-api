@@ -13,7 +13,7 @@ const VerificationSchema = z.object({
   selfie: z.string().min(1, "selfie is required"),
   document_type: z.enum(["passport", "driving_licence", "national_id"]),
   webhook_url: z.string().url().optional(),
-  metadata: z.record(z.unknown()).optional(),
+   metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 type VerificationBody = z.infer<typeof VerificationSchema>;
