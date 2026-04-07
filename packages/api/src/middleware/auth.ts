@@ -21,6 +21,7 @@ export async function authenticate(
 
   const token = authHeader.slice(7);
   const hashedKey = createHash("sha256").update(token).digest("hex");
+  console.log("[DEBUG auth] hashedKey:", hashedKey);
 
   const { data, error } = await supabase
     .from("api_keys")
@@ -28,6 +29,7 @@ export async function authenticate(
     .eq("key_hash", hashedKey)
     .eq("is_active", true)
     .single();
+  console.log("[DEBUG auth] supabase response:", { data, error });
 
   if (error || !data) {
     reply.status(401).send({ error: "Invalid API key" });

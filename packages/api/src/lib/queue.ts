@@ -1,18 +1,5 @@
 import { Queue } from "bullmq";
-
-const redisUrl = process.env.REDIS_URL;
-if (!redisUrl) throw new Error("Missing REDIS_URL env var");
-
-// Parse REDIS_URL into ioredis connection options
-const url = new URL(redisUrl);
-const connection = {
-  host: url.hostname,
-  port: Number(url.port) || 6379,
-  ...(url.password ? { password: url.password } : {}),
-  ...(url.protocol === "rediss:" ? { tls: {} } : {}),
-};
-
-export const verificationQueue = new Queue("verifications", { connection });
+import { Redis } from "ioredis";
 
 export interface VerificationJobData {
   verification_id: string;
@@ -22,10 +9,28 @@ export interface VerificationJobData {
   webhook_url: string | null;
 }
 
+let queueInstance: Queue | null = null;
+
+function getQueue(): Queue {
+  if (queueInstance) return queueInstance;
+
+  const redisUrl = process.env.REDIS_URL;
+  if (!redisUrl) throw new Error("Missing REDIS_URL env var");
+
+  const connection = new Redis(redisUrl, {
+    tls: { rejectUnauthorized: false },
+    maxRetriesPerRequest: null,
+    enableReadyCheck: false,
+  });
+
+  queueInstance = new Queue("verifications", { connection });
+  return queueInstance;
+}
+
 export async function addVerificationJob(
   data: VerificationJobData
 ): Promise<void> {
-  await verificationQueue.add("process", data, {
+  await getQueue().add("process", data, {
     attempts: 3,
     backoff: { type: "exponential", delay: 5000 },
     removeOnComplete: 100,

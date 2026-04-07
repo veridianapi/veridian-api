@@ -11,6 +11,9 @@
     "start": "node dist/index.js",
     "start:worker": "node dist/workers/verification.worker.js",
     "load-ofac": "tsx scripts/load-ofac.ts",
+    "test-redis": "tsx scripts/test-redis.ts",
+    "check-queue": "tsx scripts/check-queue.ts",
+    "clear-queue": "tsx scripts/clear-queue.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

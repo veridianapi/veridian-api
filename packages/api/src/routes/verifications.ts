@@ -40,56 +40,62 @@ export async function verificationRoutes(app: FastifyInstance): Promise<void> {
     "/v1/verifications",
     { preHandler: authenticate },
     async (request, reply) => {
-      const parsed = VerificationSchema.safeParse(request.body);
+      try {
+        const parsed = VerificationSchema.safeParse(request.body);
 
-      if (!parsed.success) {
-        reply.status(400).send({
-          error: "Validation failed",
-          details: parsed.error.flatten(),
+        if (!parsed.success) {
+          reply.status(400).send({
+            error: "Validation failed",
+            details: parsed.error.issues,
+          });
+          return;
+        }
+
+        const body = parsed.data;
+        const verificationId = randomUUID();
+        const bucket = process.env.AWS_S3_BUCKET!;
+        const prefix = `verifications/${verificationId}`;
+
+        await Promise.all([
+          uploadToS3(bucket, `${prefix}/document_front`, body.document_front),
+          body.document_back
+            ? uploadToS3(bucket, `${prefix}/document_back`, body.document_back)
+            : Promise.resolve(),
+          uploadToS3(bucket, `${prefix}/selfie`, body.selfie),
+        ]);
+
+        const { error } = await supabase.from("verifications").insert({
+          id: verificationId,
+          customer_id: request.customerId,
+          document_type: body.document_type,
+          status: "pending",
+          webhook_url: body.webhook_url ?? null,
+          metadata: body.metadata ?? null,
+          s3_prefix: prefix,
         });
-        return;
+
+        if (error) {
+          reply.status(500).send({ error: "Failed to create verification" });
+          return;
+        }
+
+        await addVerificationJob({
+          verification_id: verificationId,
+          customer_id: request.customerId,
+          document_type: body.document_type,
+          s3_prefix: prefix,
+          webhook_url: body.webhook_url ?? null,
+        });
+
+        reply.status(202).send({
+          verification_id: verificationId,
+          status: "pending",
+        });
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        request.log.error(err);
+        reply.status(500).send({ error: "Internal error", detail: message });
       }
-
-      const body = parsed.data;
-      const verificationId = randomUUID();
-      const bucket = process.env.AWS_S3_BUCKET!;
-      const prefix = `verifications/${verificationId}`;
-
-      await Promise.all([
-        uploadToS3(bucket, `${prefix}/document_front`, body.document_front),
-        body.document_back
-          ? uploadToS3(bucket, `${prefix}/document_back`, body.document_back)
-          : Promise.resolve(),
-        uploadToS3(bucket, `${prefix}/selfie`, body.selfie),
-      ]);
-
-      const { error } = await supabase.from("verifications").insert({
-        id: verificationId,
-        customer_id: request.customerId,
-        document_type: body.document_type,
-        status: "pending",
-        webhook_url: body.webhook_url ?? null,
-        metadata: body.metadata ?? null,
-        s3_prefix: prefix,
-      });
-
-      if (error) {
-        reply.status(500).send({ error: "Failed to create verification" });
-        return;
-      }
-
-      await addVerificationJob({
-        verification_id: verificationId,
-        customer_id: request.customerId,
-        document_type: body.document_type,
-        s3_prefix: prefix,
-        webhook_url: body.webhook_url ?? null,
-      });
-
-      reply.status(202).send({
-        verification_id: verificationId,
-        status: "pending",
-      });
     }
   );
 

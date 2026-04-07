@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { Worker, Job } from "bullmq";
+import { Redis } from "ioredis";
 import { createHmac } from "crypto";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import {
@@ -198,14 +199,14 @@ async function deliverWebhook(
 
 // ── Worker ────────────────────────────────────────────────────────────────────
 
-const redisUrl = process.env.REDIS_URL!;
-const url = new URL(redisUrl);
-const connection = {
-  host: url.hostname,
-  port: Number(url.port) || 6379,
-  ...(url.password ? { password: url.password } : {}),
-  ...(url.protocol === "rediss:" ? { tls: {} } : {}),
-};
+const redisUrl = process.env.REDIS_URL;
+if (!redisUrl) throw new Error("Missing REDIS_URL env var");
+
+const connection = new Redis(redisUrl, {
+  tls: { rejectUnauthorized: false },
+  maxRetriesPerRequest: null,
+  enableReadyCheck: false,
+});
 
 async function processVerification(
   job: Job<VerificationJobData>
@@ -219,16 +220,34 @@ async function processVerification(
   ]);
 
   // 2. Textract — extract document fields
-  const textractResponse = await textract.send(
-    new AnalyzeDocumentCommand({
-      Document: { Bytes: documentFront },
-      FeatureTypes: ["FORMS"],
-    })
-  );
-  const extracted = extractFields(textractResponse.Blocks ?? []);
+  let extracted: ExtractedFields;
+  try {
+    const textractResponse = await textract.send(
+      new AnalyzeDocumentCommand({
+        Document: { Bytes: documentFront },
+        FeatureTypes: ["FORMS"],
+      })
+    );
+    extracted = extractFields(textractResponse.Blocks ?? []);
+  } catch (err) {
+    console.warn(`[${verification_id}] Textract failed, continuing with null fields:`, err);
+    extracted = {
+      full_name: null,
+      date_of_birth: null,
+      document_number: null,
+      expiry_date: null,
+      nationality: null,
+    };
+  }
 
   // 3. Rekognition — face match
-  const faceMatchScore = await compareFaces(documentFront, selfie);
+  let faceMatchScore: number;
+  try {
+    faceMatchScore = await compareFaces(documentFront, selfie);
+  } catch (err) {
+    console.warn(`[${verification_id}] Rekognition failed, defaulting face score to 0:`, err);
+    faceMatchScore = 0;
+  }
 
   // 4. OFAC sanctions screening
   const sanctionsHit = extracted.full_name
