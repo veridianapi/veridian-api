@@ -70,7 +70,10 @@ export default async function DashboardPage() {
 
   if (!user) redirect("/login");
 
-  const [{ data: customer }, { data: verifications }] = await Promise.all([
+  const [
+    { data: customer },
+    { data: verifications, error: verificationsError },
+  ] = await Promise.all([
     supabase.from("customers").select("plan").eq("id", user!.id).single(),
     supabase
       .from("verifications")
@@ -80,10 +83,12 @@ export default async function DashboardPage() {
       .limit(10),
   ]);
 
-  const { data: counts } = await supabase
+  const { data: counts, error: countsError } = await supabase
     .from("verifications")
     .select("status")
     .eq("customer_id", user!.id);
+
+  const queryError = countsError || verificationsError;
 
   const tally = (counts ?? []).reduce<Record<string, number>>((acc, r) => {
     acc[r.status] = (acc[r.status] ?? 0) + 1;
@@ -166,6 +171,15 @@ export default async function DashboardPage() {
           }
         />
       </div>
+
+      {/* Query error banner */}
+      {queryError && (
+        <div className="mb-6 bg-red-50 border border-red-200 rounded-xl px-5 py-4">
+          <p className="text-sm font-medium text-red-700">
+            Unable to load verification data. Please refresh the page.
+          </p>
+        </div>
+      )}
 
       {/* Recent verifications */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100">

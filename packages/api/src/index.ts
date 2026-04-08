@@ -10,7 +10,14 @@ import { billingRoutes } from "./routes/billing.js";
 const app = Fastify({ logger: true });
 
 await app.register(helmet);
-await app.register(cors);
+
+// Restrict origins in production via ALLOWED_ORIGINS (comma-separated).
+// /v1/billing/webhook is exempt — Paddle authenticates via HMAC signature.
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",").map((s) => s.trim());
+await app.register(cors, {
+  origin: allowedOrigins?.length ? allowedOrigins : true,
+});
+
 await app.register(rateLimit, {
   max: 100,
   timeWindow: "1 minute",

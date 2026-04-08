@@ -12,8 +12,15 @@ import { s3, textract, rekognition } from "../lib/aws.js";
 import { supabase } from "../lib/supabase.js";
 import type { VerificationJobData } from "../lib/queue.js";
 
-const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET ?? "";
-const S3_BUCKET = process.env.AWS_S3_BUCKET!;
+const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
+if (!WEBHOOK_SECRET) {
+  console.warn("WEBHOOK_SECRET is not set — outbound webhook signatures will be empty strings");
+}
+
+const S3_BUCKET = process.env.AWS_S3_BUCKET;
+if (!S3_BUCKET) {
+  throw new Error("Missing AWS_S3_BUCKET env var");
+}
 
 // ── S3 helpers ────────────────────────────────────────────────────────────────
 
@@ -171,7 +178,7 @@ async function deliverWebhook(
   payload: Record<string, unknown>
 ): Promise<void> {
   const body = JSON.stringify(payload);
-  const signature = createHmac("sha256", WEBHOOK_SECRET)
+  const signature = createHmac("sha256", WEBHOOK_SECRET ?? "")
     .update(body)
     .digest("hex");
 
@@ -212,7 +219,7 @@ async function processVerification(
   job: Job<VerificationJobData>
 ): Promise<void> {
   const { verification_id, s3_prefix, webhook_url } = job.data;
-
+  try {
   // 1. Download images from S3
   const [documentFront, selfie] = await Promise.all([
     downloadFromS3(`${s3_prefix}/document_front`),
@@ -294,11 +301,20 @@ async function processVerification(
       ...extracted,
     });
   }
+  } catch (err) {
+    // Re-throw so BullMQ marks the job as failed and applies retry backoff.
+    console.error(`[${verification_id}] processVerification failed:`, err);
+    throw err;
+  }
 }
 
-new Worker<VerificationJobData>("verifications", processVerification, {
+const worker = new Worker<VerificationJobData>("verifications", processVerification, {
   connection,
   concurrency: 5,
+});
+
+worker.on("error", (err) => {
+  console.error("Verification worker error:", err);
 });
 
 console.log("Verification worker started");

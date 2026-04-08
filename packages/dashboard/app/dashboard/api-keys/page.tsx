@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 
 interface ApiKey {
@@ -22,6 +23,7 @@ function CopyIcon() {
 export default function ApiKeysPage() {
   const [keys, setKeys] = useState<ApiKey[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [newKeyName, setNewKeyName] = useState("");
   const [createdKey, setCreatedKey] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
@@ -30,19 +32,34 @@ export default function ApiKeysPage() {
   const [copied, setCopied] = useState(false);
 
   const supabase = createClient();
+  const router = useRouter();
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) router.push("/login");
+    });
+  }, [supabase, router]);
 
   const fetchKeys = useCallback(async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    const { data } = await supabase
-      .from("api_keys")
-      .select("id, name, created_at, last_used_at, is_active")
-      .eq("customer_id", user!.id)
-      .eq("is_active", true)
-      .order("created_at", { ascending: false });
-    setKeys(data ?? []);
-    setLoading(false);
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data, error: fetchError } = await supabase
+        .from("api_keys")
+        .select("id, name, created_at, last_used_at, is_active")
+        .eq("customer_id", user.id)
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+      if (fetchError) throw fetchError;
+      setKeys(data ?? []);
+    } catch {
+      setError("Failed to load API keys. Please refresh the page.");
+    } finally {
+      setLoading(false);
+    }
   }, [supabase]);
 
   useEffect(() => {
@@ -52,35 +69,43 @@ export default function ApiKeysPage() {
   async function createKey() {
     if (!newKeyName.trim()) return;
     setCreating(true);
+    setError(null);
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) { router.push("/login"); return; }
 
-    // Generate a random key
-    const raw = `vrd_live_${crypto.randomUUID().replace(/-/g, "")}`;
+      // Generate a random key
+      const raw = `vrd_live_${crypto.randomUUID().replace(/-/g, "")}`;
 
-    // Hash it for storage
-    const hashBuffer = await crypto.subtle.digest(
-      "SHA-256",
-      new TextEncoder().encode(raw)
-    );
-    const keyHash = Array.from(new Uint8Array(hashBuffer))
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
+      // Hash it for storage
+      const hashBuffer = await crypto.subtle.digest(
+        "SHA-256",
+        new TextEncoder().encode(raw)
+      );
+      const keyHash = Array.from(new Uint8Array(hashBuffer))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
 
-    await supabase.from("api_keys").insert({
-      customer_id: user!.id,
-      name: newKeyName.trim(),
-      key_hash: keyHash,
-      is_active: true,
-    });
+      const { error: insertError } = await supabase.from("api_keys").insert({
+        customer_id: user.id,
+        name: newKeyName.trim(),
+        key_hash: keyHash,
+        is_active: true,
+      });
+      if (insertError) throw insertError;
 
-    setCreatedKey(raw);
-    setNewKeyName("");
-    setCreating(false);
-    setShowForm(false);
-    fetchKeys();
+      setCreatedKey(raw);
+      setNewKeyName("");
+      setShowForm(false);
+      fetchKeys();
+    } catch {
+      setError("Failed to create API key. Please try again.");
+    } finally {
+      setCreating(false);
+    }
   }
 
   async function revokeKey(id: string) {
@@ -93,15 +118,6 @@ export default function ApiKeysPage() {
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  }
-
-  function maskKey(key: string) {
-    // Show prefix + last 4 chars: vrd_live_••••••••xxxx
-    const parts = key.split("_");
-    const prefix = parts.slice(0, 2).join("_");
-    const raw = parts.slice(2).join("_");
-    const last4 = raw.slice(-4);
-    return `${prefix}_${"•".repeat(8)}${last4}`;
   }
 
   return (
@@ -128,6 +144,13 @@ export default function ApiKeysPage() {
           Create new key
         </button>
       </div>
+
+      {/* Error banner */}
+      {error && (
+        <div className="mb-6 bg-red-50 border border-red-200 rounded-xl px-5 py-4">
+          <p className="text-sm font-medium text-red-700">{error}</p>
+        </div>
+      )}
 
       {/* New key created banner */}
       {createdKey && (
@@ -234,9 +257,6 @@ export default function ApiKeysPage() {
                 {/* Key details */}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-900">{k.name}</p>
-                  <p className="text-xs font-mono text-gray-400 mt-0.5">
-                    {maskKey(`vrd_live_${k.id.replace(/-/g, "").slice(0, 16)}`)}
-                  </p>
                 </div>
 
                 {/* Meta */}

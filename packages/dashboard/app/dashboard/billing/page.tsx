@@ -240,6 +240,9 @@ export default async function BillingPage() {
                   Current plan
                 </div>
               ) : (
+                // TODO: This raw HTML form POST does not include the Bearer token.
+                // Replace with a server action or client-side fetch that attaches
+                // the Authorization header before submitting to the billing API.
                 <form action={`${API_URL}/v1/billing/checkout`} method="POST">
                   <input type="hidden" name="plan" value={plan.id} />
                   <button

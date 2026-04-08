@@ -70,14 +70,13 @@ export default async function VerificationsPage({
 
   if (!user) redirect("/login");
 
-  let query = supabase
+  const { data: verifications, count, error: queryError } = await supabase
     .from("verifications")
     .select("id, status, risk_score, document_type, created_at", { count: "exact" })
     .eq("customer_id", user!.id)
     .order("created_at", { ascending: false })
     .range(from, from + PAGE_SIZE - 1);
 
-  const { data: verifications, count } = await query;
   const totalPages = Math.ceil((count ?? 0) / PAGE_SIZE);
 
   return (
@@ -113,7 +112,17 @@ export default async function VerificationsPage({
 
       {/* Table card */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-        {!verifications || verifications.length === 0 ? (
+        {queryError ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center px-6">
+            <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-3">
+              <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <p className="text-sm font-medium text-gray-600">Unable to load verifications</p>
+            <p className="text-xs text-gray-400 mt-1">Please refresh the page. If the problem persists, contact support.</p>
+          </div>
+        ) : !verifications || verifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center mb-3">
               <svg className="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">

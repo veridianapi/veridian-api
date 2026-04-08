@@ -31,7 +31,7 @@ export async function billingRoutes(app: FastifyInstance): Promise<void> {
     async (request, reply) => {
       const parsed = CheckoutSchema.safeParse(request.body);
       if (!parsed.success) {
-        reply.status(400).send({ error: "Validation failed", details: parsed.error.issues });
+        reply.status(400).send({ error: "Validation failed", detail: parsed.error.issues.map((i) => i.message).join("; ") });
         return;
       }
 
@@ -101,7 +101,7 @@ export async function billingRoutes(app: FastifyInstance): Promise<void> {
     scope.post("/v1/billing/webhook", async (request, reply) => {
       const webhookSecret = process.env.PADDLE_WEBHOOK_SECRET;
       if (!webhookSecret) {
-        request.log.error({}, "PADDLE_WEBHOOK_SECRET is not set");
+        request.log.error("PADDLE_WEBHOOK_SECRET is not set");
         reply.status(500).send({ error: "Webhook secret not configured" });
         return;
       }
