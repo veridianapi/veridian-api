@@ -13,7 +13,6 @@ export default function LoginPage() {
     e.preventDefault();
     setError(null);
 
-    // Basic client-side format check before hitting Supabase
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email.trim() || !emailRegex.test(email)) {
       setError("Please enter a valid email address.");
@@ -37,20 +36,18 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div
+      className="min-h-screen flex items-center justify-center px-4"
+      style={{ backgroundColor: "#0a0f0e" }}
+    >
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
           <div
             className="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4"
-            style={{ backgroundColor: "#0f6e56" }}
+            style={{ backgroundColor: "rgba(29,158,117,0.15)" }}
           >
-            <svg
-              className="w-7 h-7 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg className="w-7 h-7" fill="none" stroke="#1d9e75" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -59,43 +56,35 @@ export default function LoginPage() {
               />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Veridian</h1>
-          <p className="text-gray-500 mt-1">Sign in to your dashboard</p>
+          <h1 className="text-2xl font-bold text-white">Veridian</h1>
+          <p className="mt-1" style={{ color: "#a3b3ae" }}>
+            Sign in to your dashboard
+          </p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+        <div
+          className="rounded-2xl p-8"
+          style={{ backgroundColor: "#111916", border: "1px solid #1a2b25" }}
+        >
           {sent ? (
             <div className="text-center">
-              <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-                <svg
-                  className="w-6 h-6 text-green-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
+              <div
+                className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4"
+                style={{ backgroundColor: "rgba(29,158,117,0.15)" }}
+              >
+                <svg className="w-6 h-6" fill="none" stroke="#1d9e75" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">
-                Check your email
-              </h2>
-              <p className="text-gray-500 text-sm">
-                We sent a magic link to <strong>{email}</strong>. Click it to
-                sign in.
+              <h2 className="text-lg font-semibold text-white mb-2">Check your email</h2>
+              <p className="text-sm" style={{ color: "#a3b3ae" }}>
+                We sent a magic link to <strong className="text-white">{email}</strong>. Click it to sign in.
               </p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
+                <label htmlFor="email" className="block text-sm font-medium mb-1" style={{ color: "#a3b3ae" }}>
                   Email address
                 </label>
                 <input
@@ -105,13 +94,21 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@company.com"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:border-transparent"
-                  style={{ "--tw-ring-color": "#0f6e56" } as React.CSSProperties}
+                  className="w-full px-3 py-2.5 rounded-lg text-sm focus:outline-none focus:ring-2 min-h-[44px]"
+                  style={{
+                    backgroundColor: "#0a0f0e",
+                    border: "1px solid #1a2b25",
+                    color: "#ffffff",
+                    "--tw-ring-color": "#1d9e75",
+                  } as React.CSSProperties}
                 />
               </div>
 
               {error && (
-                <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">
+                <p
+                  className="text-sm rounded-lg px-3 py-2"
+                  style={{ color: "#f87171", backgroundColor: "rgba(220,38,38,0.10)", border: "1px solid rgba(220,38,38,0.20)" }}
+                >
                   {error}
                 </p>
               )}
@@ -119,8 +116,8 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 px-4 rounded-lg text-white text-sm font-medium transition-opacity disabled:opacity-60 cursor-pointer"
-                style={{ backgroundColor: "#0f6e56" }}
+                className="w-full py-2.5 px-4 rounded-lg text-white text-sm font-medium disabled:opacity-60 cursor-pointer min-h-[44px]"
+                style={{ backgroundColor: "#1d9e75" }}
               >
                 {loading ? "Sending…" : "Send magic link"}
               </button>

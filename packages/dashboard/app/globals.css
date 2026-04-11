@@ -1,15 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --brand: #0f6e56;
+  --brand: #1d9e75;
   --brand-bright: #1d9e75;
   --brand-dark: #0a5241;
-  --brand-light: #e6f4f0;
+  --brand-light: rgba(29,158,117,0.15);
   --sidebar-bg: #0a0f0e;
   --sidebar-text: #a3b3ae;
   --sidebar-active: #1d9e75;
-  --background: #f9fafb;
-  --foreground: #111827;
+  --background: #0a0f0e;
+  --foreground: #ffffff;
 }
 
 body {
@@ -28,7 +28,7 @@ button {
 /* Custom scrollbar */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #2d3b37 #0a0f0e;
+  scrollbar-color: #1a2b25 #0a0f0e;
 }
 
 *::-webkit-scrollbar {
@@ -37,31 +37,18 @@ button {
 }
 
 *::-webkit-scrollbar-track {
-  background: #111827;
+  background: #0a0f0e;
 }
 
 *::-webkit-scrollbar-thumb {
-  background-color: #374151;
+  background-color: #1a2b25;
   border-radius: 9999px;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background-color: #4b5563;
-}
-
-/* Main content area scrollbar */
-main::-webkit-scrollbar-track {
-  background: #f9fafb;
-}
-
-main::-webkit-scrollbar-thumb {
-  background-color: #d1d5db;
-}
-
-main::-webkit-scrollbar-thumb:hover {
-  background-color: #9ca3af;
+  background-color: #1d9e75;
 }
 
 main {
-  scrollbar-color: #d1d5db #f9fafb;
+  scrollbar-color: #1a2b25 #0a0f0e;
 }

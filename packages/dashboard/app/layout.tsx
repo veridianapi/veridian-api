@@ -16,7 +16,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.className}>
-      <body className="min-h-screen bg-gray-50">{children}</body>
+      <body className="min-h-screen" style={{ backgroundColor: "#0a0f0e", color: "#ffffff" }}>
+        {children}
+      </body>
     </html>
   );
 }
