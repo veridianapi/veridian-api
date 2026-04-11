@@ -8,8 +8,6 @@ interface ApiKey {
   id: string;
   name: string;
   created_at: string;
-  last_used_at: string | null;
-  is_active: boolean;
 }
 
 function CopyIcon() {
@@ -48,9 +46,8 @@ export default function ApiKeysPage() {
       if (!user) return;
       const { data, error: fetchError } = await supabase
         .from("api_keys")
-        .select("id, name, created_at, last_used_at, is_active")
+        .select("id, name, created_at")
         .eq("customer_id", user.id)
-        .eq("is_active", true)
         .order("created_at", { ascending: false });
       if (fetchError) throw fetchError;
       setKeys(data ?? []);
@@ -92,7 +89,6 @@ export default function ApiKeysPage() {
         customer_id: user.id,
         name: newKeyName.trim(),
         key_hash: keyHash,
-        is_active: true,
       });
       if (insertError) throw insertError;
 
@@ -109,7 +105,7 @@ export default function ApiKeysPage() {
   }
 
   async function revokeKey(id: string) {
-    await supabase.from("api_keys").update({ is_active: false }).eq("id", id);
+    await supabase.from("api_keys").delete().eq("id", id);
     setRevokeConfirm(null);
     fetchKeys();
   }
@@ -291,11 +287,6 @@ export default function ApiKeysPage() {
                 <div className="hidden sm:flex flex-col items-end text-right shrink-0">
                   <p className="text-xs" style={{ color: "#a3b3ae" }}>
                     Created {new Date(k.created_at).toLocaleDateString()}
-                  </p>
-                  <p className="text-xs mt-0.5" style={{ color: "#5a7068" }}>
-                    {k.last_used_at
-                      ? `Last used ${new Date(k.last_used_at).toLocaleDateString()}`
-                      : "Never used"}
                   </p>
                 </div>
 
