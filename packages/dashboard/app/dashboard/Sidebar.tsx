@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 
@@ -42,50 +42,198 @@ const NAV = [
       </svg>
     ),
   },
-  {
-    href: "/dashboard/settings",
-    label: "Settings",
-    icon: (
-      <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-    ),
-  },
 ];
 
-const SUPPORT_LINKS = [
-  {
-    href: "https://veridian-web-rho.vercel.app/docs",
-    label: "Docs",
-    external: true,
-    icon: (
-      <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-      </svg>
-    ),
-  },
-  {
-    href: "mailto:support@veridian.dev",
-    label: "Get help",
-    external: true,
-    icon: (
-      <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="10" strokeWidth={2} />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 17h.01" />
-      </svg>
-    ),
-  },
-];
+// ─── Profile popup ─────────────────────────────────────────────────────────
+
+interface ProfileMenuProps {
+  userEmail: string;
+  onClose: () => void;
+  onSignOut: () => void;
+}
+
+function ProfileMenu({ userEmail, onClose, onSignOut }: ProfileMenuProps) {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        bottom: "calc(100% + 8px)",
+        left: "12px",
+        width: "220px",
+        backgroundColor: "#1a2b25",
+        border: "1px solid rgba(29,158,117,0.30)",
+        borderRadius: "12px",
+        boxShadow: "0 -4px 20px rgba(0,0,0,0.4)",
+        zIndex: 60,
+        overflow: "hidden",
+      }}
+    >
+      {/* Email header */}
+      <div className="px-4 py-3">
+        <p
+          className="text-xs truncate"
+          style={{ color: "#6b8078" }}
+          title={userEmail}
+        >
+          {userEmail}
+        </p>
+      </div>
+
+      <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }} />
+
+      {/* Menu items */}
+      <div className="py-1.5">
+        <MenuLink
+          href="/dashboard/settings"
+          label="Settings"
+          onClick={onClose}
+          icon={
+            <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          }
+        />
+        <MenuLink
+          href="https://veridian-web-rho.vercel.app/docs"
+          label="Docs"
+          external
+          onClick={onClose}
+          icon={
+            <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          }
+        />
+        <MenuLink
+          href="mailto:support@veridian.dev"
+          label="Get help"
+          onClick={onClose}
+          icon={
+            <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" strokeWidth={2} />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 17h.01" />
+            </svg>
+          }
+        />
+      </div>
+
+      <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }} />
+
+      {/* Sign out */}
+      <div className="py-1.5">
+        <MenuButton
+          label="Sign out"
+          danger
+          onClick={onSignOut}
+          icon={
+            <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+          }
+        />
+      </div>
+    </div>
+  );
+}
+
+// ─── Shared menu item primitives ───────────────────────────────────────────
+
+function MenuLink({
+  href,
+  label,
+  icon,
+  external,
+  onClick,
+}: {
+  href: string;
+  label: string;
+  icon: React.ReactNode;
+  external?: boolean;
+  onClick: () => void;
+}) {
+  const [hovered, setHovered] = useState(false);
+  const linkProps = external
+    ? { target: href.startsWith("mailto:") ? undefined : "_blank" as const, rel: href.startsWith("mailto:") ? undefined : "noopener noreferrer" }
+    : {};
+
+  return (
+    <a
+      href={href}
+      {...linkProps}
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="flex items-center gap-3 mx-1.5 px-2.5 py-2 rounded-lg text-sm transition-colors"
+      style={{
+        color: hovered ? "#e2ede9" : "#a3b3ae",
+        backgroundColor: hovered ? "rgba(255,255,255,0.06)" : "transparent",
+      }}
+    >
+      {icon}
+      {label}
+    </a>
+  );
+}
+
+function MenuButton({
+  label,
+  icon,
+  danger,
+  onClick,
+}: {
+  label: string;
+  icon: React.ReactNode;
+  danger?: boolean;
+  onClick: () => void;
+}) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="flex items-center gap-3 w-full mx-1.5 px-2.5 py-2 rounded-lg text-sm transition-colors"
+      style={{
+        width: "calc(100% - 12px)",
+        color: danger ? (hovered ? "#f87171" : "#9b6464") : hovered ? "#e2ede9" : "#a3b3ae",
+        backgroundColor: hovered
+          ? danger
+            ? "rgba(153,27,27,0.15)"
+            : "rgba(255,255,255,0.06)"
+          : "transparent",
+      }}
+    >
+      {icon}
+      {label}
+    </button>
+  );
+}
+
+// ─── Sidebar ───────────────────────────────────────────────────────────────
 
 export default function Sidebar({ userEmail }: { userEmail: string }) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [signOutHover, setSignOutHover] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  // Close profile popup on outside click
+  useEffect(() => {
+    if (!profileOpen) return;
+    function handleOutside(e: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, [profileOpen]);
 
   async function handleSignOut() {
+    setProfileOpen(false);
     const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/login");
@@ -160,7 +308,7 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
           </div>
         </div>
 
-        {/* Navigation — flex-1 so it fills available space */}
+        {/* Navigation */}
         <nav className="flex-1 px-3 py-5">
           <p
             className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-widest"
@@ -216,70 +364,64 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
               );
             })}
           </div>
-
-          {/* Divider + support links */}
-          <div className="mt-4 mb-2" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }} />
-          <div className="space-y-0.5">
-            {SUPPORT_LINKS.map(({ href, label, icon }) => (
-              <a
-                key={href}
-                href={href}
-                target={href.startsWith("mailto:") ? undefined : "_blank"}
-                rel={href.startsWith("mailto:") ? undefined : "noopener noreferrer"}
-                onClick={() => setMobileOpen(false)}
-                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:text-white"
-                style={{ color: "#a3b3ae" }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.backgroundColor = "rgba(255,255,255,0.05)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.backgroundColor = "transparent";
-                }}
-              >
-                {icon}
-                {label}
-              </a>
-            ))}
-          </div>
         </nav>
 
-        {/* Footer — pinned to bottom, never scrolls away */}
+        {/* Profile footer — sticky, contains popup trigger */}
         <div
-          className="px-4 pt-4 shrink-0 sticky bottom-0"
+          ref={profileRef}
+          className="shrink-0 sticky bottom-0"
           style={{
+            position: "relative",
             borderTop: "1px solid rgba(255,255,255,0.06)",
             backgroundColor: "#0a0f0e",
-            paddingBottom: "calc(1rem + env(safe-area-inset-bottom))",
+            paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))",
           }}
         >
-          {/* Avatar + email */}
-          <div className="flex items-center gap-3 mb-2">
+          {/* Popup — rendered inside the sticky footer so it positions above it */}
+          {profileOpen && (
+            <ProfileMenu
+              userEmail={userEmail}
+              onClose={() => setProfileOpen(false)}
+              onSignOut={handleSignOut}
+            />
+          )}
+
+          {/* Trigger row */}
+          <button
+            onClick={() => setProfileOpen((o) => !o)}
+            className="flex items-center gap-3 w-full px-4 pt-3 pb-1 text-left group"
+            aria-expanded={profileOpen}
+            aria-haspopup="true"
+          >
+            {/* Avatar */}
             <div
-              className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-semibold"
-              style={{ backgroundColor: "rgba(29,158,117,0.20)", color: "#1d9e75" }}
+              className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold"
+              style={{ backgroundColor: "#1d9e75", color: "#ffffff" }}
             >
               {initials}
             </div>
-            <p className="text-xs truncate flex-1" style={{ color: "#6b8078" }}>
+
+            {/* Email */}
+            <p
+              className="text-xs truncate flex-1 text-left"
+              style={{ color: "#6b8078" }}
+            >
               {userEmail}
             </p>
-          </div>
 
-          {/* Sign out */}
-          <button
-            onClick={handleSignOut}
-            onMouseEnter={() => setSignOutHover(true)}
-            onMouseLeave={() => setSignOutHover(false)}
-            className="flex items-center gap-2 w-full px-3 rounded-lg text-xs font-medium transition-colors min-h-[44px]"
-            style={{
-              color: signOutHover ? "#f87171" : "#4a6059",
-              backgroundColor: signOutHover ? "rgba(153,27,27,0.15)" : "transparent",
-            }}
-          >
-            <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            {/* Chevron — rotates when open */}
+            <svg
+              className="w-3.5 h-3.5 shrink-0 transition-transform duration-150"
+              style={{
+                color: "#3d5249",
+                transform: profileOpen ? "rotate(180deg)" : "rotate(0deg)",
+              }}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
             </svg>
-            Sign out
           </button>
         </div>
       </aside>
