@@ -42,7 +42,18 @@ export async function billingRoutes(app: FastifyInstance): Promise<void> {
         return;
       }
 
-      const checkoutUrl = `https://buy.paddle.com/checkout/custom-checkout?items[0][priceId]=${priceId}&items[0][quantity]=1`;
+      const transaction = await paddle.transactions.create({
+        items: [{ priceId: priceId, quantity: 1 }],
+        checkout: {
+          url: process.env.PADDLE_CHECKOUT_URL ?? "https://veridian-api-dashboard.vercel.app/dashboard/billing",
+        },
+      });
+
+      const checkoutUrl = transaction.checkout?.url;
+      if (!checkoutUrl) {
+        return reply.status(500).send({ error: "No checkout URL returned" });
+      }
+
       reply.send({ checkout_url: checkoutUrl });
     }
   );
