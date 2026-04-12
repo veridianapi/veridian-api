@@ -32,14 +32,18 @@ export async function authenticate(
     }
 
     try {
-      const decoded = jwt.verify(token, jwtSecret) as jwt.JwtPayload;
+      const secret = Buffer.from(jwtSecret, "base64");
+      const decoded = jwt.verify(token, secret) as jwt.JwtPayload;
+      console.log("[JWT DEBUG] decoded sub:", decoded.sub);
+      console.log("[JWT DEBUG] token prefix:", token.substring(0, 20));
       const userId = decoded.sub;
       if (!userId) {
         reply.status(401).send({ error: "Invalid token: missing sub claim" });
         return;
       }
       request.customerId = userId;
-    } catch {
+    } catch (err) {
+      console.error("[JWT DEBUG] verify error:", (err as Error).message);
       reply.status(401).send({ error: "Invalid or expired token" });
     }
     return;
