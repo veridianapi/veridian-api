@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase-server";
+import SwitchPlanButton from "./SwitchPlanButton";
 
 const PLANS = [
   {
@@ -49,7 +50,6 @@ const PLANS = [
   },
 ];
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 export default async function BillingPage() {
   const supabase = await createClient();
@@ -230,23 +230,11 @@ export default async function BillingPage() {
                   Current plan
                 </div>
               ) : (
-                // TODO: This raw HTML form POST does not include the Bearer token.
-                // Replace with a server action or client-side fetch that attaches
-                // the Authorization header before submitting to the billing API.
-                <form action={`${API_URL}/v1/billing/checkout`} method="POST">
-                  <input type="hidden" name="plan" value={plan.id} />
-                  <button
-                    type="submit"
-                    className="w-full py-2.5 text-sm rounded-lg font-medium transition-all duration-150 min-h-[44px]"
-                    style={
-                      isUpgrade
-                        ? { backgroundColor: "#1d9e75", color: "#ffffff" }
-                        : { border: "1px solid #1a2b25", color: "#a3b3ae", backgroundColor: "transparent" }
-                    }
-                  >
-                    {isUpgrade ? "Upgrade" : "Switch"}
-                  </button>
-                </form>
+                <SwitchPlanButton
+                  plan={plan.id}
+                  label={isUpgrade ? "Upgrade" : "Switch"}
+                  isUpgrade={isUpgrade}
+                />
               )}
             </div>
           );
