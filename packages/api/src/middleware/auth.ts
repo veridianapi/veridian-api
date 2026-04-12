@@ -31,21 +31,32 @@ export async function authenticate(
       return;
     }
 
+    console.log("[JWT DEBUG] token prefix:", token.substring(0, 20));
+
+    let decoded: jwt.JwtPayload | null = null;
+
     try {
       const secret = Buffer.from(jwtSecret, "base64");
-      const decoded = jwt.verify(token, secret) as jwt.JwtPayload;
-      console.log("[JWT DEBUG] decoded sub:", decoded.sub);
-      console.log("[JWT DEBUG] token prefix:", token.substring(0, 20));
-      const userId = decoded.sub;
-      if (!userId) {
-        reply.status(401).send({ error: "Invalid token: missing sub claim" });
+      decoded = jwt.verify(token, secret, { algorithms: ["HS256"] }) as jwt.JwtPayload;
+    } catch {
+      try {
+        decoded = jwt.verify(token, jwtSecret, { algorithms: ["HS256"] }) as jwt.JwtPayload;
+      } catch (err2: unknown) {
+        const msg = err2 instanceof Error ? err2.message : String(err2);
+        console.error("[JWT DEBUG] both verify attempts failed:", msg);
+        reply.status(401).send({ error: "Invalid or expired token" });
         return;
       }
-      request.customerId = userId;
-    } catch (err) {
-      console.error("[JWT DEBUG] verify error:", (err as Error).message);
-      reply.status(401).send({ error: "Invalid or expired token" });
     }
+
+    console.log("[JWT DEBUG] decoded sub:", decoded?.sub);
+
+    if (!decoded?.sub) {
+      reply.status(401).send({ error: "Invalid token payload" });
+      return;
+    }
+
+    request.customerId = decoded.sub;
     return;
   }
 
