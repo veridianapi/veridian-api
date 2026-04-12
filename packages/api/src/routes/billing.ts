@@ -58,7 +58,8 @@ export async function billingRoutes(app: FastifyInstance): Promise<void> {
         reply.send({ checkout_url: checkoutUrl });
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
-        request.log.error({ err }, "Checkout creation failed");
+        const detail = (err as any)?.detail || (err as any)?.code || "";
+        request.log.error({ err }, `Checkout creation failed: ${message} ${detail}`);
         reply.status(500).send({ error: "Failed to create checkout", detail: message });
       }
     }
