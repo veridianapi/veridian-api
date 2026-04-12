@@ -31,9 +31,12 @@ export default function LoginPage() {
   const [oauthLoading, setOauthLoading] = useState<"github" | "google" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
+  const [sessionExpired, setSessionExpired] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setSessionExpired(params.get("expired") === "1");
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
@@ -104,6 +107,23 @@ export default function LoginPage() {
       style={{ backgroundColor: "#0a0f0e" }}
     >
       <div className="w-full max-w-md">
+        {/* Session expired banner */}
+        {sessionExpired && (
+          <div
+            className="flex items-center gap-3 px-4 py-3 rounded-xl mb-6 text-sm"
+            style={{
+              backgroundColor: "rgba(234,179,8,0.10)",
+              border: "1px solid rgba(234,179,8,0.25)",
+              color: "#fbbf24",
+            }}
+          >
+            <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Session expired — please sign in again.
+          </div>
+        )}
+
         {/* Logo */}
         <div className="text-center mb-8">
           <div
