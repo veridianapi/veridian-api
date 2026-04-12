@@ -1,12 +1,25 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { createHash } from "crypto";
 import jwt from "jsonwebtoken";
+import jwksClient from "jwks-rsa";
 import { supabase } from "../lib/supabase.js";
 
 declare module "fastify" {
   interface FastifyRequest {
     customerId: string;
   }
+}
+
+const client = jwksClient({
+  jwksUri: `${process.env.SUPABASE_URL}/auth/v1/.well-known/jwks.json`,
+  cache: true,
+  cacheMaxEntries: 5,
+  cacheMaxAge: 600000,
+});
+
+async function getSigningKey(kid: string): Promise<string> {
+  const key = await client.getSigningKey(kid);
+  return key.getPublicKey();
 }
 
 export async function authenticate(
@@ -24,39 +37,35 @@ export async function authenticate(
 
   // Supabase JWTs always start with "eyJ" (base64-encoded '{"')
   if (token.startsWith("eyJ")) {
-    const jwtSecret = process.env.SUPABASE_JWT_SECRET;
-    if (!jwtSecret) {
-      request.log.error("SUPABASE_JWT_SECRET is not configured");
-      reply.status(500).send({ error: "Server misconfiguration" });
-      return;
-    }
-
     console.log("[JWT DEBUG] token prefix:", token.substring(0, 20));
 
-    let decoded: jwt.JwtPayload | null = null;
-
     try {
-      const secret = Buffer.from(jwtSecret, "base64");
-      decoded = jwt.verify(token, secret, { algorithms: ["HS256"] }) as jwt.JwtPayload;
-    } catch {
-      try {
-        decoded = jwt.verify(token, jwtSecret, { algorithms: ["HS256"] }) as jwt.JwtPayload;
-      } catch (err2: unknown) {
-        const msg = err2 instanceof Error ? err2.message : String(err2);
-        console.error("[JWT DEBUG] both verify attempts failed:", msg);
-        reply.status(401).send({ error: "Invalid or expired token" });
+      const decoded_header = jwt.decode(token, { complete: true });
+      const kid = (decoded_header?.header as jwt.JwtHeader)?.kid;
+      if (!kid) {
+        console.error("[JWT DEBUG] missing kid in token header");
+        reply.status(401).send({ error: "Invalid token: missing key ID" });
         return;
       }
+
+      const signingKey = await getSigningKey(kid);
+      const decoded = jwt.verify(token, signingKey, {
+        algorithms: ["ES256"],
+      }) as jwt.JwtPayload;
+
+      console.log("[JWT DEBUG] decoded sub:", decoded.sub);
+
+      if (!decoded.sub) {
+        reply.status(401).send({ error: "Invalid token: missing sub claim" });
+        return;
+      }
+
+      request.customerId = decoded.sub;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("[JWT DEBUG] verify error:", msg);
+      reply.status(401).send({ error: "Invalid or expired token" });
     }
-
-    console.log("[JWT DEBUG] decoded sub:", decoded?.sub);
-
-    if (!decoded?.sub) {
-      reply.status(401).send({ error: "Invalid token payload" });
-      return;
-    }
-
-    request.customerId = decoded.sub;
     return;
   }
 
