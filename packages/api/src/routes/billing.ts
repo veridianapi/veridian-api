@@ -42,7 +42,7 @@ export async function billingRoutes(app: FastifyInstance): Promise<void> {
         return;
       }
 
-      const checkoutUrl = `https://buy.paddle.com/product/${priceId}`;
+      const checkoutUrl = `https://buy.paddle.com/checkout/custom-checkout?items[0][priceId]=${priceId}&items[0][quantity]=1`;
       reply.send({ checkout_url: checkoutUrl });
     }
   );
