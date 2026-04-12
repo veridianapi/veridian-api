@@ -42,26 +42,8 @@ export async function billingRoutes(app: FastifyInstance): Promise<void> {
         return;
       }
 
-      try {
-        const transaction = await paddle.transactions.create({
-          items: [{ priceId, quantity: 1 }],
-          customData: { customer_id: request.customerId, plan },
-          checkout: { url: process.env.PADDLE_CHECKOUT_URL ?? "https://veridian-web-rho.vercel.app" },
-        });
-
-        const checkoutUrl = transaction.checkout?.url;
-        if (!checkoutUrl) {
-          reply.status(500).send({ error: "Paddle did not return a checkout URL" });
-          return;
-        }
-
-        reply.send({ checkout_url: checkoutUrl });
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : String(err);
-        const detail = (err as any)?.detail || (err as any)?.code || "";
-        request.log.error({ err }, `Checkout creation failed: ${message} ${detail}`);
-        reply.status(500).send({ error: "Failed to create checkout", detail: message });
-      }
+      const checkoutUrl = `https://buy.paddle.com/product/${priceId}`;
+      reply.send({ checkout_url: checkoutUrl });
     }
   );
 
