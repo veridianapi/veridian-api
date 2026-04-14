@@ -8,12 +8,6 @@ export async function createClient() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
-      auth: {
-        flowType: "implicit",
-      },
-      cookieOptions: {
-        maxAge: 60 * 60 * 24 * 7, // 7 days
-      },
       cookies: {
         getAll() {
           return cookieStore.getAll();
@@ -24,7 +18,7 @@ export async function createClient() {
               cookieStore.set(name, value, options)
             );
           } catch {
-            // setAll called from a Server Component — cookies will be set by middleware
+            // Server component - ignore
           }
         },
       },
