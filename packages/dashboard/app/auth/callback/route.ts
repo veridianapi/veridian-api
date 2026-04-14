@@ -7,78 +7,63 @@ export async function GET(request: NextRequest) {
   const token_hash = searchParams.get("token_hash");
   const type = searchParams.get("type");
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/dashboard";
 
   console.log("[AUTH CALLBACK]", {
     code: !!code,
     token_hash: !!token_hash,
     type,
     origin,
-    next,
   });
 
   const cookieStore = await cookies();
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
-      auth: {
-        flowType: "pkce",
-      },
       cookies: {
         getAll() {
           return cookieStore.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, {
-              ...options,
-              maxAge: 60 * 60 * 24 * 7,
-              sameSite: "lax",
-              httpOnly: true,
-              secure: true,
-            })
-          );
+          cookiesToSet.forEach(({ name, value, options }) => {
+            cookieStore.set(name, value, options);
+          });
         },
       },
     }
   );
 
+  let error = null;
+
   if (token_hash && type) {
-    const { error } = await supabase.auth.verifyOtp({
+    const result = await supabase.auth.verifyOtp({
       token_hash,
       type: type as any,
     });
-
     console.log("[AUTH CALLBACK] verifyOtp result:", {
-      error: error ? { message: error.message, status: error.status } : null,
+      error: result.error
+        ? { message: result.error.message, status: result.error.status }
+        : null,
     });
-
-    if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
-    }
-    return NextResponse.redirect(
-      `${origin}/login?error=auth_failed&reason=${encodeURIComponent(error.message)}`
-    );
-  }
-
-  if (code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-
+    error = result.error;
+  } else if (code) {
+    const result = await supabase.auth.exchangeCodeForSession(code);
     console.log("[AUTH CALLBACK] exchangeCodeForSession result:", {
-      error: error ? { message: error.message, status: error.status } : null,
+      error: result.error
+        ? { message: result.error.message, status: result.error.status }
+        : null,
     });
-
-    if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
-    }
-    return NextResponse.redirect(
-      `${origin}/login?error=auth_failed&reason=${encodeURIComponent(error.message)}`
-    );
+    error = result.error;
+  } else {
+    console.log("[AUTH CALLBACK] no token_hash or code present");
   }
 
-  console.log("[AUTH CALLBACK] no code or token_hash present — redirecting to login");
+  if (!error) {
+    return NextResponse.redirect(`${origin}/dashboard`);
+  }
+
   return NextResponse.redirect(
-    `${origin}/login?error=auth_failed&reason=no_code`
+    `${origin}/login?error=auth_failed&reason=${encodeURIComponent(error?.message ?? "unknown")}`
   );
 }
