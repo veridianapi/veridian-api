@@ -1,31 +1,52 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase-server";
+import OnboardingChecklist from "./OnboardingChecklist";
 
+// ─── Status badge ─────────────────────────────────────────────────────────────
+// Colors follow DESIGN.md §5 Badges & Status Pills exactly.
 function StatusBadge({ status }: { status: string }) {
   const styleMap: Record<string, React.CSSProperties> = {
-    approved: { backgroundColor: "rgba(22,163,74,0.15)", color: "#4ade80" },
-    review: { backgroundColor: "rgba(251,191,36,0.15)", color: "#fbbf24" },
-    rejected: { backgroundColor: "rgba(248,113,113,0.15)", color: "#f87171" },
-    pending: { backgroundColor: "rgba(163,179,174,0.15)", color: "#a3b3ae" },
+    approved: { backgroundColor: "rgba(22,163,74,0.12)",   color: "#16a34a" },
+    review:   { backgroundColor: "rgba(217,119,6,0.12)",   color: "#d97706" },
+    rejected: { backgroundColor: "rgba(220,38,38,0.12)",   color: "#dc2626" },
+    pending:  { backgroundColor: "rgba(255,255,255,0.06)", color: "#5a7268" },
   };
   return (
     <span
-      className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium capitalize"
-      style={styleMap[status] ?? { backgroundColor: "rgba(163,179,174,0.15)", color: "#a3b3ae" }}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        padding: "2px 8px",
+        borderRadius: 9999,
+        fontSize: 11,
+        fontWeight: 500,
+        letterSpacing: "0.02em",
+        textTransform: "capitalize",
+        ...(styleMap[status] ?? { backgroundColor: "rgba(255,255,255,0.06)", color: "#5a7268" }),
+      }}
     >
       {status}
     </span>
   );
 }
 
+// ─── Risk score ───────────────────────────────────────────────────────────────
 function RiskScore({ score }: { score: number | null }) {
-  if (score === null) return <span style={{ color: "#5a7068" }}>—</span>;
+  if (score === null) return <span style={{ color: "#5a7268" }}>—</span>;
   const color =
-    score >= 70 ? "#f87171" : score >= 30 ? "#fbbf24" : "#4ade80";
-  return <span className="text-sm font-semibold" style={{ color }}>{score}</span>;
+    score >= 70 ? "#dc2626" : score >= 30 ? "#d97706" : "#16a34a";
+  return (
+    <span
+      className="text-sm font-semibold"
+      style={{ color, fontVariantNumeric: "tabular-nums" }}
+    >
+      {score}
+    </span>
+  );
 }
 
+// ─── Metric card ─────────────────────────────────────────────────────────────
 interface MetricCardProps {
   label: string;
   value: number;
@@ -38,17 +59,44 @@ interface MetricCardProps {
 function MetricCard({ label, value, iconColor, iconBg, subtext, icon }: MetricCardProps) {
   return (
     <div
-      className="rounded-xl p-6 transition-all duration-150"
-      style={{ backgroundColor: "#111916", border: "1px solid #1a2b25" }}
+      className="rounded-xl p-6 transition-colors duration-150"
+      style={{
+        backgroundColor: "#111916",
+        border: "1px solid rgba(255,255,255,0.08)",
+      }}
     >
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm mb-1" style={{ color: "#a3b3ae" }}>{label}</p>
-          <p className="text-3xl font-bold text-white">{value}</p>
+          {/* Label: 12px, weight 500, uppercase, #5a7268, letter-spacing 0.06em */}
+          <p
+            style={{
+              fontSize: 11,
+              fontWeight: 500,
+              color: "#5a7268",
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+              marginBottom: 8,
+            }}
+          >
+            {label}
+          </p>
+          {/* Value: 32px, weight 600, tabular-nums */}
+          <p
+            style={{
+              fontSize: 32,
+              fontWeight: 600,
+              color: "#f0f4f3",
+              lineHeight: 1.2,
+              fontVariantNumeric: "tabular-nums",
+            }}
+          >
+            {value}
+          </p>
           {subtext && (
-            <p className="text-xs mt-1" style={{ color: "#5a7068" }}>{subtext}</p>
+            <p className="text-xs mt-1" style={{ color: "#5a7268" }}>{subtext}</p>
           )}
         </div>
+        {/* Icon: 40px circle */}
         <div
           className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
           style={{ backgroundColor: iconBg, color: iconColor }}
@@ -60,6 +108,7 @@ function MetricCard({ label, value, iconColor, iconBg, subtext, icon }: MetricCa
   );
 }
 
+// ─── Page ─────────────────────────────────────────────────────────────────────
 export default async function DashboardPage() {
   const supabase = await createClient();
   const {
@@ -71,6 +120,7 @@ export default async function DashboardPage() {
   const [
     { data: customer },
     { data: verifications, error: verificationsError },
+    { count: apiKeyCount },
   ] = await Promise.all([
     supabase.from("customers").select("plan").eq("id", user!.id).single(),
     supabase
@@ -79,6 +129,10 @@ export default async function DashboardPage() {
       .eq("customer_id", user!.id)
       .order("created_at", { ascending: false })
       .limit(10),
+    supabase
+      .from("api_keys")
+      .select("id", { count: "exact", head: true })
+      .eq("customer_id", user!.id),
   ]);
 
   const { data: counts, error: countsError } = await supabase
@@ -100,18 +154,38 @@ export default async function DashboardPage() {
     day: "numeric",
   });
 
+  const paidPlans = ["starter", "growth", "scale"];
+  const hasPaidPlan = paidPlans.includes(customer?.plan ?? "");
+
   return (
     <div>
+      {/* Onboarding checklist — shown to new users until dismissed */}
+      <OnboardingChecklist
+        hasApiKey={(apiKeyCount ?? 0) > 0}
+        hasVerification={(counts ?? []).length > 0}
+        hasPaidPlan={hasPaidPlan}
+      />
+
       {/* Page header */}
       <div className="flex items-start justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-white">Overview</h1>
-          <p className="text-sm mt-0.5" style={{ color: "#a3b3ae" }}>{today}</p>
+          <h1 className="text-2xl font-semibold" style={{ color: "#f0f4f3" }}>Overview</h1>
+          <p className="text-sm mt-1" style={{ color: "#a3b3ae" }}>{today}</p>
         </div>
         {customer?.plan && (
           <span
-            className="px-3 py-1.5 rounded-full text-xs font-semibold text-white capitalize"
-            style={{ backgroundColor: "rgba(29,158,117,0.20)", color: "#1d9e75" }}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              padding: "2px 8px",
+              borderRadius: 9999,
+              fontSize: 11,
+              fontWeight: 500,
+              letterSpacing: "0.02em",
+              backgroundColor: "rgba(29,158,117,0.15)",
+              color: "#1d9e75",
+              textTransform: "capitalize",
+            }}
           >
             {customer.plan} plan
           </span>
@@ -135,7 +209,7 @@ export default async function DashboardPage() {
         <MetricCard
           label="Approved"
           value={tally.approved ?? 0}
-          iconColor="#4ade80"
+          iconColor="#16a34a"
           iconBg="rgba(22,163,74,0.12)"
           subtext="Verified identities"
           icon={
@@ -147,8 +221,8 @@ export default async function DashboardPage() {
         <MetricCard
           label="Under Review"
           value={tally.review ?? 0}
-          iconColor="#fbbf24"
-          iconBg="rgba(251,191,36,0.12)"
+          iconColor="#d97706"
+          iconBg="rgba(217,119,6,0.12)"
           subtext="Needs attention"
           icon={
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -159,8 +233,8 @@ export default async function DashboardPage() {
         <MetricCard
           label="Rejected"
           value={tally.rejected ?? 0}
-          iconColor="#f87171"
-          iconBg="rgba(248,113,113,0.12)"
+          iconColor="#dc2626"
+          iconBg="rgba(220,38,38,0.12)"
           subtext="Failed checks"
           icon={
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -174,24 +248,33 @@ export default async function DashboardPage() {
       {queryError && (
         <div
           className="mb-6 rounded-xl px-5 py-4"
-          style={{ backgroundColor: "rgba(220,38,38,0.10)", border: "1px solid rgba(220,38,38,0.25)" }}
+          style={{
+            backgroundColor: "rgba(220,38,38,0.10)",
+            border: "1px solid rgba(220,38,38,0.25)",
+            borderLeft: "3px solid #dc2626",
+          }}
         >
-          <p className="text-sm font-medium" style={{ color: "#f87171" }}>
+          <p className="text-sm font-medium" style={{ color: "#dc2626" }}>
             Unable to load verification data. Please refresh the page.
           </p>
         </div>
       )}
 
-      {/* Recent verifications */}
-      <div className="rounded-xl" style={{ backgroundColor: "#111916", border: "1px solid #1a2b25" }}>
+      {/* Recent verifications card */}
+      <div
+        className="rounded-xl"
+        style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
+      >
         <div
           className="px-6 py-4 flex items-center justify-between"
-          style={{ borderBottom: "1px solid #1a2b25" }}
+          style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}
         >
-          <h2 className="text-sm font-semibold text-white">Recent Verifications</h2>
+          <h2 className="text-sm font-semibold" style={{ color: "#f0f4f3" }}>
+            Recent Verifications
+          </h2>
           <Link
             href="/dashboard/verifications"
-            className="text-xs font-medium hover:opacity-80 transition-all duration-150"
+            className="text-xs font-medium hover:opacity-80"
             style={{ color: "#1d9e75" }}
           >
             View all →
@@ -199,58 +282,106 @@ export default async function DashboardPage() {
         </div>
 
         {!verifications || verifications.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
+          /* Empty state: icon + headline + description + action (DESIGN.md §8) */
+          <div className="flex flex-col items-center justify-center py-16 text-center px-6">
             <div
-              className="w-12 h-12 rounded-full flex items-center justify-center mb-3"
-              style={{ backgroundColor: "rgba(163,179,174,0.08)" }}
+              className="w-10 h-10 rounded-full flex items-center justify-center mb-4"
+              style={{ backgroundColor: "rgba(255,255,255,0.04)" }}
             >
-              <svg className="w-6 h-6" fill="none" stroke="#a3b3ae" strokeOpacity="0.4" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg className="w-5 h-5" fill="none" stroke="#5a7268" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
             </div>
-            <p className="text-sm font-medium" style={{ color: "#a3b3ae" }}>No verifications yet</p>
-            <p className="text-xs mt-1" style={{ color: "#5a7068" }}>Submitted verifications will appear here</p>
+            <p className="text-base font-medium mb-1" style={{ color: "#a3b3ae" }}>
+              No verifications yet
+            </p>
+            <p className="text-sm mb-4" style={{ color: "#5a7268" }}>
+              Submit your first API request to see results here.
+            </p>
+            <Link
+              href="/dashboard/help"
+              className="inline-flex items-center gap-2 px-4 py-0 rounded-lg text-[13px] font-medium"
+              style={{
+                backgroundColor: "#1d9e75",
+                color: "#050a09",
+                height: 36,
+                lineHeight: "36px",
+                borderRadius: 8,
+              }}
+            >
+              View API docs
+            </Link>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm min-w-[600px]">
+            <table className="w-full min-w-[600px]" style={{ borderCollapse: "collapse", fontSize: 14 }}>
               <thead>
-                <tr className="text-left" style={{ borderBottom: "1px solid #1a2b25" }}>
-                  <th className="px-6 py-3 text-xs font-medium uppercase tracking-wide" style={{ color: "#5a7068" }}>ID</th>
-                  <th className="px-6 py-3 text-xs font-medium uppercase tracking-wide" style={{ color: "#5a7068" }}>Status</th>
-                  <th className="px-6 py-3 text-xs font-medium uppercase tracking-wide" style={{ color: "#5a7068" }}>Risk</th>
-                  <th className="px-6 py-3 text-xs font-medium uppercase tracking-wide" style={{ color: "#5a7068" }}>Document</th>
-                  <th className="px-6 py-3 text-xs font-medium uppercase tracking-wide" style={{ color: "#5a7068" }}>Created</th>
+                <tr>
+                  {["ID", "Status", "Risk", "Document", "Created"].map((col) => (
+                    <th
+                      key={col}
+                      className="text-left"
+                      style={{
+                        padding: "12px 16px",
+                        fontSize: 11,
+                        fontWeight: 500,
+                        color: "#5a7268",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.06em",
+                        borderBottom: "1px solid rgba(255,255,255,0.08)",
+                      }}
+                    >
+                      {col}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {verifications.map((v) => (
+                {verifications.map((v, idx) => (
                   <tr
                     key={v.id}
-                    className="last:border-0 transition-all duration-150"
-                    style={{ borderBottom: "1px solid #1a2b25" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(29,158,117,0.04)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                    style={{
+                      borderBottom:
+                        idx < verifications.length - 1
+                          ? "1px solid rgba(255,255,255,0.04)"
+                          : "none",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.02)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.backgroundColor = "transparent")
+                    }
                   >
-                    <td className="px-6 py-3">
+                    <td style={{ padding: "14px 16px" }}>
                       <Link
                         href={`/dashboard/verifications/${v.id}`}
-                        className="font-mono text-xs hover:underline"
-                        style={{ color: "#1d9e75" }}
+                        className="hover:underline"
+                        style={{
+                          fontFamily: "var(--font-mono)",
+                          fontSize: 12,
+                          color: "#1d9e75",
+                        }}
                       >
                         {v.id.slice(0, 8)}…
                       </Link>
                     </td>
-                    <td className="px-6 py-3">
+                    <td style={{ padding: "14px 16px" }}>
                       <StatusBadge status={v.status} />
                     </td>
-                    <td className="px-6 py-3">
+                    <td style={{ padding: "14px 16px" }}>
                       <RiskScore score={v.risk_score} />
                     </td>
-                    <td className="px-6 py-3 capitalize text-sm" style={{ color: "#a3b3ae" }}>
+                    <td
+                      style={{
+                        padding: "14px 16px",
+                        color: "#a3b3ae",
+                        textTransform: "capitalize",
+                      }}
+                    >
                       {v.document_type.replace(/_/g, " ")}
                     </td>
-                    <td className="px-6 py-3 text-sm" style={{ color: "#a3b3ae" }}>
+                    <td style={{ padding: "14px 16px", color: "#a3b3ae" }}>
                       {new Date(v.created_at).toLocaleDateString()}
                     </td>
                   </tr>

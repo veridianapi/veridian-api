@@ -50,7 +50,6 @@ const PLANS = [
   },
 ];
 
-
 export default async function BillingPage() {
   const supabase = await createClient();
   const {
@@ -84,8 +83,9 @@ export default async function BillingPage() {
   const limit = currentPlan?.limit ?? 200;
   const usagePct = Math.min(100, Math.round((usage / limit) * 100));
 
+  // DESIGN.md §7 progress bar colors: 0-79=brand, 80-99=warning, 100=danger
   const usageBarColor =
-    usagePct >= 90 ? "#f87171" : usagePct >= 70 ? "#fbbf24" : "#1d9e75";
+    usagePct >= 100 ? "#dc2626" : usagePct >= 80 ? "#d97706" : "#1d9e75";
 
   const currentPlanIdx = PLANS.findIndex((p) => p.id === customer?.plan);
 
@@ -93,8 +93,8 @@ export default async function BillingPage() {
     <div>
       {/* Page header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Billing</h1>
-        <p className="text-sm mt-0.5" style={{ color: "#a3b3ae" }}>
+        <h1 className="text-2xl font-semibold" style={{ color: "#f0f4f3" }}>Billing</h1>
+        <p className="text-sm mt-1" style={{ color: "#a3b3ae" }}>
           Manage your plan and usage
         </p>
       </div>
@@ -102,22 +102,29 @@ export default async function BillingPage() {
       {/* Current plan summary card */}
       <div
         className="rounded-xl p-6 mb-8"
-        style={{ backgroundColor: "#111916", border: "1px solid #1a2b25" }}
+        style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
       >
         <div className="flex items-start justify-between mb-5">
           <div>
-            <div className="flex items-center gap-2.5 mb-1">
-              <h2 className="text-base font-semibold text-white capitalize">
+            <div className="flex items-center gap-2 mb-1">
+              <h2 className="text-base font-semibold capitalize" style={{ color: "#f0f4f3" }}>
                 {customer?.plan ?? "Free"} Plan
               </h2>
               {customer?.subscription_status && (
                 <span
-                  className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium capitalize"
-                  style={
-                    customer.subscription_status === "active"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    padding: "2px 8px",
+                    borderRadius: 9999,
+                    fontSize: 11,
+                    fontWeight: 500,
+                    letterSpacing: "0.02em",
+                    textTransform: "capitalize",
+                    ...(customer.subscription_status === "active"
                       ? { backgroundColor: "rgba(29,158,117,0.15)", color: "#1d9e75" }
-                      : { backgroundColor: "rgba(163,179,174,0.15)", color: "#a3b3ae" }
-                  }
+                      : { backgroundColor: "rgba(255,255,255,0.06)", color: "#5a7268" }),
+                  }}
                 >
                   {customer.subscription_status}
                 </span>
@@ -136,7 +143,16 @@ export default async function BillingPage() {
           </div>
           {currentPlan && (
             <div className="text-right">
-              <span className="text-2xl font-bold text-white">{currentPlan.price}</span>
+              <span
+                style={{
+                  fontSize: 32,
+                  fontWeight: 600,
+                  color: "#f0f4f3",
+                  fontVariantNumeric: "tabular-nums",
+                }}
+              >
+                {currentPlan.price}
+              </span>
               <span className="text-sm" style={{ color: "#a3b3ae" }}>{currentPlan.period}</span>
             </div>
           )}
@@ -148,31 +164,45 @@ export default async function BillingPage() {
             <span className="text-sm font-medium" style={{ color: "#a3b3ae" }}>
               Verifications this month
             </span>
-            <span className="text-sm font-semibold text-white">
+            <span className="text-sm font-semibold" style={{ color: "#f0f4f3" }}>
               {usage.toLocaleString()}{" "}
-              <span className="font-normal" style={{ color: "#a3b3ae" }}>
+              <span style={{ fontWeight: 400, color: "#a3b3ae" }}>
                 / {limit.toLocaleString()}
               </span>
             </span>
           </div>
-          <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: "#1a2b25" }}>
+          <div
+            className="w-full rounded-full overflow-hidden"
+            style={{ height: 4, backgroundColor: "rgba(255,255,255,0.08)" }}
+          >
             <div
-              className="h-full rounded-full transition-all duration-300"
+              className="h-full rounded-full"
               style={{ width: `${usagePct}%`, backgroundColor: usageBarColor }}
             />
           </div>
           {usagePct >= 80 && (
-            <p className="text-xs mt-2" style={{ color: usagePct >= 90 ? "#f87171" : "#fbbf24" }}>
-              {usagePct >= 90
-                ? "You're close to your monthly limit. Upgrade to avoid interruptions."
-                : "You've used most of your monthly quota."}
+            <p className="text-xs mt-2" style={{ color: usagePct >= 100 ? "#dc2626" : "#d97706" }}>
+              {usagePct >= 100
+                ? "You've reached your monthly limit. Upgrade to restore access."
+                : "You're close to your monthly limit. Upgrade to avoid interruptions."}
             </p>
           )}
         </div>
       </div>
 
       {/* Plan cards */}
-      <h2 className="text-sm font-semibold text-white mb-4">Available Plans</h2>
+      <h2
+        style={{
+          fontSize: 11,
+          fontWeight: 500,
+          textTransform: "uppercase",
+          letterSpacing: "0.06em",
+          color: "#5a7268",
+          marginBottom: 16,
+        }}
+      >
+        Available Plans
+      </h2>
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
         {PLANS.map((plan, idx) => {
           const isCurrent = plan.id === customer?.plan;
@@ -181,19 +211,31 @@ export default async function BillingPage() {
           return (
             <div
               key={plan.id}
-              className="rounded-xl p-6 transition-all duration-150"
+              className="rounded-xl p-6"
               style={{
                 backgroundColor: "#111916",
-                border: isCurrent ? "2px solid #1d9e75" : "1px solid #1a2b25",
+                border: isCurrent
+                  ? "2px solid #1d9e75"
+                  : "1px solid rgba(255,255,255,0.08)",
               }}
             >
               {/* Plan name + badge */}
               <div className="flex items-center justify-between mb-1">
-                <h3 className="text-sm font-semibold text-white">{plan.name}</h3>
+                <h3 className="text-sm font-semibold" style={{ color: "#f0f4f3" }}>
+                  {plan.name}
+                </h3>
                 {isCurrent && (
                   <span
-                    className="inline-flex px-2 py-0.5 rounded-full text-xs font-semibold"
-                    style={{ backgroundColor: "rgba(29,158,117,0.20)", color: "#1d9e75" }}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      padding: "2px 8px",
+                      borderRadius: 9999,
+                      fontSize: 11,
+                      fontWeight: 500,
+                      backgroundColor: "rgba(29,158,117,0.15)",
+                      color: "#1d9e75",
+                    }}
                   >
                     Current plan
                   </span>
@@ -202,7 +244,16 @@ export default async function BillingPage() {
 
               {/* Price */}
               <div className="mb-1">
-                <span className="text-3xl font-bold text-white">{plan.price}</span>
+                <span
+                  style={{
+                    fontSize: 32,
+                    fontWeight: 600,
+                    color: "#f0f4f3",
+                    fontVariantNumeric: "tabular-nums",
+                  }}
+                >
+                  {plan.price}
+                </span>
                 <span className="text-sm" style={{ color: "#a3b3ae" }}>{plan.period}</span>
               </div>
 
@@ -210,9 +261,13 @@ export default async function BillingPage() {
               <p className="text-xs mb-5" style={{ color: "#a3b3ae" }}>{plan.description}</p>
 
               {/* Feature list */}
-              <ul className="space-y-2.5 mb-6">
+              <ul className="space-y-2 mb-6">
                 {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2 text-sm" style={{ color: "#a3b3ae" }}>
+                  <li
+                    key={feature}
+                    className="flex items-start gap-2 text-sm"
+                    style={{ color: "#a3b3ae" }}
+                  >
                     <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="#1d9e75" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
@@ -224,8 +279,14 @@ export default async function BillingPage() {
               {/* CTA */}
               {isCurrent ? (
                 <div
-                  className="w-full py-2.5 text-sm rounded-lg font-medium text-center cursor-default select-none min-h-[44px] flex items-center justify-center"
-                  style={{ border: "1px solid #1d9e75", color: "#1d9e75", opacity: 0.5 }}
+                  className="w-full text-[13px] font-medium text-center cursor-default select-none flex items-center justify-center"
+                  style={{
+                    border: "1px solid rgba(29,158,117,0.30)",
+                    color: "#1d9e75",
+                    height: 36,
+                    borderRadius: 8,
+                    opacity: 0.5,
+                  }}
                 >
                   Current plan
                 </div>

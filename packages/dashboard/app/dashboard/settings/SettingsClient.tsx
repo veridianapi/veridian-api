@@ -16,12 +16,12 @@ function Section({
   return (
     <div
       className="rounded-xl p-6"
-      style={{ backgroundColor: "#111916", border: "1px solid #1a2b25" }}
+      style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
     >
       <div className="mb-4">
-        <h2 className="text-sm font-semibold text-white">{title}</h2>
+        <h2 className="text-sm font-semibold" style={{ color: "#f0f4f3" }}>{title}</h2>
         {description && (
-          <p className="text-xs mt-0.5" style={{ color: "#6b8078" }}>
+          <p className="text-xs mt-1" style={{ color: "#5a7268" }}>
             {description}
           </p>
         )}
@@ -73,9 +73,9 @@ export default function SettingsClient({ email }: { email: string }) {
 
   return (
     <div className="max-w-2xl space-y-6">
-      <div className="mb-6">
-        <h1 className="text-xl font-bold text-white">Settings</h1>
-        <p className="text-sm mt-1" style={{ color: "#6b8078" }}>
+      <div className="mb-8">
+        <h1 className="text-2xl font-semibold" style={{ color: "#f0f4f3" }}>Settings</h1>
+        <p className="text-sm mt-1" style={{ color: "#a3b3ae" }}>
           Manage your account preferences
         </p>
       </div>
@@ -83,20 +83,28 @@ export default function SettingsClient({ email }: { email: string }) {
       {/* Account */}
       <Section title="Account" description="Your account details and authentication email">
         <div className="mb-4">
-          <label className="block text-xs font-medium mb-1" style={{ color: "#a3b3ae" }}>
+          <label className="block mb-1" style={{ fontSize: 12, fontWeight: 500, color: "#a3b3ae" }}>
             Current email
           </label>
           <p
             className="text-sm px-3 py-2 rounded-lg"
-            style={{ backgroundColor: "#0a0f0e", color: "#ffffff", border: "1px solid #1a2b25" }}
+            style={{
+              backgroundColor: "#0d1211",
+              color: "#f0f4f3",
+              border: "1px solid rgba(255,255,255,0.08)",
+            }}
           >
             {email}
           </p>
         </div>
 
-        <form onSubmit={handleEmailUpdate} className="space-y-3">
+        <form onSubmit={handleEmailUpdate} className="space-y-4">
           <div>
-            <label htmlFor="new-email" className="block text-xs font-medium mb-1" style={{ color: "#a3b3ae" }}>
+            <label
+              htmlFor="new-email"
+              className="block mb-1"
+              style={{ fontSize: 12, fontWeight: 500, color: "#a3b3ae" }}
+            >
               Update email
             </label>
             <input
@@ -109,11 +117,13 @@ export default function SettingsClient({ email }: { email: string }) {
                 setEmailError(null);
               }}
               placeholder="new@email.com"
-              className="w-full px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2"
+              className="w-full px-3 text-sm rounded-lg focus:outline-none focus:ring-2"
               style={{
-                backgroundColor: "#0a0f0e",
-                border: "1px solid #1a2b25",
-                color: "#ffffff",
+                backgroundColor: "#0d1211",
+                border: "1px solid rgba(255,255,255,0.08)",
+                color: "#f0f4f3",
+                height: 36,
+                borderRadius: 8,
                 "--tw-ring-color": "#1d9e75",
               } as React.CSSProperties}
             />
@@ -122,7 +132,11 @@ export default function SettingsClient({ email }: { email: string }) {
           {emailError && (
             <p
               className="text-xs px-3 py-2 rounded-lg"
-              style={{ color: "#f87171", backgroundColor: "rgba(220,38,38,0.10)", border: "1px solid rgba(220,38,38,0.20)" }}
+              style={{
+                color: "#dc2626",
+                backgroundColor: "rgba(220,38,38,0.10)",
+                border: "1px solid rgba(220,38,38,0.20)",
+              }}
             >
               {emailError}
             </p>
@@ -131,7 +145,11 @@ export default function SettingsClient({ email }: { email: string }) {
           {emailStatus === "sent" && (
             <p
               className="text-xs px-3 py-2 rounded-lg"
-              style={{ color: "#1d9e75", backgroundColor: "rgba(29,158,117,0.10)", border: "1px solid rgba(29,158,117,0.20)" }}
+              style={{
+                color: "#1d9e75",
+                backgroundColor: "rgba(29,158,117,0.10)",
+                border: "1px solid rgba(29,158,117,0.20)",
+              }}
             >
               Confirmation sent — check your new inbox to complete the change.
             </p>
@@ -140,8 +158,14 @@ export default function SettingsClient({ email }: { email: string }) {
           <button
             type="submit"
             disabled={emailStatus === "sending" || !newEmail.trim()}
-            className="px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-50"
-            style={{ backgroundColor: "#1d9e75" }}
+            className="text-[13px] font-medium disabled:opacity-50 hover:opacity-90"
+            style={{
+              backgroundColor: "#1d9e75",
+              color: "#050a09",
+              height: 36,
+              padding: "0 16px",
+              borderRadius: 8,
+            }}
           >
             {emailStatus === "sending" ? "Sending…" : "Send confirmation"}
           </button>
@@ -150,7 +174,7 @@ export default function SettingsClient({ email }: { email: string }) {
 
       {/* Appearance */}
       <Section title="Appearance" description="Customize how the dashboard looks">
-        <p className="text-sm" style={{ color: "#5a7068" }}>
+        <p className="text-sm" style={{ color: "#5a7268" }}>
           Appearance options coming soon.
         </p>
       </Section>
@@ -161,10 +185,10 @@ export default function SettingsClient({ email }: { email: string }) {
         style={{ backgroundColor: "#111916", border: "1px solid rgba(220,38,38,0.25)" }}
       >
         <div className="mb-4">
-          <h2 className="text-sm font-semibold" style={{ color: "#f87171" }}>
+          <h2 className="text-sm font-semibold" style={{ color: "#dc2626" }}>
             Danger zone
           </h2>
-          <p className="text-xs mt-0.5" style={{ color: "#6b8078" }}>
+          <p className="text-xs mt-1" style={{ color: "#5a7268" }}>
             Permanent actions — these cannot be undone.
           </p>
         </div>
@@ -172,24 +196,27 @@ export default function SettingsClient({ email }: { email: string }) {
         {deletePhase === "idle" ? (
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-medium text-white">Delete account</p>
-              <p className="text-xs mt-0.5" style={{ color: "#6b8078" }}>
+              <p className="text-sm font-medium" style={{ color: "#f0f4f3" }}>Delete account</p>
+              <p className="text-xs mt-1" style={{ color: "#5a7268" }}>
                 Permanently remove your account and all associated data.
               </p>
             </div>
             <button
               onClick={() => setDeletePhase("confirm")}
-              className="shrink-0 px-4 py-2 rounded-lg text-sm font-medium"
+              className="shrink-0 text-[13px] font-medium hover:opacity-90"
               style={{
-                color: "#f87171",
+                color: "#dc2626",
                 border: "1px solid rgba(220,38,38,0.35)",
-                backgroundColor: "transparent",
+                backgroundColor: "rgba(220,38,38,0.08)",
+                height: 36,
+                padding: "0 16px",
+                borderRadius: 8,
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.backgroundColor = "rgba(153,27,27,0.15)";
+                (e.currentTarget as HTMLElement).style.backgroundColor = "rgba(220,38,38,0.16)";
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.backgroundColor = "transparent";
+                (e.currentTarget as HTMLElement).style.backgroundColor = "rgba(220,38,38,0.08)";
               }}
             >
               Delete account
@@ -198,17 +225,20 @@ export default function SettingsClient({ email }: { email: string }) {
         ) : (
           <div
             className="rounded-lg p-4 space-y-3"
-            style={{ backgroundColor: "rgba(153,27,27,0.12)", border: "1px solid rgba(220,38,38,0.20)" }}
+            style={{
+              backgroundColor: "rgba(220,38,38,0.08)",
+              border: "1px solid rgba(220,38,38,0.20)",
+            }}
           >
-            <p className="text-sm font-medium" style={{ color: "#f87171" }}>
+            <p className="text-sm font-medium" style={{ color: "#dc2626" }}>
               Are you sure? This is permanent.
             </p>
-            <p className="text-xs" style={{ color: "#6b8078" }}>
+            <p className="text-xs" style={{ color: "#5a7268" }}>
               Your account, API keys, and all data will be deleted immediately. There is no recovery.
             </p>
 
             {deleteError && (
-              <p className="text-xs" style={{ color: "#f87171" }}>
+              <p className="text-xs" style={{ color: "#dc2626" }}>
                 {deleteError}
               </p>
             )}
@@ -217,8 +247,14 @@ export default function SettingsClient({ email }: { email: string }) {
               <button
                 onClick={handleDeleteConfirm}
                 disabled={isPending}
-                className="px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-60"
-                style={{ backgroundColor: "#dc2626" }}
+                className="text-[13px] font-medium disabled:opacity-60 hover:opacity-90"
+                style={{
+                  backgroundColor: "#dc2626",
+                  color: "#f0f4f3",
+                  height: 36,
+                  padding: "0 16px",
+                  borderRadius: 8,
+                }}
               >
                 {isPending ? "Deleting…" : "Yes, delete my account"}
               </button>
@@ -228,8 +264,15 @@ export default function SettingsClient({ email }: { email: string }) {
                   setDeleteError(null);
                 }}
                 disabled={isPending}
-                className="px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-60"
-                style={{ color: "#a3b3ae" }}
+                className="text-[13px] font-medium disabled:opacity-60 hover:opacity-80"
+                style={{
+                  color: "#a3b3ae",
+                  border: "1px solid rgba(255,255,255,0.10)",
+                  backgroundColor: "transparent",
+                  height: 36,
+                  padding: "0 16px",
+                  borderRadius: 8,
+                }}
               >
                 Cancel
               </button>

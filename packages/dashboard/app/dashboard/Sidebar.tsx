@@ -60,7 +60,7 @@ function ProfileMenu({ userEmail, onClose, onSignOut }: ProfileMenuProps) {
         bottom: "calc(100% + 8px)",
         left: "12px",
         width: "220px",
-        backgroundColor: "#1a2b25",
+        backgroundColor: "#111916",
         border: "1px solid rgba(29,158,117,0.30)",
         borderRadius: "12px",
         boxShadow: "0 -4px 20px rgba(0,0,0,0.4)",
@@ -72,7 +72,7 @@ function ProfileMenu({ userEmail, onClose, onSignOut }: ProfileMenuProps) {
       <div className="px-4 py-3">
         <p
           className="text-xs truncate"
-          style={{ color: "#6b8078" }}
+          style={{ color: "#5a7268" }}
           title={userEmail}
         >
           {userEmail}
@@ -167,7 +167,7 @@ function MenuLink({
       onMouseLeave={() => setHovered(false)}
       className="flex items-center gap-3 mx-1.5 px-2.5 py-2 rounded-lg text-sm transition-colors"
       style={{
-        color: hovered ? "#e2ede9" : "#a3b3ae",
+        color: hovered ? "#f0f4f3" : "#a3b3ae",
         backgroundColor: hovered ? "rgba(255,255,255,0.06)" : "transparent",
       }}
     >
@@ -197,7 +197,7 @@ function MenuButton({
       className="flex items-center gap-3 w-full mx-1.5 px-2.5 py-2 rounded-lg text-sm transition-colors"
       style={{
         width: "calc(100% - 12px)",
-        color: danger ? (hovered ? "#f87171" : "#9b6464") : hovered ? "#e2ede9" : "#a3b3ae",
+        color: danger ? (hovered ? "#dc2626" : "#a3b3ae") : hovered ? "#f0f4f3" : "#a3b3ae",
         backgroundColor: hovered
           ? danger
             ? "rgba(153,27,27,0.15)"
@@ -246,7 +246,7 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
       {/* Mobile hamburger button */}
       <button
         className="md:hidden fixed top-3 left-3 z-50 w-10 h-10 flex items-center justify-center rounded-lg"
-        style={{ backgroundColor: "#111916", border: "1px solid #1a2b25" }}
+        style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
         onClick={() => setMobileOpen(true)}
         aria-label="Open menu"
       >
@@ -312,7 +312,7 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
         <nav className="flex-1 px-3 py-5">
           <p
             className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-widest"
-            style={{ color: "#3d5249" }}
+            style={{ color: "#5a7268" }}
           >
             Navigation
           </p>
@@ -396,7 +396,7 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
             {/* Avatar */}
             <div
               className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold"
-              style={{ backgroundColor: "#1d9e75", color: "#ffffff" }}
+              style={{ backgroundColor: "#1d9e75", color: "#050a09" }}
             >
               {initials}
             </div>
@@ -404,7 +404,7 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
             {/* Email */}
             <p
               className="text-xs truncate flex-1 text-left"
-              style={{ color: "#6b8078" }}
+              style={{ color: "#5a7268" }}
             >
               {userEmail}
             </p>

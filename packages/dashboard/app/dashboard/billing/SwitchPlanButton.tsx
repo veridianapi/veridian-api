@@ -45,7 +45,7 @@ export default function SwitchPlanButton({ plan, label, isUpgrade }: Props) {
       const { checkout_url } = await res.json();
       window.location.href = checkout_url;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError(err instanceof Error ? err.message : "Request failed — please try again.");
       setLoading(false);
     }
   }
@@ -55,17 +55,28 @@ export default function SwitchPlanButton({ plan, label, isUpgrade }: Props) {
       <button
         onClick={handleClick}
         disabled={loading}
-        className="w-full py-2.5 text-sm rounded-lg font-medium transition-all duration-150 min-h-[44px] disabled:opacity-60 disabled:cursor-not-allowed"
+        className="w-full text-[13px] font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90"
         style={
           isUpgrade
-            ? { backgroundColor: "#1d9e75", color: "#ffffff" }
-            : { border: "1px solid #1a2b25", color: "#a3b3ae", backgroundColor: "transparent" }
+            ? {
+                backgroundColor: "#1d9e75",
+                color: "#050a09",
+                height: 36,
+                borderRadius: 8,
+              }
+            : {
+                border: "1px solid rgba(255,255,255,0.10)",
+                color: "#a3b3ae",
+                backgroundColor: "transparent",
+                height: 36,
+                borderRadius: 8,
+              }
         }
       >
         {loading ? "Loading…" : label}
       </button>
       {error && (
-        <p className="mt-2 text-xs text-red-400">{error}</p>
+        <p className="mt-2 text-xs" style={{ color: "#dc2626" }}>{error}</p>
       )}
     </div>
   );

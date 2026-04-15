@@ -91,19 +91,19 @@ function AccordionItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+    <div style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center justify-between w-full px-5 py-4 text-left gap-4 group"
+        className="flex items-center justify-between w-full px-5 py-4 text-left gap-4"
       >
         <span
-          className="text-sm font-medium leading-snug transition-colors"
-          style={{ color: open ? "#ffffff" : "#c8d8d2" }}
+          className="text-sm font-medium leading-snug"
+          style={{ color: open ? "#f0f4f3" : "#a3b3ae" }}
         >
           {q}
         </span>
         <svg
-          className="w-4 h-4 shrink-0 transition-transform duration-200"
+          className="w-4 h-4 shrink-0 transition-transform duration-150"
           style={{
             color: "#1d9e75",
             transform: open ? "rotate(180deg)" : "rotate(0deg)",
@@ -118,15 +118,14 @@ function AccordionItem({ q, a }: { q: string; a: string }) {
 
       {open && (
         <div className="px-5 pb-5">
-          {/* Render answer preserving newlines as code-like blocks */}
           {a.split("\n").map((line, i) =>
             line === "" ? (
               <div key={i} className="h-2" />
             ) : line.startsWith("•") || line.startsWith("POST") || line.startsWith("GET") || line.startsWith("{") || line.startsWith("}") || line.startsWith("  ") || line.startsWith("Authorization") || line.startsWith("Content-Type") ? (
               <p
                 key={i}
-                className="text-xs font-mono leading-relaxed"
-                style={{ color: "#1d9e75" }}
+                className="text-xs leading-relaxed"
+                style={{ fontFamily: "var(--font-mono)", color: "#1d9e75" }}
               >
                 {line}
               </p>
@@ -134,7 +133,7 @@ function AccordionItem({ q, a }: { q: string; a: string }) {
               <p
                 key={i}
                 className="text-sm leading-relaxed"
-                style={{ color: "#8fa89f" }}
+                style={{ color: "#a3b3ae" }}
               >
                 {line}
               </p>
@@ -160,15 +159,18 @@ function Section({
   return (
     <div
       className="rounded-xl overflow-hidden"
-      style={{ backgroundColor: "#111916", border: "1px solid #1a2b25" }}
+      style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
     >
       {/* Section header */}
       <div
-        className="flex items-center gap-2.5 px-5 py-4"
-        style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", color: "#1d9e75" }}
+        className="flex items-center gap-2 px-5 py-4"
+        style={{
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
+          color: "#1d9e75",
+        }}
       >
         {icon}
-        <h2 className="text-sm font-semibold" style={{ color: "#ffffff" }}>
+        <h2 className="text-sm font-semibold" style={{ color: "#f0f4f3" }}>
           {title}
         </h2>
       </div>
@@ -201,17 +203,19 @@ export default function HelpPage() {
     <div className="max-w-2xl">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white mb-1">How can we help?</h1>
-        <p className="text-sm" style={{ color: "#6b8078" }}>
+        <h1 className="text-2xl font-semibold mb-1" style={{ color: "#f0f4f3" }}>
+          How can we help?
+        </h1>
+        <p className="text-sm" style={{ color: "#a3b3ae" }}>
           Guides, API reference, and answers to common questions.
         </p>
       </div>
 
-      {/* Search */}
+      {/* Search — follows input spec */}
       <div className="relative mb-8">
         <svg
-          className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
-          style={{ color: "#4a6059" }}
+          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
+          style={{ color: "#5a7268" }}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -223,19 +227,21 @@ export default function HelpPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search help articles…"
-          className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2"
+          className="w-full pl-10 pr-10 text-sm rounded-lg focus:outline-none focus:ring-2"
           style={{
-            backgroundColor: "#111916",
-            border: "1px solid #1a2b25",
-            color: "#ffffff",
+            backgroundColor: "#0d1211",
+            border: "1px solid rgba(255,255,255,0.08)",
+            color: "#f0f4f3",
+            height: 36,
+            borderRadius: 8,
             "--tw-ring-color": "#1d9e75",
           } as React.CSSProperties}
         />
         {search && (
           <button
             onClick={() => setSearch("")}
-            className="absolute right-3 top-1/2 -translate-y-1/2"
-            style={{ color: "#4a6059" }}
+            className="absolute right-3 top-1/2 -translate-y-1/2 hover:opacity-80"
+            style={{ color: "#5a7268" }}
             aria-label="Clear search"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -258,31 +264,68 @@ export default function HelpPage() {
           ))}
         </div>
       ) : (
+        /* Empty state — icon + headline + description + action */
         <div
-          className="rounded-xl px-6 py-12 text-center"
-          style={{ backgroundColor: "#111916", border: "1px solid #1a2b25" }}
+          className="rounded-xl px-6 py-16 flex flex-col items-center text-center"
+          style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
         >
-          <p className="text-sm" style={{ color: "#6b8078" }}>
-            No results for <span className="text-white">"{search}"</span>
+          <div
+            className="w-10 h-10 rounded-full flex items-center justify-center mb-4"
+            style={{ backgroundColor: "rgba(255,255,255,0.04)" }}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="#5a7268" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <p className="text-base font-medium mb-1" style={{ color: "#a3b3ae" }}>
+            No results found
           </p>
+          <p className="text-sm mb-4" style={{ color: "#5a7268" }}>
+            No articles match{" "}
+            <span style={{ color: "#f0f4f3" }}>&ldquo;{search}&rdquo;</span>
+            . Try a different search term.
+          </p>
+          <button
+            onClick={() => setSearch("")}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              padding: "0 16px",
+              height: 36,
+              borderRadius: 8,
+              fontSize: 13,
+              fontWeight: 500,
+              border: "1px solid rgba(255,255,255,0.10)",
+              color: "#a3b3ae",
+              backgroundColor: "transparent",
+            }}
+          >
+            Clear search
+          </button>
         </div>
       )}
 
       {/* Footer CTA */}
       <div
         className="mt-8 rounded-xl px-6 py-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
-        style={{ backgroundColor: "#111916", border: "1px solid #1a2b25" }}
+        style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
       >
         <div>
-          <p className="text-sm font-medium text-white">Still need help?</p>
-          <p className="text-xs mt-0.5" style={{ color: "#6b8078" }}>
+          <p className="text-sm font-medium" style={{ color: "#f0f4f3" }}>Still need help?</p>
+          <p className="text-xs mt-1" style={{ color: "#5a7268" }}>
             Our team usually replies within a few hours.
           </p>
         </div>
         <a
           href="mailto:support@veridian.dev"
-          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white shrink-0"
-          style={{ backgroundColor: "#1d9e75" }}
+          className="flex items-center gap-2 text-[13px] font-medium shrink-0 hover:opacity-90"
+          style={{
+            backgroundColor: "#1d9e75",
+            color: "#050a09",
+            height: 36,
+            padding: "0 16px",
+            borderRadius: 8,
+          }}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />

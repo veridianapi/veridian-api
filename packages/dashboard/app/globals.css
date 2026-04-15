@@ -1,28 +1,62 @@
 @import "tailwindcss";
 
 :root {
-  --brand: #1d9e75;
-  --brand-bright: #1d9e75;
-  --brand-dark: #0a5241;
-  --brand-light: rgba(29,158,117,0.15);
-  --sidebar-bg: #0a0f0e;
-  --sidebar-text: #a3b3ae;
+  --bg-void:       #020706;
+  --bg-base:       #050a09;
+  --bg-surface:    #0a0f0e;
+  --bg-elevated:   #111916;
+  --bg-overlay:    #1a2b25;
+  --bg-input:      #0d1211;
+
+  --brand-dim:     #0f6e56;
+  --brand:         #1d9e75;
+  --brand-bright:  #22c55e;
+  --brand-glow:    rgba(29,158,117,0.15);
+
+  --success:       #16a34a;
+  --success-bg:    rgba(22,163,74,0.12);
+  --warning:       #d97706;
+  --warning-bg:    rgba(217,119,6,0.12);
+  --danger:        #dc2626;
+  --danger-bg:     rgba(220,38,38,0.12);
+  --info:          #3b82f6;
+  --info-bg:       rgba(59,130,246,0.12);
+
+  --text-primary:   #f0f4f3;
+  --text-secondary: #a3b3ae;
+  --text-tertiary:  #5a7268;
+  --text-inverse:   #050a09;
+  --text-code:      #a8ff78;
+  --text-link:      #1d9e75;
+
+  --border-subtle:  rgba(255,255,255,0.04);
+  --border-default: rgba(255,255,255,0.08);
+  --border-strong:  rgba(255,255,255,0.14);
+  --border-brand:   rgba(29,158,117,0.40);
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+
+  /* Legacy aliases kept for backward compat */
+  --sidebar-bg:     #0a0f0e;
+  --sidebar-text:   #a3b3ae;
   --sidebar-active: #1d9e75;
-  --background: #0a0f0e;
-  --foreground: #ffffff;
+  --background:     #050a09;
+  --foreground:     #f0f4f3;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
+  font-family: var(--font-sans);
 }
 
 /* Global transitions */
 a,
 button {
-  transition-property: all;
+  transition-property: background, border-color, color, box-shadow, opacity;
   transition-duration: 150ms;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-timing-function: ease;
 }
 
 /* Custom scrollbar */
