@@ -56,13 +56,30 @@ export default function OnboardingChecklist({ hasApiKey, hasVerification, hasPai
   return (
     <div
       className="rounded-xl p-6 mb-8"
-      style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
+      style={{ backgroundColor: "#111916", border: "1px solid rgba(29,158,117,0.25)" }}
     >
       <div className="flex items-start justify-between mb-4">
         <div>
-          <h2 className="text-sm font-semibold" style={{ color: "#f0f4f3" }}>
-            Get started with Veridian
-          </h2>
+          <div className="flex items-center gap-2 mb-1">
+            {/* Teal lightning bolt — marks this as an active onboarding prompt */}
+            <svg
+              className="w-3.5 h-3.5 shrink-0"
+              fill="none"
+              stroke="#1d9e75"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 10V3L4 14h7v7l9-11h-7z"
+              />
+            </svg>
+            <h2 className="text-sm font-semibold" style={{ color: "#f0f4f3" }}>
+              Get started with Veridian
+            </h2>
+          </div>
           <p className="text-xs mt-1" style={{ color: "#5a7268" }}>
             Complete these steps to start running verifications.
           </p>

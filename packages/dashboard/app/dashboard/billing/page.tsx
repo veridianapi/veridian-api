@@ -207,8 +207,11 @@ export default async function BillingPage() {
         {PLANS.map((plan, idx) => {
           const isCurrent = plan.id === customer?.plan;
           const isUpgrade = idx > currentPlanIdx && currentPlanIdx !== -1;
+          const isMostPopular = plan.id === "growth";
 
-          return (
+          // Growth card is wrapped in a relative container so the badge
+          // can be absolutely positioned above the card edge.
+          const card = (
             <div
               key={plan.id}
               className="rounded-xl p-6"
@@ -216,7 +219,12 @@ export default async function BillingPage() {
                 backgroundColor: "#111916",
                 border: isCurrent
                   ? "2px solid #1d9e75"
+                  : isMostPopular
+                  ? "1px solid rgba(29,158,117,0.40)"
                   : "1px solid rgba(255,255,255,0.08)",
+                boxShadow: isMostPopular
+                  ? "0 0 0 1px rgba(29,158,117,0.15)"
+                  : undefined,
               }}
             >
               {/* Plan name + badge */}
@@ -299,6 +307,44 @@ export default async function BillingPage() {
               )}
             </div>
           );
+
+          // Growth card gets a relative wrapper so the badge floats above it
+          if (isMostPopular) {
+            return (
+              <div key={plan.id} style={{ position: "relative", paddingTop: 20 }}>
+                {/* "Most popular" badge centred above the card edge */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    display: "flex",
+                    justifyContent: "center",
+                  }}
+                >
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      padding: "2px 8px",
+                      borderRadius: 9999,
+                      fontSize: 11,
+                      fontWeight: 500,
+                      letterSpacing: "0.02em",
+                      backgroundColor: "#1d9e75",
+                      color: "#050a09",
+                    }}
+                  >
+                    Most popular
+                  </span>
+                </div>
+                {card}
+              </div>
+            );
+          }
+
+          return card;
         })}
       </div>
     </div>
