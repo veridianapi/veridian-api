@@ -329,7 +329,7 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
                     key={href}
                     href={href}
                     onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                    className="flex items-center gap-3 py-2 rounded-lg text-sm font-[510] transition-colors"
                     style={{
                       paddingLeft: "calc(0.75rem - 2px)",
                       paddingRight: "0.75rem",
@@ -349,7 +349,7 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
                   key={href}
                   href={href}
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:text-white"
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-[510] transition-colors hover:text-white"
                   style={{ color: "#a3b3ae" }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.backgroundColor = "rgba(255,255,255,0.05)";

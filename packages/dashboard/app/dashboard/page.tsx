@@ -17,10 +17,10 @@ function StatusBadge({ status }: { status: string }) {
       style={{
         display: "inline-flex",
         alignItems: "center",
-        padding: "2px 8px",
+        padding: "0px 6px",
         borderRadius: 9999,
         fontSize: 11,
-        fontWeight: 500,
+        fontWeight: 510,
         letterSpacing: "0.02em",
         textTransform: "capitalize",
         ...(styleMap[status] ?? { backgroundColor: "rgba(255,255,255,0.06)", color: "#5a7268" }),
@@ -59,7 +59,7 @@ interface MetricCardProps {
 function MetricCard({ label, value, iconColor, iconBg, subtext, icon }: MetricCardProps) {
   return (
     <div
-      className="rounded-xl p-6 transition-colors duration-150"
+      className="card-lift rounded-xl p-6 transition-colors duration-150"
       style={{
         backgroundColor: "#111916",
         border: "1px solid rgba(255,255,255,0.08)",
@@ -88,6 +88,7 @@ function MetricCard({ label, value, iconColor, iconBg, subtext, icon }: MetricCa
               color: "#f0f4f3",
               lineHeight: 1.2,
               fontVariantNumeric: "tabular-nums",
+              letterSpacing: "-0.704px",
             }}
           >
             {value}
@@ -169,7 +170,7 @@ export default async function DashboardPage() {
       {/* Page header */}
       <div className="flex items-start justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-semibold" style={{ color: "#f0f4f3" }}>Overview</h1>
+          <h1 className="text-2xl font-semibold" style={{ color: "#f0f4f3", letterSpacing: "-0.704px" }}>Overview</h1>
           <p className="text-sm mt-1" style={{ color: "#a3b3ae" }}>{today}</p>
         </div>
         {customer?.plan && (
@@ -177,10 +178,10 @@ export default async function DashboardPage() {
             style={{
               display: "inline-flex",
               alignItems: "center",
-              padding: "2px 8px",
+              padding: "0px 6px",
               borderRadius: 9999,
               fontSize: 11,
-              fontWeight: 500,
+              fontWeight: 510,
               letterSpacing: "0.02em",
               backgroundColor: "rgba(29,158,117,0.15)",
               color: "#1d9e75",
@@ -262,14 +263,14 @@ export default async function DashboardPage() {
 
       {/* Recent verifications card */}
       <div
-        className="rounded-xl"
+        className="card-lift rounded-xl"
         style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
       >
         <div
           className="px-6 py-4 flex items-center justify-between"
           style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}
         >
-          <h2 className="text-sm font-semibold" style={{ color: "#f0f4f3" }}>
+          <h2 className="text-sm font-semibold" style={{ color: "#f0f4f3", letterSpacing: "-0.288px" }}>
             Recent Verifications
           </h2>
           <Link
@@ -285,10 +286,10 @@ export default async function DashboardPage() {
           /* Empty state: icon + headline + description + action (DESIGN.md §8) */
           <div className="flex flex-col items-center justify-center py-16 text-center px-6">
             <div
-              className="w-10 h-10 rounded-full flex items-center justify-center mb-4"
+              className="w-8 h-8 rounded-full flex items-center justify-center mb-4"
               style={{ backgroundColor: "rgba(255,255,255,0.04)" }}
             >
-              <svg className="w-5 h-5" fill="none" stroke="#5a7268" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="#5a7268" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
             </div>
@@ -353,7 +354,7 @@ export default async function DashboardPage() {
                       (e.currentTarget.style.backgroundColor = "transparent")
                     }
                   >
-                    <td style={{ padding: "14px 16px" }}>
+                    <td style={{ padding: "12px 16px" }}>
                       <Link
                         href={`/dashboard/verifications/${v.id}`}
                         className="hover:underline"
@@ -366,22 +367,23 @@ export default async function DashboardPage() {
                         {v.id.slice(0, 8)}…
                       </Link>
                     </td>
-                    <td style={{ padding: "14px 16px" }}>
+                    <td style={{ padding: "12px 16px" }}>
                       <StatusBadge status={v.status} />
                     </td>
-                    <td style={{ padding: "14px 16px" }}>
+                    <td style={{ padding: "12px 16px" }}>
                       <RiskScore score={v.risk_score} />
                     </td>
                     <td
                       style={{
-                        padding: "14px 16px",
+                        padding: "12px 16px",
                         color: "#a3b3ae",
                         textTransform: "capitalize",
+                        fontSize: 13,
                       }}
                     >
                       {v.document_type.replace(/_/g, " ")}
                     </td>
-                    <td style={{ padding: "14px 16px", color: "#a3b3ae" }}>
+                    <td style={{ padding: "12px 16px", color: "#a3b3ae", fontSize: 13 }}>
                       {new Date(v.created_at).toLocaleDateString()}
                     </td>
                   </tr>

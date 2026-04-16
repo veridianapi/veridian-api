@@ -49,6 +49,36 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+  /* Linear's OpenType features — single-story 'a' (cv01) + geometric alternates (ss03) */
+  font-feature-settings: "cv01", "ss03";
+}
+
+/* Inherit OpenType features into all form controls */
+input,
+textarea,
+select,
+button {
+  font-feature-settings: "cv01", "ss03";
+}
+
+/* Linear-style card hover lift
+   Uses a compositing ::after so it works over any solid background color. */
+.card-lift {
+  position: relative;
+  isolation: isolate;
+}
+.card-lift::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+}
+.card-lift:hover::after {
+  opacity: 1;
 }
 
 /* Global transitions */

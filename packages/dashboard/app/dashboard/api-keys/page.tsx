@@ -122,7 +122,7 @@ export default function ApiKeysPage() {
       {/* Page header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-semibold" style={{ color: "#f0f4f3" }}>API Keys</h1>
+          <h1 className="text-2xl font-semibold" style={{ color: "#f0f4f3", letterSpacing: "-0.704px" }}>API Keys</h1>
           <p className="text-sm mt-1" style={{ color: "#a3b3ae" }}>
             Manage your authentication keys
           </p>
@@ -238,6 +238,7 @@ export default function ApiKeysPage() {
                 color: "#f0f4f3",
                 height: 36,
                 borderRadius: 8,
+                fontFeatureSettings: '"cv01","ss03"',
                 "--tw-ring-color": "#1d9e75",
               } as React.CSSProperties}
               autoFocus
@@ -276,7 +277,7 @@ export default function ApiKeysPage() {
 
       {/* Keys list */}
       <div
-        className="rounded-xl"
+        className="card-lift rounded-xl"
         style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
       >
         {loading ? (
@@ -293,10 +294,10 @@ export default function ApiKeysPage() {
           /* Empty state: icon + headline + description + action (DESIGN.md §8) */
           <div className="flex flex-col items-center justify-center py-20 text-center px-6">
             <div
-              className="w-10 h-10 rounded-full flex items-center justify-center mb-4"
+              className="w-8 h-8 rounded-full flex items-center justify-center mb-4"
               style={{ backgroundColor: "rgba(255,255,255,0.04)" }}
             >
-              <svg className="w-5 h-5" fill="none" stroke="#5a7268" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="#5a7268" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
               </svg>
             </div>
@@ -352,7 +353,7 @@ export default function ApiKeysPage() {
 
                 {/* Meta */}
                 <div className="hidden sm:flex flex-col items-end text-right shrink-0">
-                  <p className="text-xs" style={{ color: "#a3b3ae" }}>
+                  <p style={{ fontSize: 13, color: "#a3b3ae" }}>
                     Created {new Date(k.created_at).toLocaleDateString()}
                   </p>
                 </div>

@@ -17,10 +17,10 @@ function StatusBadge({ status }: { status: string }) {
       style={{
         display: "inline-flex",
         alignItems: "center",
-        padding: "2px 8px",
+        padding: "0px 6px",
         borderRadius: 9999,
         fontSize: 11,
-        fontWeight: 500,
+        fontWeight: 510,
         letterSpacing: "0.02em",
         textTransform: "capitalize",
         ...(styleMap[status] ?? { backgroundColor: "rgba(255,255,255,0.06)", color: "#5a7268" }),
@@ -89,7 +89,7 @@ export default async function VerificationsPage({
       {/* Page header */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-2xl font-semibold" style={{ color: "#f0f4f3" }}>Verifications</h1>
+          <h1 className="text-2xl font-semibold" style={{ color: "#f0f4f3", letterSpacing: "-0.704px" }}>Verifications</h1>
           <p className="text-sm mt-1" style={{ color: "#a3b3ae" }}>
             {count ?? 0} total record{(count ?? 0) !== 1 ? "s" : ""}
           </p>
@@ -114,6 +114,7 @@ export default async function VerificationsPage({
                 border: "1px solid rgba(255,255,255,0.08)",
                 color: "#f0f4f3",
                 height: 36,
+                fontFeatureSettings: '"cv01","ss03"',
                 "--tw-ring-color": "#1d9e75",
               } as React.CSSProperties}
             />
@@ -123,17 +124,17 @@ export default async function VerificationsPage({
 
       {/* Table card */}
       <div
-        className="rounded-xl"
+        className="card-lift rounded-xl"
         style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
       >
         {queryError ? (
           /* Error empty state */
           <div className="flex flex-col items-center justify-center py-20 text-center px-6">
             <div
-              className="w-10 h-10 rounded-full flex items-center justify-center mb-4"
+              className="w-8 h-8 rounded-full flex items-center justify-center mb-4"
               style={{ backgroundColor: "rgba(220,38,38,0.10)" }}
             >
-              <svg className="w-5 h-5" fill="none" stroke="#dc2626" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="#dc2626" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
             </div>
@@ -148,10 +149,10 @@ export default async function VerificationsPage({
           /* Empty state: icon + headline + description + action (DESIGN.md §8) */
           <div className="flex flex-col items-center justify-center py-20 text-center px-6">
             <div
-              className="w-10 h-10 rounded-full flex items-center justify-center mb-4"
+              className="w-8 h-8 rounded-full flex items-center justify-center mb-4"
               style={{ backgroundColor: "rgba(255,255,255,0.04)" }}
             >
-              <svg className="w-5 h-5" fill="none" stroke="#5a7268" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="#5a7268" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
             </div>
@@ -224,7 +225,7 @@ export default async function VerificationsPage({
                         (e.currentTarget.style.backgroundColor = "transparent")
                       }
                     >
-                      <td style={{ padding: "14px 16px" }}>
+                      <td style={{ padding: "12px 16px" }}>
                         <Link
                           href={`/dashboard/verifications/${v.id}`}
                           className="hover:underline"
@@ -238,22 +239,23 @@ export default async function VerificationsPage({
                           {v.id.slice(0, 8)}…
                         </Link>
                       </td>
-                      <td style={{ padding: "14px 16px" }}>
+                      <td style={{ padding: "12px 16px" }}>
                         <StatusBadge status={v.status} />
                       </td>
-                      <td style={{ padding: "14px 16px" }}>
+                      <td style={{ padding: "12px 16px" }}>
                         <RiskBar score={v.risk_score} />
                       </td>
                       <td
                         style={{
-                          padding: "14px 16px",
+                          padding: "12px 16px",
                           color: "#a3b3ae",
                           textTransform: "capitalize",
+                          fontSize: 13,
                         }}
                       >
                         {v.document_type.replace(/_/g, " ")}
                       </td>
-                      <td style={{ padding: "14px 16px", color: "#a3b3ae" }}>
+                      <td style={{ padding: "12px 16px", color: "#a3b3ae", fontSize: 13 }}>
                         {new Date(v.created_at).toLocaleDateString()}
                       </td>
                     </tr>

@@ -93,7 +93,7 @@ export default async function BillingPage() {
     <div>
       {/* Page header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold" style={{ color: "#f0f4f3" }}>Billing</h1>
+        <h1 className="text-2xl font-semibold" style={{ color: "#f0f4f3", letterSpacing: "-0.704px" }}>Billing</h1>
         <p className="text-sm mt-1" style={{ color: "#a3b3ae" }}>
           Manage your plan and usage
         </p>
@@ -101,7 +101,7 @@ export default async function BillingPage() {
 
       {/* Current plan summary card */}
       <div
-        className="rounded-xl p-6 mb-8"
+        className="card-lift rounded-xl p-6 mb-8"
         style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
       >
         <div className="flex items-start justify-between mb-5">
@@ -118,7 +118,7 @@ export default async function BillingPage() {
                     padding: "2px 8px",
                     borderRadius: 9999,
                     fontSize: 11,
-                    fontWeight: 500,
+                    fontWeight: 510,
                     letterSpacing: "0.02em",
                     textTransform: "capitalize",
                     ...(customer.subscription_status === "active"
@@ -131,7 +131,7 @@ export default async function BillingPage() {
               )}
             </div>
             {customer?.next_billing_date && (
-              <p className="text-sm" style={{ color: "#a3b3ae" }}>
+              <p style={{ fontSize: 13, color: "#a3b3ae" }}>
                 Next billing:{" "}
                 {new Date(customer.next_billing_date).toLocaleDateString("en-US", {
                   year: "numeric",
@@ -214,7 +214,7 @@ export default async function BillingPage() {
           const card = (
             <div
               key={plan.id}
-              className="rounded-xl p-6"
+              className="card-lift rounded-xl p-6"
               style={{
                 backgroundColor: "#111916",
                 border: isCurrent
