@@ -341,18 +341,13 @@ export default async function DashboardPage() {
                 {verifications.map((v, idx) => (
                   <tr
                     key={v.id}
+                    className="hover:bg-[rgba(255,255,255,0.02)] transition-colors duration-150"
                     style={{
                       borderBottom:
                         idx < verifications.length - 1
                           ? "1px solid rgba(255,255,255,0.04)"
                           : "none",
                     }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.02)")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.backgroundColor = "transparent")
-                    }
                   >
                     <td style={{ padding: "12px 16px" }}>
                       <Link
