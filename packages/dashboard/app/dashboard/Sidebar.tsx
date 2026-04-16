@@ -5,6 +5,10 @@ import { useState, useRef, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 
+const EXPANDED_WIDTH = 240;
+const COLLAPSED_WIDTH = 64;
+const LS_COLLAPSE_KEY = "veridian_sidebar_collapsed";
+
 const NAV = [
   {
     href: "/dashboard",
@@ -44,7 +48,7 @@ const NAV = [
   },
 ];
 
-// ─── Profile popup ─────────────────────────────────────────────────────────
+// ─── Profile popup ──────────────────────────────────────────────────────────
 
 interface ProfileMenuProps {
   userEmail: string;
@@ -68,20 +72,14 @@ function ProfileMenu({ userEmail, onClose, onSignOut }: ProfileMenuProps) {
         overflow: "hidden",
       }}
     >
-      {/* Email header */}
       <div className="px-4 py-3">
-        <p
-          className="text-xs truncate"
-          style={{ color: "#5a7268" }}
-          title={userEmail}
-        >
+        <p className="text-xs truncate" style={{ color: "#5a7268" }} title={userEmail}>
           {userEmail}
         </p>
       </div>
 
       <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }} />
 
-      {/* Menu items */}
       <div className="py-1.5">
         <MenuLink
           href="/dashboard/settings"
@@ -121,7 +119,6 @@ function ProfileMenu({ userEmail, onClose, onSignOut }: ProfileMenuProps) {
 
       <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }} />
 
-      {/* Sign out */}
       <div className="py-1.5">
         <MenuButton
           label="Sign out"
@@ -138,7 +135,7 @@ function ProfileMenu({ userEmail, onClose, onSignOut }: ProfileMenuProps) {
   );
 }
 
-// ─── Shared menu item primitives ───────────────────────────────────────────
+// ─── Shared menu item primitives ─────────────────────────────────────────────
 
 function MenuLink({
   href,
@@ -153,9 +150,11 @@ function MenuLink({
   external?: boolean;
   onClick: () => void;
 }) {
-  const [hovered, setHovered] = useState(false);
   const linkProps = external
-    ? { target: href.startsWith("mailto:") ? undefined : "_blank" as const, rel: href.startsWith("mailto:") ? undefined : "noopener noreferrer" }
+    ? {
+        target: href.startsWith("mailto:") ? undefined : ("_blank" as const),
+        rel: href.startsWith("mailto:") ? undefined : "noopener noreferrer",
+      }
     : {};
 
   return (
@@ -163,13 +162,7 @@ function MenuLink({
       href={href}
       {...linkProps}
       onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className="flex items-center gap-3 mx-1.5 px-2.5 py-2 rounded-lg text-sm transition-colors"
-      style={{
-        color: hovered ? "#f0f4f3" : "#a3b3ae",
-        backgroundColor: hovered ? "rgba(255,255,255,0.06)" : "transparent",
-      }}
+      className="flex items-center gap-3 mx-1.5 px-2.5 py-2 rounded-lg text-sm transition-colors text-[#a3b3ae] hover:text-[#f0f4f3] hover:bg-[rgba(255,255,255,0.06)]"
     >
       {icon}
       {label}
@@ -188,22 +181,15 @@ function MenuButton({
   danger?: boolean;
   onClick: () => void;
 }) {
-  const [hovered, setHovered] = useState(false);
   return (
     <button
       onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className="flex items-center gap-3 w-full mx-1.5 px-2.5 py-2 rounded-lg text-sm transition-colors"
-      style={{
-        width: "calc(100% - 12px)",
-        color: danger ? (hovered ? "#dc2626" : "#a3b3ae") : hovered ? "#f0f4f3" : "#a3b3ae",
-        backgroundColor: hovered
-          ? danger
-            ? "rgba(153,27,27,0.15)"
-            : "rgba(255,255,255,0.06)"
-          : "transparent",
-      }}
+      className={`flex items-center gap-3 mx-1.5 px-2.5 py-2 rounded-lg text-sm transition-colors text-[#a3b3ae] ${
+        danger
+          ? "hover:text-[#dc2626] hover:bg-[rgba(153,27,27,0.15)]"
+          : "hover:text-[#f0f4f3] hover:bg-[rgba(255,255,255,0.06)]"
+      }`}
+      style={{ width: "calc(100% - 12px)" }}
     >
       {icon}
       {label}
@@ -211,14 +197,112 @@ function MenuButton({
   );
 }
 
-// ─── Sidebar ───────────────────────────────────────────────────────────────
+// ─── Nav item with collapsed tooltip ─────────────────────────────────────────
+
+function NavItem({
+  href,
+  label,
+  icon,
+  active,
+  isCollapsed,
+  onClick,
+}: {
+  href: string;
+  label: string;
+  icon: React.ReactNode;
+  active: boolean;
+  isCollapsed: boolean;
+  onClick: () => void;
+}) {
+  const [tooltipTop, setTooltipTop] = useState<number | null>(null);
+  const ref = useRef<HTMLDivElement>(null);
+
+  function handleMouseEnter() {
+    if (!isCollapsed || !ref.current) return;
+    const r = ref.current.getBoundingClientRect();
+    setTooltipTop(r.top + r.height / 2);
+  }
+
+  return (
+    <>
+      <div ref={ref} onMouseEnter={handleMouseEnter} onMouseLeave={() => setTooltipTop(null)}>
+        <Link
+          href={href}
+          onClick={onClick}
+          className={`flex items-center rounded-lg text-sm font-[510] transition-colors${
+            !active ? " hover:bg-[rgba(255,255,255,0.04)]" : ""
+          }`}
+          style={{
+            height: 36,
+            justifyContent: isCollapsed ? "center" : "flex-start",
+            padding: isCollapsed
+              ? "0"
+              : active
+              ? "0 12px 0 calc(12px - 2px)"
+              : "0 12px",
+            gap: isCollapsed ? 0 : 12,
+            backgroundColor: active ? "rgba(29,158,117,0.10)" : undefined,
+            color: active ? "#1d9e75" : "#a3b3ae",
+            borderLeft: active ? "2px solid #1d9e75" : "2px solid transparent",
+          }}
+        >
+          {icon}
+          {!isCollapsed && label}
+        </Link>
+      </div>
+
+      {/* Fixed-position tooltip — bypasses sidebar overflow clipping */}
+      {tooltipTop !== null && (
+        <div
+          style={{
+            position: "fixed",
+            left: COLLAPSED_WIDTH + 8,
+            top: tooltipTop,
+            transform: "translateY(-50%)",
+            backgroundColor: "#111916",
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: 6,
+            padding: "4px 8px",
+            fontSize: 12,
+            fontWeight: 500,
+            color: "#f0f4f3",
+            whiteSpace: "nowrap",
+            pointerEvents: "none",
+            zIndex: 200,
+          }}
+        >
+          {label}
+        </div>
+      )}
+    </>
+  );
+}
+
+// ─── Sidebar ──────────────────────────────────────────────────────────────────
 
 export default function Sidebar({ userEmail }: { userEmail: string }) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
+
+  // Read persisted collapse state after hydration
+  useEffect(() => {
+    const stored = localStorage.getItem(LS_COLLAPSE_KEY);
+    if (stored === "true") setCollapsed(true);
+  }, []);
+
+  // On mobile (mobileOpen=true) always show the full sidebar regardless of collapsed state
+  const isCollapsed = collapsed && !mobileOpen;
+  const sidebarWidth = isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
+
+  function toggleCollapsed() {
+    const next = !collapsed;
+    setCollapsed(next);
+    localStorage.setItem(LS_COLLAPSE_KEY, String(next));
+  }
 
   // Close profile popup on outside click
   useEffect(() => {
@@ -243,7 +327,7 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
 
   return (
     <>
-      {/* Mobile hamburger button */}
+      {/* Mobile hamburger */}
       <button
         className="md:hidden fixed top-3 left-3 z-50 w-10 h-10 flex items-center justify-center rounded-lg"
         style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
@@ -265,27 +349,27 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
 
       {/* Sidebar panel */}
       <aside
-        className={`flex flex-col shrink-0 h-screen fixed md:relative inset-y-0 left-0 z-50 md:z-auto transition-transform duration-200 ease-in-out overflow-y-auto ${
+        className={`flex flex-col shrink-0 h-screen fixed md:relative inset-y-0 left-0 z-50 md:z-auto overflow-y-auto ${
           mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
-        style={{ width: "240px", backgroundColor: "#0a0f0e" }}
+        style={{
+          width: sidebarWidth,
+          backgroundColor: "#0a0f0e",
+          borderRight: "1px solid rgba(255,255,255,0.06)",
+          transition: "width 200ms ease, transform 200ms ease-in-out",
+        }}
       >
-        {/* Logo / Header */}
-        <div className="px-5 py-6 shrink-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-          <div className="flex items-center gap-3">
-            {/* Close button on mobile */}
-            <button
-              className="md:hidden absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-lg"
-              style={{ color: "#a3b3ae" }}
-              onClick={() => setMobileOpen(false)}
-              aria-label="Close menu"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-
-            {/* Shield icon */}
+        {/* ── Header: logo + collapse toggle ─────────────────────────────── */}
+        <div
+          className="shrink-0 flex items-center gap-2 px-3 py-4"
+          style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+        >
+          {/* Logo — navigates to /dashboard */}
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-3 min-w-0 flex-1"
+            onClick={() => setMobileOpen(false)}
+          >
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
               style={{ backgroundColor: "rgba(29,158,117,0.15)" }}
@@ -299,74 +383,86 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
                 />
               </svg>
             </div>
-            <div>
-              <p className="text-sm font-semibold text-white leading-tight">Veridian</p>
-              <p className="text-xs leading-tight" style={{ color: "#5a7068" }}>
+            {/* Text fades out as sidebar collapses */}
+            <div
+              style={{
+                opacity: isCollapsed ? 0 : 1,
+                transition: "opacity 100ms ease",
+                overflow: "hidden",
+                whiteSpace: "nowrap",
+              }}
+            >
+              <p className="text-sm font-semibold leading-tight" style={{ color: "#f0f4f3" }}>
+                Veridian
+              </p>
+              <p className="text-xs leading-tight" style={{ color: "#5a7268" }}>
                 Compliance
               </p>
             </div>
-          </div>
-        </div>
+          </Link>
 
-        {/* Navigation */}
-        <nav className="flex-1 px-3 py-5">
-          <p
-            className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-widest"
+          {/* Mobile: close button */}
+          <button
+            className="md:hidden flex items-center justify-center w-7 h-7 rounded-md shrink-0 transition-colors hover:bg-[rgba(255,255,255,0.06)]"
+            style={{ color: "#a3b3ae" }}
+            onClick={() => setMobileOpen(false)}
+            aria-label="Close menu"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          {/* Desktop: collapse toggle chevron */}
+          <button
+            className="hidden md:flex items-center justify-center w-6 h-6 rounded-md shrink-0 transition-colors hover:bg-[rgba(255,255,255,0.06)]"
+            onClick={toggleCollapsed}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             style={{ color: "#5a7268" }}
           >
-            Navigation
-          </p>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d={collapsed ? "M9 5l7 7-7 7" : "M15 19l-7-7 7-7"}
+              />
+            </svg>
+          </button>
+        </div>
+
+        {/* ── Navigation ──────────────────────────────────────────────────── */}
+        <nav className="flex-1 px-2 py-5">
+          {!isCollapsed && (
+            <p
+              className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-widest"
+              style={{ color: "#5a7268" }}
+            >
+              Navigation
+            </p>
+          )}
           <div className="space-y-0.5">
             {NAV.map(({ href, label, icon }) => {
               const active =
                 href === "/dashboard"
                   ? pathname === "/dashboard"
                   : pathname.startsWith(href);
-
-              if (active) {
-                return (
-                  <Link
-                    key={href}
-                    href={href}
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-3 py-2 rounded-lg text-sm font-[510] transition-colors"
-                    style={{
-                      paddingLeft: "calc(0.75rem - 2px)",
-                      paddingRight: "0.75rem",
-                      backgroundColor: "rgba(29,158,117,0.10)",
-                      color: "#1d9e75",
-                      borderLeft: "2px solid #1d9e75",
-                    }}
-                  >
-                    {icon}
-                    {label}
-                  </Link>
-                );
-              }
-
               return (
-                <Link
+                <NavItem
                   key={href}
                   href={href}
+                  label={label}
+                  icon={icon}
+                  active={active}
+                  isCollapsed={isCollapsed}
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-[510] transition-colors hover:text-white"
-                  style={{ color: "#a3b3ae" }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.backgroundColor = "rgba(255,255,255,0.05)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.backgroundColor = "transparent";
-                  }}
-                >
-                  {icon}
-                  {label}
-                </Link>
+                />
               );
             })}
           </div>
         </nav>
 
-        {/* Profile footer — sticky, contains popup trigger */}
+        {/* ── Profile footer ──────────────────────────────────────────────── */}
         <div
           ref={profileRef}
           className="shrink-0 sticky bottom-0"
@@ -377,7 +473,6 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
             paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))",
           }}
         >
-          {/* Popup — rendered inside the sticky footer so it positions above it */}
           {profileOpen && (
             <ProfileMenu
               userEmail={userEmail}
@@ -386,10 +481,13 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
             />
           )}
 
-          {/* Trigger row */}
           <button
             onClick={() => setProfileOpen((o) => !o)}
-            className="flex items-center gap-3 w-full px-4 pt-3 pb-1 text-left group"
+            className="flex items-center gap-3 w-full text-left"
+            style={{
+              padding: isCollapsed ? "12px 0 4px" : "12px 16px 4px",
+              justifyContent: isCollapsed ? "center" : "flex-start",
+            }}
             aria-expanded={profileOpen}
             aria-haspopup="true"
           >
@@ -401,27 +499,26 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
               {initials}
             </div>
 
-            {/* Email */}
-            <p
-              className="text-xs truncate flex-1 text-left"
-              style={{ color: "#5a7268" }}
-            >
-              {userEmail}
-            </p>
-
-            {/* Chevron — rotates when open */}
-            <svg
-              className="w-3.5 h-3.5 shrink-0 transition-transform duration-150"
-              style={{
-                color: "#3d5249",
-                transform: profileOpen ? "rotate(180deg)" : "rotate(0deg)",
-              }}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-            </svg>
+            {/* Email + chevron — hidden when collapsed */}
+            {!isCollapsed && (
+              <>
+                <p className="text-xs truncate flex-1 text-left" style={{ color: "#5a7268" }}>
+                  {userEmail}
+                </p>
+                <svg
+                  className="w-3.5 h-3.5 shrink-0 transition-transform duration-150"
+                  style={{
+                    color: "#5a7268",
+                    transform: profileOpen ? "rotate(180deg)" : "rotate(0deg)",
+                  }}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                </svg>
+              </>
+            )}
           </button>
         </div>
       </aside>

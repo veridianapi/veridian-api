@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { sendSupportEmail } from "./actions";
 
 // ─── Data ──────────────────────────────────────────────────────────────────
 
@@ -79,13 +80,20 @@ const SECTIONS = [
       },
       {
         q: "Cancellation and refunds",
-        a: "You can cancel your subscription at any time from the Billing page — no forms, no calls, no waiting. Your access continues until the end of the billing period. If you're within 14 days of your first payment, contact support@veridian.dev for a full refund, no questions asked.",
+        a: "You can cancel your subscription at any time from the Billing page — no forms, no calls, no waiting. Your access continues until the end of the billing period. If you're within 14 days of your first payment, contact support@veridianapi.com for a full refund, no questions asked.",
       },
     ],
   },
 ];
 
-// ─── Accordion item ─────────────────────────────────────────────────────────
+const SUBJECTS = [
+  "Technical issue",
+  "Billing question",
+  "Feature request",
+  "Other",
+];
+
+// ─── Accordion item ──────────────────────────────────────────────────────────
 
 function AccordionItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
@@ -121,7 +129,14 @@ function AccordionItem({ q, a }: { q: string; a: string }) {
           {a.split("\n").map((line, i) =>
             line === "" ? (
               <div key={i} className="h-2" />
-            ) : line.startsWith("•") || line.startsWith("POST") || line.startsWith("GET") || line.startsWith("{") || line.startsWith("}") || line.startsWith("  ") || line.startsWith("Authorization") || line.startsWith("Content-Type") ? (
+            ) : line.startsWith("•") ||
+              line.startsWith("POST") ||
+              line.startsWith("GET") ||
+              line.startsWith("{") ||
+              line.startsWith("}") ||
+              line.startsWith("  ") ||
+              line.startsWith("Authorization") ||
+              line.startsWith("Content-Type") ? (
               <p
                 key={i}
                 className="text-xs leading-relaxed"
@@ -130,11 +145,7 @@ function AccordionItem({ q, a }: { q: string; a: string }) {
                 {line}
               </p>
             ) : (
-              <p
-                key={i}
-                className="text-sm leading-relaxed"
-                style={{ color: "#a3b3ae" }}
-              >
+              <p key={i} className="text-sm leading-relaxed" style={{ color: "#a3b3ae" }}>
                 {line}
               </p>
             )
@@ -145,7 +156,7 @@ function AccordionItem({ q, a }: { q: string; a: string }) {
   );
 }
 
-// ─── Section ────────────────────────────────────────────────────────────────
+// ─── Section ─────────────────────────────────────────────────────────────────
 
 function Section({
   title,
@@ -161,21 +172,15 @@ function Section({
       className="rounded-xl overflow-hidden"
       style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
     >
-      {/* Section header */}
       <div
         className="flex items-center gap-2 px-5 py-4"
-        style={{
-          borderBottom: "1px solid rgba(255,255,255,0.08)",
-          color: "#1d9e75",
-        }}
+        style={{ borderBottom: "1px solid rgba(255,255,255,0.08)", color: "#1d9e75" }}
       >
         {icon}
         <h2 className="text-sm font-semibold" style={{ color: "#f0f4f3" }}>
           {title}
         </h2>
       </div>
-
-      {/* Items */}
       {items.map((item) => (
         <AccordionItem key={item.q} q={item.q} a={item.a} />
       ))}
@@ -183,7 +188,241 @@ function Section({
   );
 }
 
-// ─── Page ───────────────────────────────────────────────────────────────────
+// ─── Contact form ─────────────────────────────────────────────────────────────
+
+function ContactForm() {
+  const [subject, setSubject] = useState(SUBJECTS[0]);
+  const [message, setMessage] = useState("");
+  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [isPending, startTransition] = useTransition();
+
+  const charCount = message.length;
+  const tooShort = charCount > 0 && charCount < 100;
+  const canSubmit = charCount >= 100 && !isPending;
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!canSubmit) return;
+
+    setStatus("idle");
+    setErrorMsg("");
+
+    startTransition(async () => {
+      const result = await sendSupportEmail({ subject, message });
+      if (result.ok) {
+        setStatus("success");
+        setMessage("");
+        setSubject(SUBJECTS[0]);
+      } else {
+        setStatus("error");
+        setErrorMsg(result.error);
+      }
+    });
+  }
+
+  if (status === "success") {
+    return (
+      <div
+        className="rounded-xl p-6 flex flex-col items-center text-center"
+        style={{ backgroundColor: "#111916", border: "1px solid rgba(29,158,117,0.25)" }}
+      >
+        <div
+          className="w-10 h-10 rounded-full flex items-center justify-center mb-4"
+          style={{ backgroundColor: "rgba(29,158,117,0.12)" }}
+        >
+          <svg className="w-5 h-5" fill="none" stroke="#1d9e75" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <p className="text-base font-medium mb-1" style={{ color: "#f0f4f3" }}>
+          Message sent
+        </p>
+        <p className="text-sm mb-5" style={{ color: "#5a7268" }}>
+          We typically reply within a few hours.
+        </p>
+        <button
+          onClick={() => setStatus("idle")}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            padding: "0 16px",
+            height: 36,
+            borderRadius: 8,
+            fontSize: 13,
+            fontWeight: 500,
+            border: "1px solid rgba(255,255,255,0.10)",
+            color: "#a3b3ae",
+            backgroundColor: "transparent",
+          }}
+        >
+          Send another message
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="rounded-xl overflow-hidden"
+      style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
+    >
+      {/* Card header */}
+      <div
+        className="flex items-center gap-2 px-5 py-4"
+        style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}
+      >
+        <svg className="w-4 h-4 shrink-0" fill="none" stroke="#1d9e75" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+        <h2 className="text-sm font-semibold" style={{ color: "#f0f4f3" }}>
+          Contact support
+        </h2>
+        <span className="text-xs ml-1" style={{ color: "#5a7268" }}>
+          — we usually reply within a few hours
+        </span>
+      </div>
+
+      <form onSubmit={handleSubmit} className="p-5 space-y-4">
+        {/* Subject */}
+        <div>
+          <label
+            htmlFor="support-subject"
+            style={{
+              display: "block",
+              fontSize: 12,
+              fontWeight: 500,
+              color: "#a3b3ae",
+              marginBottom: 6,
+              letterSpacing: "0.02em",
+            }}
+          >
+            Subject
+          </label>
+          <select
+            id="support-subject"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            className="w-full text-sm rounded-lg focus:outline-none focus:ring-2 appearance-none"
+            style={{
+              backgroundColor: "#0d1211",
+              border: "1px solid rgba(255,255,255,0.08)",
+              color: "#f0f4f3",
+              height: 36,
+              padding: "0 12px",
+              borderRadius: 8,
+              fontFeatureSettings: '"cv01","ss03"',
+              "--tw-ring-color": "#1d9e75",
+            } as React.CSSProperties}
+          >
+            {SUBJECTS.map((s) => (
+              <option key={s} value={s} style={{ backgroundColor: "#111916" }}>
+                {s}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Message */}
+        <div>
+          <div className="flex items-baseline justify-between mb-1.5">
+            <label
+              htmlFor="support-message"
+              style={{
+                fontSize: 12,
+                fontWeight: 500,
+                color: "#a3b3ae",
+                letterSpacing: "0.02em",
+              }}
+            >
+              Message
+            </label>
+            <span
+              style={{
+                fontSize: 11,
+                color: tooShort ? "#d97706" : charCount >= 100 ? "#16a34a" : "#5a7268",
+              }}
+            >
+              {charCount}/100 min
+            </span>
+          </div>
+          <textarea
+            id="support-message"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Describe your issue or question in detail…"
+            rows={5}
+            className="w-full text-sm rounded-lg focus:outline-none focus:ring-2 resize-none"
+            style={{
+              backgroundColor: "#0d1211",
+              border: `1px solid ${tooShort ? "rgba(217,119,6,0.40)" : "rgba(255,255,255,0.08)"}`,
+              color: "#f0f4f3",
+              padding: "10px 12px",
+              borderRadius: 8,
+              fontFeatureSettings: '"cv01","ss03"',
+              lineHeight: 1.5,
+              "--tw-ring-color": "#1d9e75",
+            } as React.CSSProperties}
+          />
+          {tooShort && (
+            <p className="mt-1.5 text-xs" style={{ color: "#d97706" }}>
+              Please write at least 100 characters so we can help you effectively.
+            </p>
+          )}
+        </div>
+
+        {/* Error banner */}
+        {status === "error" && (
+          <div
+            className="rounded-lg px-4 py-3"
+            style={{
+              backgroundColor: "rgba(220,38,38,0.10)",
+              border: "1px solid rgba(220,38,38,0.25)",
+              borderLeft: "3px solid #dc2626",
+            }}
+          >
+            <p className="text-sm" style={{ color: "#dc2626" }}>{errorMsg}</p>
+          </div>
+        )}
+
+        {/* Submit */}
+        <div className="flex justify-end pt-1">
+          <button
+            type="submit"
+            disabled={!canSubmit}
+            className="inline-flex items-center gap-2 text-[13px] font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 active:scale-[0.98] transition-all"
+            style={{
+              backgroundColor: "#1d9e75",
+              color: "#050a09",
+              height: 36,
+              padding: "0 16px",
+              borderRadius: 8,
+            }}
+          >
+            {isPending ? (
+              <>
+                <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Sending…
+              </>
+            ) : (
+              <>
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+                Send message
+              </>
+            )}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function HelpPage() {
   const [search, setSearch] = useState("");
@@ -203,7 +442,10 @@ export default function HelpPage() {
     <div className="max-w-2xl">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold mb-1" style={{ color: "#f0f4f3" }}>
+        <h1
+          className="text-2xl font-semibold mb-1"
+          style={{ color: "#f0f4f3", letterSpacing: "-0.704px" }}
+        >
           How can we help?
         </h1>
         <p className="text-sm" style={{ color: "#a3b3ae" }}>
@@ -211,7 +453,7 @@ export default function HelpPage() {
         </p>
       </div>
 
-      {/* Search — follows input spec */}
+      {/* Search */}
       <div className="relative mb-8">
         <svg
           className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
@@ -234,6 +476,7 @@ export default function HelpPage() {
             color: "#f0f4f3",
             height: 36,
             borderRadius: 8,
+            fontFeatureSettings: '"cv01","ss03"',
             "--tw-ring-color": "#1d9e75",
           } as React.CSSProperties}
         />
@@ -251,7 +494,7 @@ export default function HelpPage() {
         )}
       </div>
 
-      {/* Sections */}
+      {/* Sections or empty state */}
       {filtered.length > 0 ? (
         <div className="space-y-4">
           {filtered.map((section) => (
@@ -264,16 +507,15 @@ export default function HelpPage() {
           ))}
         </div>
       ) : (
-        /* Empty state — icon + headline + description + action */
         <div
           className="rounded-xl px-6 py-16 flex flex-col items-center text-center"
           style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
         >
           <div
-            className="w-10 h-10 rounded-full flex items-center justify-center mb-4"
+            className="w-8 h-8 rounded-full flex items-center justify-center mb-4"
             style={{ backgroundColor: "rgba(255,255,255,0.04)" }}
           >
-            <svg className="w-5 h-5" fill="none" stroke="#5a7268" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" fill="none" stroke="#5a7268" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
@@ -305,33 +547,9 @@ export default function HelpPage() {
         </div>
       )}
 
-      {/* Footer CTA */}
-      <div
-        className="mt-8 rounded-xl px-6 py-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
-        style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
-      >
-        <div>
-          <p className="text-sm font-medium" style={{ color: "#f0f4f3" }}>Still need help?</p>
-          <p className="text-xs mt-1" style={{ color: "#5a7268" }}>
-            Our team usually replies within a few hours.
-          </p>
-        </div>
-        <a
-          href="mailto:support@veridian.dev"
-          className="flex items-center gap-2 text-[13px] font-medium shrink-0 hover:opacity-90"
-          style={{
-            backgroundColor: "#1d9e75",
-            color: "#050a09",
-            height: 36,
-            padding: "0 16px",
-            borderRadius: 8,
-          }}
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-          </svg>
-          Email support
-        </a>
+      {/* Contact form */}
+      <div className="mt-6">
+        <ContactForm />
       </div>
     </div>
   );
