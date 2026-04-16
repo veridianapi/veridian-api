@@ -197,78 +197,6 @@ function MenuButton({
   );
 }
 
-// ─── Collapse toggle (nav-section button) ────────────────────────────────────
-
-function CollapseToggle({
-  isCollapsed,
-  onToggle,
-}: {
-  isCollapsed: boolean;
-  onToggle: () => void;
-}) {
-  const [tooltipTop, setTooltipTop] = useState<number | null>(null);
-  const ref = useRef<HTMLButtonElement>(null);
-
-  function handleMouseEnter() {
-    if (!isCollapsed || !ref.current) return;
-    const r = ref.current.getBoundingClientRect();
-    setTooltipTop(r.top + r.height / 2);
-  }
-
-  return (
-    <>
-      <button
-        ref={ref}
-        onClick={onToggle}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={() => setTooltipTop(null)}
-        aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        className="flex items-center rounded-lg text-sm font-[510] transition-colors w-full hover:bg-[rgba(255,255,255,0.04)]"
-        style={{
-          height: 36,
-          justifyContent: isCollapsed ? "center" : "flex-start",
-          padding: isCollapsed ? "0" : "0 12px",
-          gap: isCollapsed ? 0 : 12,
-          color: "#5a7268",
-        }}
-      >
-        <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d={isCollapsed ? "M9 5l7 7-7 7" : "M15 19l-7-7 7-7"}
-          />
-        </svg>
-        {!isCollapsed && "Collapse"}
-      </button>
-
-      {tooltipTop !== null && (
-        <div
-          style={{
-            position: "fixed",
-            left: COLLAPSED_WIDTH + 8,
-            top: tooltipTop,
-            transform: "translateY(-50%)",
-            backgroundColor: "#111916",
-            border: "1px solid rgba(255,255,255,0.08)",
-            borderRadius: 6,
-            padding: "4px 8px",
-            fontSize: 12,
-            fontWeight: 500,
-            color: "#f0f4f3",
-            whiteSpace: "nowrap",
-            pointerEvents: "none",
-            zIndex: 200,
-          }}
-        >
-          Expand
-        </div>
-      )}
-    </>
-  );
-}
-
 // ─── Nav item with collapsed tooltip ─────────────────────────────────────────
 
 function NavItem({
@@ -358,6 +286,7 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const [toggleHovered, setToggleHovered] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
   // Read persisted collapse state after hydration
@@ -517,10 +446,6 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
             })}
           </div>
 
-          {/* Collapse toggle — desktop only, bottom of nav */}
-          <div className="hidden md:block mt-4 pt-3" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-            <CollapseToggle isCollapsed={isCollapsed} onToggle={toggleCollapsed} />
-          </div>
         </nav>
 
         {/* ── Profile footer ──────────────────────────────────────────────── */}
@@ -583,6 +508,38 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
           </button>
         </div>
       </aside>
+
+      {/* ── Desktop collapse toggle — Linear-style floating circle ─────────
+          Fixed position so it isn't clipped by the sidebar's overflow-y.
+          Tracks sidebar width with the same 200ms ease transition.        */}
+      <button
+        className="hidden md:flex items-center justify-center fixed z-20 rounded-full"
+        onClick={toggleCollapsed}
+        onMouseEnter={() => setToggleHovered(true)}
+        onMouseLeave={() => setToggleHovered(false)}
+        aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        style={{
+          width: 24,
+          height: 24,
+          left: sidebarWidth - 12,
+          top: "50%",
+          transform: "translateY(-50%)",
+          backgroundColor: toggleHovered ? "#1a2b25" : "#111916",
+          border: "1px solid rgba(255,255,255,0.08)",
+          color: "#a3b3ae",
+          cursor: "pointer",
+          transition: "left 200ms ease, background-color 150ms ease",
+        }}
+      >
+        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2.5}
+            d={collapsed ? "M9 5l7 7-7 7" : "M15 19l-7-7 7-7"}
+          />
+        </svg>
+      </button>
     </>
   );
 }
