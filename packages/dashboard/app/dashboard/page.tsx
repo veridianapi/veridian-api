@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase-server";
 import OnboardingChecklist from "./OnboardingChecklist";
+import AnnouncementBanner from "./AnnouncementBanner";
+import QuickActions from "./QuickActions";
 
 // ─── Status badge ─────────────────────────────────────────────────────────────
 // Colors follow DESIGN.md §5 Badges & Status Pills exactly.
@@ -158,12 +160,18 @@ export default async function DashboardPage() {
   const paidPlans = ["starter", "growth", "scale"];
   const hasPaidPlan = paidPlans.includes(customer?.plan ?? "");
 
+  const hasApiKey = (apiKeyCount ?? 0) > 0;
+  const hasVerification = (counts ?? []).length > 0;
+
   return (
     <div>
+      {/* Announcement banner — dismissible, state persisted in localStorage */}
+      <AnnouncementBanner />
+
       {/* Onboarding checklist — shown to new users until dismissed */}
       <OnboardingChecklist
-        hasApiKey={(apiKeyCount ?? 0) > 0}
-        hasVerification={(counts ?? []).length > 0}
+        hasApiKey={hasApiKey}
+        hasVerification={hasVerification}
         hasPaidPlan={hasPaidPlan}
       />
 
@@ -244,6 +252,9 @@ export default async function DashboardPage() {
           }
         />
       </div>
+
+      {/* Quick actions — hidden once user has ≥1 API key AND ≥1 verification */}
+      <QuickActions hasApiKey={hasApiKey} hasVerification={hasVerification} />
 
       {/* Query error banner */}
       {queryError && (
