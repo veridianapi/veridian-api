@@ -28,7 +28,7 @@ export async function sendSupportEmail({
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: "Veridian Dashboard <noreply@veridianapi.com>",
+      from: "Veridian Support <support@veridianapi.com>",
       to: ["support@veridianapi.com"],
       reply_to: userEmail,
       subject: `[Support] ${subject}`,

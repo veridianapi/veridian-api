@@ -197,6 +197,78 @@ function MenuButton({
   );
 }
 
+// ─── Collapse toggle (nav-section button) ────────────────────────────────────
+
+function CollapseToggle({
+  isCollapsed,
+  onToggle,
+}: {
+  isCollapsed: boolean;
+  onToggle: () => void;
+}) {
+  const [tooltipTop, setTooltipTop] = useState<number | null>(null);
+  const ref = useRef<HTMLButtonElement>(null);
+
+  function handleMouseEnter() {
+    if (!isCollapsed || !ref.current) return;
+    const r = ref.current.getBoundingClientRect();
+    setTooltipTop(r.top + r.height / 2);
+  }
+
+  return (
+    <>
+      <button
+        ref={ref}
+        onClick={onToggle}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={() => setTooltipTop(null)}
+        aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        className="flex items-center rounded-lg text-sm font-[510] transition-colors w-full hover:bg-[rgba(255,255,255,0.04)]"
+        style={{
+          height: 36,
+          justifyContent: isCollapsed ? "center" : "flex-start",
+          padding: isCollapsed ? "0" : "0 12px",
+          gap: isCollapsed ? 0 : 12,
+          color: "#5a7268",
+        }}
+      >
+        <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d={isCollapsed ? "M9 5l7 7-7 7" : "M15 19l-7-7 7-7"}
+          />
+        </svg>
+        {!isCollapsed && "Collapse"}
+      </button>
+
+      {tooltipTop !== null && (
+        <div
+          style={{
+            position: "fixed",
+            left: COLLAPSED_WIDTH + 8,
+            top: tooltipTop,
+            transform: "translateY(-50%)",
+            backgroundColor: "#111916",
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: 6,
+            padding: "4px 8px",
+            fontSize: 12,
+            fontWeight: 500,
+            color: "#f0f4f3",
+            whiteSpace: "nowrap",
+            pointerEvents: "none",
+            zIndex: 200,
+          }}
+        >
+          Expand
+        </div>
+      )}
+    </>
+  );
+}
+
 // ─── Nav item with collapsed tooltip ─────────────────────────────────────────
 
 function NavItem({
@@ -359,12 +431,13 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
           transition: "width 200ms ease, transform 200ms ease-in-out",
         }}
       >
-        {/* ── Header: logo + collapse toggle ─────────────────────────────── */}
+        {/* ── Header: logo only — collapse toggle lives in the nav ────────── */}
         <div
           className="shrink-0 flex items-center gap-2 px-3 py-4"
           style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
         >
-          {/* Logo — navigates to /dashboard */}
+          {/* Logo — navigates to /dashboard. flex-1 so it fills all header
+              space safely; on desktop the chevron is in the nav, not here. */}
           <Link
             href="/dashboard"
             className="flex items-center gap-3 min-w-0 flex-1"
@@ -412,23 +485,6 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
-
-          {/* Desktop: collapse toggle chevron */}
-          <button
-            className="hidden md:flex items-center justify-center w-6 h-6 rounded-md shrink-0 transition-colors hover:bg-[rgba(255,255,255,0.06)]"
-            onClick={toggleCollapsed}
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            style={{ color: "#5a7268" }}
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d={collapsed ? "M9 5l7 7-7 7" : "M15 19l-7-7 7-7"}
-              />
-            </svg>
-          </button>
         </div>
 
         {/* ── Navigation ──────────────────────────────────────────────────── */}
@@ -459,6 +515,11 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
                 />
               );
             })}
+          </div>
+
+          {/* Collapse toggle — desktop only, bottom of nav */}
+          <div className="hidden md:block mt-4 pt-3" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+            <CollapseToggle isCollapsed={isCollapsed} onToggle={toggleCollapsed} />
           </div>
         </nav>
 
