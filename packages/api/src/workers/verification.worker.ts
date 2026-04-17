@@ -249,11 +249,16 @@ async function processVerification(
 
   // 3. Rekognition — face match
   let faceMatchScore: number;
-  try {
-    faceMatchScore = await compareFaces(documentFront, selfie);
-  } catch (err) {
-    console.warn(`[${verification_id}] Rekognition failed, defaulting face score to 0:`, err);
+  if (!documentFront || !selfie) {
+    console.warn('[worker] Skipping face match — no images provided');
     faceMatchScore = 0;
+  } else {
+    try {
+      faceMatchScore = await compareFaces(documentFront, selfie);
+    } catch (err) {
+      console.warn(`[${verification_id}] Rekognition failed, defaulting face score to 0:`, err);
+      faceMatchScore = 0;
+    }
   }
 
   // 4. OFAC sanctions screening
