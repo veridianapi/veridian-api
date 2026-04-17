@@ -8,10 +8,10 @@ const PLANS = [
     name: "Starter",
     price: "$199",
     period: "/month",
-    limit: 200,
-    description: "Up to 200 verifications/month",
+    limit: 500,
+    description: "Up to 500 verifications/month",
     features: [
-      "200 verifications / month",
+      "500 verifications / month",
       "Passport & ID checks",
       "OFAC sanctions screening",
       "API access",
@@ -23,10 +23,10 @@ const PLANS = [
     name: "Growth",
     price: "$499",
     period: "/month",
-    limit: 500,
-    description: "Up to 500 verifications/month",
+    limit: 2000,
+    description: "Up to 2,000 verifications/month",
     features: [
-      "500 verifications / month",
+      "2,000 verifications / month",
       "All document types",
       "OFAC + PEP screening",
       "Webhook events",
@@ -38,10 +38,10 @@ const PLANS = [
     name: "Scale",
     price: "$999",
     period: "/month",
-    limit: 2500,
-    description: "Up to 2,500 verifications/month",
+    limit: 10000,
+    description: "Up to 10,000 verifications/month",
     features: [
-      "2,500 verifications / month",
+      "10,000 verifications / month",
       "All document types",
       "Full sanctions + PEP database",
       "Dedicated account manager",
@@ -80,7 +80,7 @@ export default async function BillingPage() {
 
   const currentPlan = PLANS.find((p) => p.id === customer?.plan);
   const usage = usageCount ?? 0;
-  const limit = currentPlan?.limit ?? 200;
+  const limit = currentPlan?.limit ?? 50;
   const usagePct = Math.min(100, Math.round((usage / limit) * 100));
 
   // DESIGN.md §7 progress bar colors: 0-79=brand, 80-99=warning, 100=danger
