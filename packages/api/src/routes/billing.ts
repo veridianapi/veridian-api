@@ -45,7 +45,7 @@ export async function billingRoutes(app: FastifyInstance): Promise<void> {
       const transaction = await paddle.transactions.create({
         items: [{ priceId: priceId, quantity: 1 }],
         checkout: {
-          url: process.env.PADDLE_CHECKOUT_URL ?? "https://veridian-api-dashboard.vercel.app/dashboard/billing",
+          url: process.env.PADDLE_CHECKOUT_URL ?? "https://app.veridianapi.com/dashboard/billing",
         },
       });
 
