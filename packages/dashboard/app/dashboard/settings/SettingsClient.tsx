@@ -37,10 +37,20 @@ export default function SettingsClient({ email }: { email: string }) {
   const [emailStatus, setEmailStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [emailError, setEmailError] = useState<string | null>(null);
 
+  // Sign out other sessions
+  const [signOutStatus, setSignOutStatus] = useState<"idle" | "loading" | "done">("idle");
+
   // Delete account
   const [deletePhase, setDeletePhase] = useState<"idle" | "confirm">("idle");
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  async function handleSignOutOthers() {
+    setSignOutStatus("loading");
+    const supabase = createClient();
+    await supabase.auth.signOut({ scope: "others" });
+    setSignOutStatus("done");
+  }
 
   async function handleEmailUpdate(e: React.FormEvent) {
     e.preventDefault();
@@ -172,10 +182,174 @@ export default function SettingsClient({ email }: { email: string }) {
         </form>
       </Section>
 
+      {/* Security */}
+      <Section title="Security" description="Sessions, authentication, and key protection">
+        {/* Active sessions */}
+        <div
+          className="flex items-center justify-between gap-4 pb-5 mb-5"
+          style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+        >
+          <div>
+            <p className="text-sm font-medium mb-1" style={{ color: "#f0f4f3" }}>
+              Active sessions
+            </p>
+            <p className="text-xs" style={{ color: "#5a7268" }}>
+              Device: Current browser session
+            </p>
+            <p className="text-xs mt-0.5" style={{ color: "#5a7268" }}>
+              Last active: Just now
+            </p>
+            <div className="flex items-center gap-1.5 mt-2">
+              <span
+                style={{
+                  display: "inline-block",
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  backgroundColor: "#16a34a",
+                  flexShrink: 0,
+                }}
+              />
+              <span style={{ fontSize: 12, color: "#16a34a" }}>Active</span>
+            </div>
+          </div>
+          <button
+            onClick={handleSignOutOthers}
+            disabled={signOutStatus === "loading" || signOutStatus === "done"}
+            className="shrink-0 text-[13px] font-medium disabled:opacity-50"
+            style={{
+              color: "#a3b3ae",
+              border: "1px solid rgba(255,255,255,0.10)",
+              backgroundColor: "transparent",
+              height: 36,
+              padding: "0 16px",
+              borderRadius: 8,
+              cursor: signOutStatus === "done" ? "default" : "pointer",
+            }}
+            onMouseEnter={(e) => {
+              if (signOutStatus === "idle")
+                (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.20)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.10)";
+            }}
+          >
+            {signOutStatus === "loading"
+              ? "Signing out…"
+              : signOutStatus === "done"
+              ? "Done"
+              : "Sign out all other sessions"}
+          </button>
+        </div>
+
+        {/* Two-factor authentication */}
+        <div
+          className="flex items-center justify-between gap-4 pb-5 mb-5"
+          style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+        >
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <p className="text-sm font-medium" style={{ color: "#f0f4f3" }}>
+                Two-factor authentication
+              </p>
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  padding: "1px 8px",
+                  borderRadius: 9999,
+                  fontSize: 11,
+                  fontWeight: 500,
+                  backgroundColor: "rgba(217,119,6,0.12)",
+                  color: "#d97706",
+                }}
+              >
+                Not enabled
+              </span>
+            </div>
+            <p className="text-xs" style={{ color: "#5a7268" }}>
+              Add an extra layer of security to your account.
+            </p>
+          </div>
+          <button
+            disabled
+            className="shrink-0 text-[13px] font-medium"
+            style={{
+              color: "#5a7268",
+              border: "1px solid rgba(255,255,255,0.08)",
+              backgroundColor: "transparent",
+              height: 36,
+              padding: "0 16px",
+              borderRadius: 8,
+              cursor: "not-allowed",
+              opacity: 0.6,
+            }}
+          >
+            Coming soon
+          </button>
+        </div>
+
+        {/* API key security */}
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <p className="text-sm font-medium" style={{ color: "#f0f4f3" }}>
+                API key security
+              </p>
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  padding: "1px 8px",
+                  borderRadius: 9999,
+                  fontSize: 11,
+                  fontWeight: 500,
+                  backgroundColor: "rgba(22,163,74,0.12)",
+                  color: "#16a34a",
+                }}
+              >
+                Secure
+              </span>
+            </div>
+            <p className="text-xs" style={{ color: "#5a7268" }}>
+              Your API keys are hashed with SHA-256. Raw keys are shown only once and never stored.
+            </p>
+          </div>
+        </div>
+      </Section>
+
       {/* Appearance */}
       <Section title="Appearance" description="Customize how the dashboard looks">
-        <p className="text-sm" style={{ color: "#5a7268" }}>
-          Appearance options coming soon.
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-medium mb-1" style={{ color: "#f0f4f3" }}>Theme</p>
+            <p className="text-xs" style={{ color: "#5a7268" }}>Dark (default)</p>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "6px 12px",
+              borderRadius: 8,
+              backgroundColor: "rgba(29,158,117,0.10)",
+              border: "1px solid rgba(29,158,117,0.20)",
+            }}
+          >
+            <span
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: "50%",
+                backgroundColor: "#1d9e75",
+                display: "inline-block",
+              }}
+            />
+            <span style={{ fontSize: 13, fontWeight: 500, color: "#1d9e75" }}>Selected</span>
+          </div>
+        </div>
+        <p className="text-xs mt-4" style={{ color: "#5a7268" }}>
+          More appearance options coming soon.
         </p>
       </Section>
 
