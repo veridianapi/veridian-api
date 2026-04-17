@@ -38,7 +38,9 @@ export default function SettingsClient({ email }: { email: string }) {
   const [emailError, setEmailError] = useState<string | null>(null);
 
   // Sign out other sessions
-  const [signOutStatus, setSignOutStatus] = useState<"idle" | "loading" | "done">("idle");
+  const [signOutStatus, setSignOutStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [signOutError, setSignOutError] = useState<string | null>(null);
+  const [sentToEmail, setSentToEmail] = useState<string | null>(null);
 
   // Delete account
   const [deletePhase, setDeletePhase] = useState<"idle" | "confirm">("idle");
@@ -47,9 +49,15 @@ export default function SettingsClient({ email }: { email: string }) {
 
   async function handleSignOutOthers() {
     setSignOutStatus("loading");
+    setSignOutError(null);
     const supabase = createClient();
-    await supabase.auth.signOut({ scope: "others" });
-    setSignOutStatus("done");
+    const { error } = await supabase.auth.signOut({ scope: "others" });
+    if (error) {
+      setSignOutError(error.message);
+      setSignOutStatus("error");
+    } else {
+      setSignOutStatus("done");
+    }
   }
 
   async function handleEmailUpdate(e: React.FormEvent) {
@@ -59,11 +67,13 @@ export default function SettingsClient({ email }: { email: string }) {
     setEmailError(null);
 
     const supabase = createClient();
-    const { error } = await supabase.auth.updateUser({ email: newEmail.trim() });
+    const target = newEmail.trim();
+    const { error } = await supabase.auth.updateUser({ email: target });
     if (error) {
       setEmailError(error.message);
       setEmailStatus("error");
     } else {
+      setSentToEmail(target);
       setEmailStatus("sent");
       setNewEmail("");
     }
@@ -144,8 +154,10 @@ export default function SettingsClient({ email }: { email: string }) {
               className="text-xs px-3 py-2 rounded-lg"
               style={{
                 color: "#dc2626",
-                backgroundColor: "rgba(220,38,38,0.10)",
+                backgroundColor: "rgba(220,38,38,0.12)",
                 border: "1px solid rgba(220,38,38,0.20)",
+                transition: "opacity 150ms",
+                opacity: 1,
               }}
             >
               {emailError}
@@ -156,12 +168,15 @@ export default function SettingsClient({ email }: { email: string }) {
             <p
               className="text-xs px-3 py-2 rounded-lg"
               style={{
-                color: "#1d9e75",
-                backgroundColor: "rgba(29,158,117,0.10)",
-                border: "1px solid rgba(29,158,117,0.20)",
+                color: "#16a34a",
+                backgroundColor: "rgba(22,163,74,0.12)",
+                border: "1px solid rgba(22,163,74,0.20)",
+                transition: "opacity 150ms",
+                opacity: 1,
               }}
             >
-              Confirmation sent — check your new inbox to complete the change.
+              Confirmation email sent to{" "}
+              <span style={{ fontWeight: 500 }}>{sentToEmail}</span> — check that inbox to complete the change.
             </p>
           )}
 
@@ -224,7 +239,7 @@ export default function SettingsClient({ email }: { email: string }) {
               height: 36,
               padding: "0 16px",
               borderRadius: 8,
-              cursor: signOutStatus === "done" ? "default" : "pointer",
+              cursor: signOutStatus === "done" || signOutStatus === "loading" ? "default" : "pointer",
             }}
             onMouseEnter={(e) => {
               if (signOutStatus === "idle")
@@ -241,6 +256,36 @@ export default function SettingsClient({ email }: { email: string }) {
               : "Sign out all other sessions"}
           </button>
         </div>
+
+        {signOutStatus === "done" && (
+          <p
+            className="text-xs px-3 py-2 rounded-lg -mt-3 mb-5"
+            style={{
+              color: "#16a34a",
+              backgroundColor: "rgba(22,163,74,0.12)",
+              border: "1px solid rgba(22,163,74,0.20)",
+              transition: "opacity 150ms",
+              opacity: 1,
+            }}
+          >
+            All other sessions signed out.
+          </p>
+        )}
+
+        {signOutStatus === "error" && signOutError && (
+          <p
+            className="text-xs px-3 py-2 rounded-lg -mt-3 mb-5"
+            style={{
+              color: "#dc2626",
+              backgroundColor: "rgba(220,38,38,0.12)",
+              border: "1px solid rgba(220,38,38,0.20)",
+              transition: "opacity 150ms",
+              opacity: 1,
+            }}
+          >
+            {signOutError}
+          </p>
+        )}
 
         {/* Two-factor authentication */}
         <div
@@ -412,7 +457,16 @@ export default function SettingsClient({ email }: { email: string }) {
             </p>
 
             {deleteError && (
-              <p className="text-xs" style={{ color: "#dc2626" }}>
+              <p
+                className="text-xs px-3 py-2 rounded-lg"
+                style={{
+                  color: "#dc2626",
+                  backgroundColor: "rgba(220,38,38,0.12)",
+                  border: "1px solid rgba(220,38,38,0.20)",
+                  transition: "opacity 150ms",
+                  opacity: 1,
+                }}
+              >
                 {deleteError}
               </p>
             )}
