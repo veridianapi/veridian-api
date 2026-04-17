@@ -34,9 +34,12 @@ export default function LoginPage() {
   const [sessionExpired, setSessionExpired] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const [next, setNext] = useState("/dashboard");
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     setSessionExpired(params.get("expired") === "1");
+    setNext(params.get("next") || "/dashboard");
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
@@ -62,7 +65,7 @@ export default function LoginPage() {
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=${next}` },
     });
     if (error) {
       setError(error.message);
@@ -85,7 +88,7 @@ export default function LoginPage() {
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=${next}` },
     });
 
     if (error) {
