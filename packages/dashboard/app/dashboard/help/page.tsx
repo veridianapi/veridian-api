@@ -170,7 +170,7 @@ function Section({
   return (
     <div
       className="rounded-xl overflow-hidden"
-      style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
+      style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.06)" }}
     >
       <div
         className="flex items-center gap-2 px-5 py-4"
@@ -265,7 +265,7 @@ function ContactForm() {
   return (
     <div
       className="rounded-xl overflow-hidden"
-      style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
+      style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.06)" }}
     >
       {/* Card header */}
       <div
@@ -443,12 +443,12 @@ export default function HelpPage() {
       {/* Header */}
       <div className="mb-8">
         <h1
-          className="text-2xl font-semibold mb-1"
-          style={{ color: "#f0f4f3", letterSpacing: "-0.704px" }}
+          className="font-semibold"
+          style={{ fontSize: 22, color: "#f0f4f3", letterSpacing: "-0.02em", marginBottom: 4 }}
         >
           How can we help?
         </h1>
-        <p className="text-sm" style={{ color: "#a3b3ae" }}>
+        <p style={{ fontSize: 13, color: "#5a7268", fontWeight: 400 }}>
           Guides, API reference, and answers to common questions.
         </p>
       </div>
@@ -509,7 +509,7 @@ export default function HelpPage() {
       ) : (
         <div
           className="rounded-xl px-6 py-16 flex flex-col items-center text-center"
-          style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
+          style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.06)" }}
         >
           <div
             className="w-8 h-8 rounded-full flex items-center justify-center mb-4"

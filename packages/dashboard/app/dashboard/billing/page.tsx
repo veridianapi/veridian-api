@@ -93,8 +93,8 @@ export default async function BillingPage() {
     <div>
       {/* Page header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold" style={{ color: "#f0f4f3", letterSpacing: "-0.704px" }}>Billing</h1>
-        <p className="text-sm mt-1" style={{ color: "#a3b3ae" }}>
+        <h1 className="font-semibold" style={{ fontSize: 22, color: "#f0f4f3", letterSpacing: "-0.02em", marginBottom: 4 }}>Billing</h1>
+        <p style={{ fontSize: 13, color: "#5a7268", fontWeight: 400 }}>
           Manage your plan and usage
         </p>
       </div>
@@ -102,7 +102,7 @@ export default async function BillingPage() {
       {/* Current plan summary card */}
       <div
         className="card-lift rounded-xl p-6 mb-8"
-        style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
+        style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.06)" }}
       >
         <div className="flex items-start justify-between mb-5">
           <div>
@@ -221,7 +221,7 @@ export default async function BillingPage() {
                   ? "2px solid #1d9e75"
                   : isMostPopular
                   ? "1px solid rgba(29,158,117,0.40)"
-                  : "1px solid rgba(255,255,255,0.08)",
+                  : "1px solid rgba(255,255,255,0.06)",
                 boxShadow: isMostPopular
                   ? "0 0 0 1px rgba(29,158,117,0.15)"
                   : undefined,

@@ -122,8 +122,8 @@ export default function ApiKeysPage() {
       {/* Page header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-semibold" style={{ color: "#f0f4f3", letterSpacing: "-0.704px" }}>API Keys</h1>
-          <p className="text-sm mt-1" style={{ color: "#a3b3ae" }}>
+          <h1 className="font-semibold" style={{ fontSize: 22, color: "#f0f4f3", letterSpacing: "-0.02em", marginBottom: 4 }}>API Keys</h1>
+          <p style={{ fontSize: 13, color: "#5a7268", fontWeight: 400 }}>
             Manage your authentication keys
           </p>
         </div>
@@ -221,7 +221,7 @@ export default function ApiKeysPage() {
       {showForm && (
         <div
           className="rounded-xl p-6 mb-5"
-          style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
+          style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.06)" }}
         >
           <h2 className="text-sm font-semibold mb-4" style={{ color: "#f0f4f3" }}>New API Key</h2>
           <div className="flex gap-3 flex-wrap sm:flex-nowrap">
@@ -278,7 +278,7 @@ export default function ApiKeysPage() {
       {/* Keys list */}
       <div
         className="card-lift rounded-xl"
-        style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
+        style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.06)" }}
       >
         {loading ? (
           <div className="flex items-center justify-center py-16">

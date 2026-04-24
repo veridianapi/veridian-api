@@ -16,7 +16,7 @@ function Section({
   return (
     <div
       className="rounded-xl p-6"
-      style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
+      style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.06)" }}
     >
       <div className="mb-4">
         <h2 className="text-sm font-semibold" style={{ color: "#f0f4f3" }}>{title}</h2>
@@ -94,8 +94,8 @@ export default function SettingsClient({ email }: { email: string }) {
   return (
     <div className="max-w-2xl space-y-6">
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold" style={{ color: "#f0f4f3" }}>Settings</h1>
-        <p className="text-sm mt-1" style={{ color: "#a3b3ae" }}>
+        <h1 className="font-semibold" style={{ fontSize: 22, color: "#f0f4f3", letterSpacing: "-0.02em", marginBottom: 4 }}>Settings</h1>
+        <p style={{ fontSize: 13, color: "#5a7268", fontWeight: 400 }}>
           Manage your account preferences
         </p>
       </div>

@@ -229,8 +229,8 @@ function NavItem({
         <Link
           href={href}
           onClick={onClick}
-          className={`flex items-center rounded-lg text-sm font-[510] transition-colors${
-            !active ? " hover:bg-[rgba(255,255,255,0.04)]" : ""
+          className={`flex items-center rounded-lg text-sm font-[510]${
+            !active ? " hover:bg-[rgba(255,255,255,0.03)]" : ""
           }`}
           style={{
             height: 36,
@@ -238,12 +238,13 @@ function NavItem({
             padding: isCollapsed
               ? "0"
               : active
-              ? "0 12px 0 calc(12px - 2px)"
-              : "0 12px",
-            gap: isCollapsed ? 0 : 12,
-            backgroundColor: active ? "rgba(29,158,117,0.10)" : undefined,
-            color: active ? "#1d9e75" : "#a3b3ae",
+              ? "8px 12px 8px calc(12px - 2px)"
+              : "8px 12px",
+            gap: isCollapsed ? 0 : 10,
+            backgroundColor: active ? "rgba(29,158,117,0.08)" : undefined,
+            color: active ? "#f0f4f3" : "#a3b3ae",
             borderLeft: active ? "2px solid #1d9e75" : "2px solid transparent",
+            transition: "background-color var(--transition-fast), color var(--transition-fast)",
           }}
         >
           {icon}
@@ -420,8 +421,8 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
         <nav className="flex-1 px-2 py-5">
           {!isCollapsed && (
             <p
-              className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-widest"
-              style={{ color: "#5a7268" }}
+              className="px-3 mb-2 text-[10px] font-medium uppercase"
+              style={{ color: "#5a7268", letterSpacing: "0.12em" }}
             >
               Navigation
             </p>

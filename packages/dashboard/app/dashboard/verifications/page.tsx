@@ -17,10 +17,10 @@ function StatusBadge({ status }: { status: string }) {
       style={{
         display: "inline-flex",
         alignItems: "center",
-        padding: "0px 6px",
-        borderRadius: 9999,
+        padding: "3px 8px",
+        borderRadius: 4,
         fontSize: 11,
-        fontWeight: 510,
+        fontWeight: 500,
         letterSpacing: "0.02em",
         textTransform: "capitalize",
         ...(styleMap[status] ?? { backgroundColor: "rgba(255,255,255,0.06)", color: "#5a7268" }),
@@ -42,7 +42,7 @@ function RiskBar({ score }: { score: number | null }) {
   return (
     <div className="flex items-center gap-2">
       <span
-        style={{ fontSize: 14, fontWeight: 600, color, fontVariantNumeric: "tabular-nums" }}
+        style={{ fontSize: 13, fontWeight: 600, color, fontVariantNumeric: "tabular-nums", fontFamily: "var(--font-mono)" }}
       >
         {score}
       </span>
@@ -89,8 +89,8 @@ export default async function VerificationsPage({
       {/* Page header */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-2xl font-semibold" style={{ color: "#f0f4f3", letterSpacing: "-0.704px" }}>Verifications</h1>
-          <p className="text-sm mt-1" style={{ color: "#a3b3ae" }}>
+          <h1 className="font-semibold" style={{ fontSize: 22, color: "#f0f4f3", letterSpacing: "-0.02em", marginBottom: 4 }}>Verifications</h1>
+          <p style={{ fontSize: 13, color: "#5a7268", fontWeight: 400 }}>
             {count ?? 0} total record{(count ?? 0) !== 1 ? "s" : ""}
           </p>
         </div>
@@ -124,8 +124,8 @@ export default async function VerificationsPage({
 
       {/* Table card */}
       <div
-        className="card-lift rounded-xl"
-        style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
+        className="card-lift rounded-xl overflow-hidden"
+        style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.06)" }}
       >
         {queryError ? (
           /* Error empty state */
@@ -199,7 +199,7 @@ export default async function VerificationsPage({
                           fontWeight: 500,
                           color: "#5a7268",
                           textTransform: "uppercase",
-                          letterSpacing: "0.06em",
+                          letterSpacing: "0.08em",
                           borderBottom: "1px solid rgba(255,255,255,0.08)",
                         }}
                       >
@@ -212,7 +212,7 @@ export default async function VerificationsPage({
                   {verifications.map((v, idx) => (
                     <tr
                       key={v.id}
-                      className="hover:bg-[rgba(255,255,255,0.02)] transition-colors duration-150"
+                      className="hover:bg-[rgba(255,255,255,0.02)] transition-colors duration-[120ms]"
                       style={{
                         borderBottom:
                           idx < verifications.length - 1
@@ -220,7 +220,7 @@ export default async function VerificationsPage({
                             : "none",
                       }}
                     >
-                      <td style={{ padding: "12px 16px" }}>
+                      <td style={{ padding: "16px 16px" }}>
                         <Link
                           href={`/dashboard/verifications/${v.id}`}
                           className="hover:underline"
@@ -228,21 +228,21 @@ export default async function VerificationsPage({
                             fontFamily: "var(--font-mono)",
                             fontSize: 12,
                             fontWeight: 500,
-                            color: "#1d9e75",
+                            color: "#5a7268",
                           }}
                         >
                           {v.id.slice(0, 8)}…
                         </Link>
                       </td>
-                      <td style={{ padding: "12px 16px" }}>
+                      <td style={{ padding: "16px 16px" }}>
                         <StatusBadge status={v.status} />
                       </td>
-                      <td style={{ padding: "12px 16px" }}>
+                      <td style={{ padding: "16px 16px" }}>
                         <RiskBar score={v.risk_score} />
                       </td>
                       <td
                         style={{
-                          padding: "12px 16px",
+                          padding: "16px 16px",
                           color: "#a3b3ae",
                           textTransform: "capitalize",
                           fontSize: 13,
@@ -250,7 +250,7 @@ export default async function VerificationsPage({
                       >
                         {v.document_type.replace(/_/g, " ")}
                       </td>
-                      <td style={{ padding: "12px 16px", color: "#a3b3ae", fontSize: 13 }}>
+                      <td style={{ padding: "16px 16px", color: "#a3b3ae", fontSize: 13 }}>
                         {new Date(v.created_at).toLocaleDateString()}
                       </td>
                     </tr>

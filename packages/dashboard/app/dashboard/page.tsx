@@ -19,10 +19,10 @@ function StatusBadge({ status }: { status: string }) {
       style={{
         display: "inline-flex",
         alignItems: "center",
-        padding: "0px 6px",
-        borderRadius: 9999,
+        padding: "3px 8px",
+        borderRadius: 4,
         fontSize: 11,
-        fontWeight: 510,
+        fontWeight: 500,
         letterSpacing: "0.02em",
         textTransform: "capitalize",
         ...(styleMap[status] ?? { backgroundColor: "rgba(255,255,255,0.06)", color: "#5a7268" }),
@@ -40,8 +40,13 @@ function RiskScore({ score }: { score: number | null }) {
     score >= 70 ? "#dc2626" : score >= 30 ? "#d97706" : "#16a34a";
   return (
     <span
-      className="text-sm font-semibold"
-      style={{ color, fontVariantNumeric: "tabular-nums" }}
+      style={{
+        color,
+        fontFamily: "var(--font-mono)",
+        fontSize: 13,
+        fontWeight: 600,
+        fontVariantNumeric: "tabular-nums",
+      }}
     >
       {score}
     </span>
@@ -56,33 +61,33 @@ interface MetricCardProps {
   iconBg: string;
   subtext?: string;
   icon: React.ReactNode;
+  highlightBottom?: boolean;
 }
 
-function MetricCard({ label, value, iconColor, iconBg, subtext, icon }: MetricCardProps) {
+function MetricCard({ label, value, iconColor, iconBg, subtext, icon, highlightBottom }: MetricCardProps) {
   return (
     <div
-      className="card-lift rounded-xl p-6 transition-colors duration-150"
+      className="metric-card card-lift rounded-xl p-6"
       style={{
         backgroundColor: "#111916",
-        border: "1px solid rgba(255,255,255,0.08)",
+        border: "1px solid rgba(255,255,255,0.06)",
+        borderBottom: highlightBottom ? "2px solid rgba(29,158,117,0.4)" : undefined,
       }}
     >
       <div className="flex items-start justify-between">
         <div>
-          {/* Label: 12px, weight 500, uppercase, #5a7268, letter-spacing 0.06em */}
           <p
             style={{
               fontSize: 11,
               fontWeight: 500,
               color: "#5a7268",
               textTransform: "uppercase",
-              letterSpacing: "0.06em",
+              letterSpacing: "0.08em",
               marginBottom: 8,
             }}
           >
             {label}
           </p>
-          {/* Value: 32px, weight 600, tabular-nums */}
           <p
             style={{
               fontSize: 32,
@@ -90,7 +95,7 @@ function MetricCard({ label, value, iconColor, iconBg, subtext, icon }: MetricCa
               color: "#f0f4f3",
               lineHeight: 1.2,
               fontVariantNumeric: "tabular-nums",
-              letterSpacing: "-0.704px",
+              letterSpacing: "-0.04em",
             }}
           >
             {value}
@@ -99,9 +104,9 @@ function MetricCard({ label, value, iconColor, iconBg, subtext, icon }: MetricCa
             <p className="text-xs mt-1" style={{ color: "#5a7268" }}>{subtext}</p>
           )}
         </div>
-        {/* Icon: 40px circle */}
+        {/* Icon: 36px, 8px radius */}
         <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+          className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
           style={{ backgroundColor: iconBg, color: iconColor }}
         >
           {icon}
@@ -178,8 +183,8 @@ export default async function DashboardPage() {
       {/* Page header */}
       <div className="flex items-start justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-semibold" style={{ color: "#f0f4f3", letterSpacing: "-0.704px" }}>Overview</h1>
-          <p className="text-sm mt-1" style={{ color: "#a3b3ae" }}>{today}</p>
+          <h1 className="font-semibold" style={{ fontSize: 22, color: "#f0f4f3", letterSpacing: "-0.02em", marginBottom: 4 }}>Overview</h1>
+          <p style={{ fontSize: 13, color: "#5a7268", fontWeight: 400 }}>{today}</p>
         </div>
         {customer?.plan && (
           <span
@@ -221,6 +226,7 @@ export default async function DashboardPage() {
           iconColor="#16a34a"
           iconBg="rgba(22,163,74,0.12)"
           subtext="Verified identities"
+          highlightBottom
           icon={
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -274,8 +280,8 @@ export default async function DashboardPage() {
 
       {/* Recent verifications card */}
       <div
-        className="card-lift rounded-xl"
-        style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
+        className="card-lift rounded-xl overflow-hidden"
+        style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.06)" }}
       >
         <div
           className="px-6 py-4 flex items-center justify-between"
@@ -339,7 +345,7 @@ export default async function DashboardPage() {
                         fontWeight: 500,
                         color: "#5a7268",
                         textTransform: "uppercase",
-                        letterSpacing: "0.06em",
+                        letterSpacing: "0.08em",
                         borderBottom: "1px solid rgba(255,255,255,0.08)",
                       }}
                     >
@@ -352,7 +358,7 @@ export default async function DashboardPage() {
                 {verifications.map((v, idx) => (
                   <tr
                     key={v.id}
-                    className="hover:bg-[rgba(255,255,255,0.02)] transition-colors duration-150"
+                    className="hover:bg-[rgba(255,255,255,0.02)] transition-colors duration-[120ms]"
                     style={{
                       borderBottom:
                         idx < verifications.length - 1
@@ -360,28 +366,28 @@ export default async function DashboardPage() {
                           : "none",
                     }}
                   >
-                    <td style={{ padding: "12px 16px" }}>
+                    <td style={{ padding: "16px 16px" }}>
                       <Link
                         href={`/dashboard/verifications/${v.id}`}
                         className="hover:underline"
                         style={{
                           fontFamily: "var(--font-mono)",
                           fontSize: 12,
-                          color: "#1d9e75",
+                          color: "#5a7268",
                         }}
                       >
                         {v.id.slice(0, 8)}…
                       </Link>
                     </td>
-                    <td style={{ padding: "12px 16px" }}>
+                    <td style={{ padding: "16px 16px" }}>
                       <StatusBadge status={v.status} />
                     </td>
-                    <td style={{ padding: "12px 16px" }}>
+                    <td style={{ padding: "16px 16px" }}>
                       <RiskScore score={v.risk_score} />
                     </td>
                     <td
                       style={{
-                        padding: "12px 16px",
+                        padding: "16px 16px",
                         color: "#a3b3ae",
                         textTransform: "capitalize",
                         fontSize: 13,
@@ -389,7 +395,7 @@ export default async function DashboardPage() {
                     >
                       {v.document_type.replace(/_/g, " ")}
                     </td>
-                    <td style={{ padding: "12px 16px", color: "#a3b3ae", fontSize: 13 }}>
+                    <td style={{ padding: "16px 16px", color: "#a3b3ae", fontSize: 13 }}>
                       {new Date(v.created_at).toLocaleDateString()}
                     </td>
                   </tr>
