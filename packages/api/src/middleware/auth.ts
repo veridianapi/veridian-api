@@ -7,6 +7,7 @@ import { supabase } from "../lib/supabase.js";
 declare module "fastify" {
   interface FastifyRequest {
     customerId: string;
+    isSandbox: boolean;
   }
 }
 
@@ -61,6 +62,7 @@ export async function authenticate(
       }
 
       request.customerId = decoded.sub;
+      request.isSandbox = false;
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       console.error("[JWT DEBUG] verify error:", msg);
@@ -74,7 +76,7 @@ export async function authenticate(
 
   const { data, error } = await supabase
     .from("api_keys")
-    .select("customer_id")
+    .select("customer_id, is_sandbox")
     .eq("key_hash", hashedKey)
     .eq("is_active", true)
     .single();
@@ -85,4 +87,5 @@ export async function authenticate(
   }
 
   request.customerId = data.customer_id;
+  request.isSandbox = data.is_sandbox ?? false;
 }

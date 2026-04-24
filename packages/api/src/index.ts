@@ -7,6 +7,7 @@ import { healthRoutes } from "./routes/health.js";
 import { verificationRoutes } from "./routes/verifications.js";
 import { billingRoutes } from "./routes/billing.js";
 import { sessionsRoute } from "./routes/sessions.js";
+import { webhooksRoute } from "./routes/webhooks.js";
 
 const app = Fastify({ logger: true });
 
@@ -28,6 +29,7 @@ await app.register(healthRoutes);
 await app.register(verificationRoutes);
 await app.register(billingRoutes);
 await app.register(sessionsRoute, { prefix: "/v1/sessions" });
+await app.register(webhooksRoute, { prefix: "/v1/webhooks" });
 
 const port = Number(process.env.PORT) || 3001;
 

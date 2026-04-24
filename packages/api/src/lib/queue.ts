@@ -7,6 +7,7 @@ export interface VerificationJobData {
   document_type: string;
   s3_prefix: string;
   webhook_url: string | null;
+  has_document_back: boolean;
 }
 
 let queueInstance: Queue | null = null;

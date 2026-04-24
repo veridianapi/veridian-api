@@ -57,11 +57,47 @@ export async function verificationRoutes(app: FastifyInstance): Promise<void> {
         const body = parsed.data;
         const verificationId = randomUUID();
         const prefix = `verifications/${verificationId}`;
+        const hasDocumentBack = !!body.document_back;
 
+        // ── Sandbox mode — skip real processing, return mock result ───────────
+        if (request.isSandbox) {
+          const { error } = await supabase.from("verifications").insert({
+            id: verificationId,
+            customer_id: request.customerId,
+            document_type: body.document_type,
+            status: "approved",
+            risk_score: 10,
+            face_match_score: 0.95,
+            sanctions_hit: false,
+            webhook_url: body.webhook_url ?? null,
+            metadata: body.metadata ?? null,
+            s3_prefix: prefix,
+            is_sandbox: true,
+            processed_at: new Date().toISOString(),
+          });
+
+          if (error) {
+            request.log.error({ err: error }, "Failed to insert sandbox verification");
+            reply.status(500).send({ error: "Failed to create verification", detail: error.message });
+            return;
+          }
+
+          reply.status(200).send({
+            verification_id: verificationId,
+            status: "approved",
+            risk_score: 10,
+            face_match_score: 0.95,
+            sanctions_hit: false,
+            is_sandbox: true,
+          });
+          return;
+        }
+
+        // ── Production mode ───────────────────────────────────────────────────
         await Promise.all([
           uploadToS3(S3_BUCKET, `${prefix}/document_front`, body.document_front),
-          body.document_back
-            ? uploadToS3(S3_BUCKET, `${prefix}/document_back`, body.document_back)
+          hasDocumentBack
+            ? uploadToS3(S3_BUCKET, `${prefix}/document_back`, body.document_back!)
             : Promise.resolve(),
           uploadToS3(S3_BUCKET, `${prefix}/selfie`, body.selfie),
         ]);
@@ -74,6 +110,7 @@ export async function verificationRoutes(app: FastifyInstance): Promise<void> {
           webhook_url: body.webhook_url ?? null,
           metadata: body.metadata ?? null,
           s3_prefix: prefix,
+          is_sandbox: false,
         });
 
         if (error) {
@@ -88,6 +125,7 @@ export async function verificationRoutes(app: FastifyInstance): Promise<void> {
           document_type: body.document_type,
           s3_prefix: prefix,
           webhook_url: body.webhook_url ?? null,
+          has_document_back: hasDocumentBack,
         });
 
         reply.status(202).send({
