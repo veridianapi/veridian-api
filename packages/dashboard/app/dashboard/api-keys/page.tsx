@@ -4,6 +4,9 @@ import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
+import { PageHeader } from "../_components/PageHeader";
+import { PrimaryButton } from "../_components/PrimaryButton";
+import { EmptyState } from "../_components/EmptyState";
 
 interface ApiKey {
   id: string;
@@ -119,35 +122,18 @@ export default function ApiKeysPage() {
 
   return (
     <div>
-      {/* Page header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="font-semibold" style={{ fontSize: 22, color: "#f0f4f3", letterSpacing: "-0.02em", marginBottom: 4 }}>API Keys</h1>
-          <p style={{ fontSize: 13, color: "#5a7268", fontWeight: 400 }}>
-            Manage your authentication keys
-          </p>
-        </div>
-        {/* Primary button: bg #1d9e75, text #050a09, h 36px, radius 8px */}
-        <button
-          onClick={() => {
-            setShowForm(!showForm);
-            setCreatedKey(null);
-          }}
-          className="inline-flex items-center gap-2 text-[13px] font-medium hover:opacity-90 active:scale-[0.98]"
-          style={{
-            backgroundColor: "#1d9e75",
-            color: "#050a09",
-            height: 36,
-            padding: "0 16px",
-            borderRadius: 8,
-          }}
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Create new key
-        </button>
-      </div>
+      <PageHeader
+        title="API Keys"
+        subtitle="Manage your authentication keys"
+        action={
+          <PrimaryButton onClick={() => { setShowForm(!showForm); setCreatedKey(null); }}>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Create new key
+          </PrimaryButton>
+        }
+      />
 
       {/* Error banner */}
       {error && (
@@ -291,40 +277,16 @@ export default function ApiKeysPage() {
             </div>
           </div>
         ) : keys.length === 0 ? (
-          /* Empty state: icon + headline + description + action (DESIGN.md §8) */
-          <div className="flex flex-col items-center justify-center py-20 text-center px-6">
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center mb-4"
-              style={{ backgroundColor: "rgba(255,255,255,0.04)" }}
-            >
+          <EmptyState
+            icon={
               <svg className="w-4 h-4" fill="none" stroke="#5a7268" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
               </svg>
-            </div>
-            <p className="text-base font-medium mb-1" style={{ color: "#a3b3ae" }}>
-              No API keys yet
-            </p>
-            <p className="text-sm mb-4" style={{ color: "#5a7268" }}>
-              Create a key to start making API requests.
-            </p>
-            <button
-              onClick={() => setShowForm(true)}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "0 16px",
-                height: 36,
-                borderRadius: 8,
-                fontSize: 13,
-                fontWeight: 500,
-                backgroundColor: "#1d9e75",
-                color: "#050a09",
-              }}
-            >
-              Create API key
-            </button>
-          </div>
+            }
+            title="No API keys yet"
+            description="Create a key to start making API requests."
+            action={<PrimaryButton onClick={() => setShowForm(true)}>Create API key</PrimaryButton>}
+          />
         ) : (
           <div>
             {keys.map((k, i) => (

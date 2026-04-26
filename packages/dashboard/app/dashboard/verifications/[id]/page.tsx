@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase-server";
+import { StatusBadge } from "../../_components/StatusBadge";
 
 function Field({
   label,
@@ -33,32 +34,6 @@ function Field({
         )}
       </dd>
     </div>
-  );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const styleMap: Record<string, React.CSSProperties> = {
-    approved: { backgroundColor: "rgba(22,163,74,0.12)",   color: "#16a34a" },
-    review:   { backgroundColor: "rgba(217,119,6,0.12)",   color: "#d97706" },
-    rejected: { backgroundColor: "rgba(220,38,38,0.12)",   color: "#dc2626" },
-    pending:  { backgroundColor: "rgba(255,255,255,0.06)", color: "#5a7268" },
-  };
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        padding: "2px 8px",
-        borderRadius: 9999,
-        fontSize: 11,
-        fontWeight: 500,
-        letterSpacing: "0.02em",
-        textTransform: "capitalize",
-        ...(styleMap[status] ?? { backgroundColor: "rgba(255,255,255,0.06)", color: "#5a7268" }),
-      }}
-    >
-      {status}
-    </span>
   );
 }
 
@@ -157,7 +132,7 @@ export default async function VerificationDetailPage({
           {/* Document Data card */}
           <div
             className="rounded-xl p-6"
-            style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
+            style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.06)" }}
           >
             <h2
               className="text-sm font-semibold mb-5 flex items-center gap-2"
@@ -184,7 +159,7 @@ export default async function VerificationDetailPage({
           {/* Verification Details card */}
           <div
             className="rounded-xl p-6"
-            style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
+            style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.06)" }}
           >
             <h2
               className="text-sm font-semibold mb-5 flex items-center gap-2"
@@ -240,7 +215,7 @@ export default async function VerificationDetailPage({
             className="rounded-xl p-6 text-center"
             style={{
               backgroundColor: "#111916",
-              border: "1px solid rgba(255,255,255,0.08)",
+              border: "1px solid rgba(255,255,255,0.06)",
               borderTop: `3px solid ${riskColor}`,
             }}
           >
@@ -279,7 +254,7 @@ export default async function VerificationDetailPage({
           {/* Face Match card */}
           <div
             className="rounded-xl p-6"
-            style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
+            style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.06)" }}
           >
             <p
               style={{
@@ -320,7 +295,7 @@ export default async function VerificationDetailPage({
           {/* Sanctions card */}
           <div
             className="rounded-xl p-6"
-            style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
+            style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.06)" }}
           >
             <p
               style={{

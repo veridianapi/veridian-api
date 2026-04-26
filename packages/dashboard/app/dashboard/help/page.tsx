@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { sendSupportEmail } from "./actions";
+import { PageHeader } from "../_components/PageHeader";
 
 // ─── Data ──────────────────────────────────────────────────────────────────
 
@@ -440,18 +441,7 @@ export default function HelpPage() {
 
   return (
     <div className="max-w-2xl">
-      {/* Header */}
-      <div className="mb-8">
-        <h1
-          className="font-semibold"
-          style={{ fontSize: 22, color: "#f0f4f3", letterSpacing: "-0.02em", marginBottom: 4 }}
-        >
-          How can we help?
-        </h1>
-        <p style={{ fontSize: 13, color: "#5a7268", fontWeight: 400 }}>
-          Guides, API reference, and answers to common questions.
-        </p>
-      </div>
+      <PageHeader title="How can we help?" subtitle="Guides, API reference, and answers to common questions." />
 
       {/* Search */}
       <div className="relative mb-8">

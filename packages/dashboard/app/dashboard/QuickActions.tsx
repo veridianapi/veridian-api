@@ -7,7 +7,7 @@ interface Props {
 
 const cardStyle: React.CSSProperties = {
   backgroundColor: "#111916",
-  border: "1px solid rgba(255,255,255,0.08)",
+  border: "1px solid rgba(255,255,255,0.06)",
   borderRadius: 12,
   padding: 20,
   display: "flex",

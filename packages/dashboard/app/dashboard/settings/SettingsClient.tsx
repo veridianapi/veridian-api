@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { createClient } from "@/lib/supabase";
 import { deleteAccount } from "./actions";
+import { PageHeader } from "../_components/PageHeader";
 
 function Section({
   title,
@@ -93,12 +94,7 @@ export default function SettingsClient({ email }: { email: string }) {
 
   return (
     <div className="max-w-2xl space-y-6">
-      <div className="mb-8">
-        <h1 className="font-semibold" style={{ fontSize: 22, color: "#f0f4f3", letterSpacing: "-0.02em", marginBottom: 4 }}>Settings</h1>
-        <p style={{ fontSize: 13, color: "#5a7268", fontWeight: 400 }}>
-          Manage your account preferences
-        </p>
-      </div>
+      <PageHeader title="Settings" subtitle="Manage your account preferences" />
 
       {/* Account */}
       <Section title="Account" description="Your account details and authentication email">

@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase";
+import { PageHeader } from "../_components/PageHeader";
+import { EmptyState } from "../_components/EmptyState";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -252,18 +254,7 @@ export default function WebhooksPage() {
 
   return (
     <div>
-      {/* Page header */}
-      <div className="mb-8">
-        <h1
-          className="font-semibold"
-          style={{ fontSize: 22, color: "#f0f4f3", letterSpacing: "-0.02em", marginBottom: 4 }}
-        >
-          Webhooks
-        </h1>
-        <p style={{ fontSize: 13, color: "#5a7268", fontWeight: 400 }}>
-          Receive real-time notifications when verifications complete
-        </p>
-      </div>
+      <PageHeader title="Webhooks" subtitle="Receive real-time notifications when verifications complete" />
 
       {/* Load error */}
       {loadError && (
@@ -530,22 +521,16 @@ export default function WebhooksPage() {
             </div>
           </div>
         ) : endpoints.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-14 text-center px-6">
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center mb-4"
-              style={{ backgroundColor: "rgba(255,255,255,0.04)" }}
-            >
+          <EmptyState
+            icon={
               <svg className="w-4 h-4" fill="none" stroke="#5a7268" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-            </div>
-            <p className="text-base font-medium mb-1" style={{ color: "#a3b3ae" }}>
-              No webhook endpoints yet
-            </p>
-            <p className="text-sm" style={{ color: "#5a7268" }}>
-              Add an endpoint above to start receiving verification events.
-            </p>
-          </div>
+            }
+            title="No webhook endpoints yet"
+            description="Add an endpoint above to start receiving verification events."
+            py={14}
+          />
         ) : (
           <div>
             {endpoints.map((ep, idx) => (
@@ -669,22 +654,16 @@ export default function WebhooksPage() {
             </div>
           </div>
         ) : deliveries.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-14 text-center px-6">
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center mb-4"
-              style={{ backgroundColor: "rgba(255,255,255,0.04)" }}
-            >
+          <EmptyState
+            icon={
               <svg className="w-4 h-4" fill="none" stroke="#5a7268" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
-            </div>
-            <p className="text-base font-medium mb-1" style={{ color: "#a3b3ae" }}>
-              No deliveries yet
-            </p>
-            <p className="text-sm" style={{ color: "#5a7268" }}>
-              Deliveries appear here after verifications trigger your endpoints.
-            </p>
-          </div>
+            }
+            title="No deliveries yet"
+            description="Deliveries appear here after verifications trigger your endpoints."
+            py={14}
+          />
         ) : (
           <div className="overflow-x-auto">
             <table

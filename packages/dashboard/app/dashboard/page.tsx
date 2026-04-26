@@ -4,34 +4,9 @@ import { createClient } from "@/lib/supabase-server";
 import OnboardingChecklist from "./OnboardingChecklist";
 import AnnouncementBanner from "./AnnouncementBanner";
 import QuickActions from "./QuickActions";
-
-// ─── Status badge ─────────────────────────────────────────────────────────────
-// Colors follow DESIGN.md §5 Badges & Status Pills exactly.
-function StatusBadge({ status }: { status: string }) {
-  const styleMap: Record<string, React.CSSProperties> = {
-    approved: { backgroundColor: "rgba(22,163,74,0.12)",   color: "#16a34a" },
-    review:   { backgroundColor: "rgba(217,119,6,0.12)",   color: "#d97706" },
-    rejected: { backgroundColor: "rgba(220,38,38,0.12)",   color: "#dc2626" },
-    pending:  { backgroundColor: "rgba(255,255,255,0.06)", color: "#5a7268" },
-  };
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        padding: "3px 8px",
-        borderRadius: 4,
-        fontSize: 11,
-        fontWeight: 500,
-        letterSpacing: "0.02em",
-        textTransform: "capitalize",
-        ...(styleMap[status] ?? { backgroundColor: "rgba(255,255,255,0.06)", color: "#5a7268" }),
-      }}
-    >
-      {status}
-    </span>
-  );
-}
+import { StatusBadge } from "./_components/StatusBadge";
+import { PageHeader } from "./_components/PageHeader";
+import { EmptyState } from "./_components/EmptyState";
 
 // ─── Risk score ───────────────────────────────────────────────────────────────
 function RiskScore({ score }: { score: number | null }) {
@@ -180,13 +155,10 @@ export default async function DashboardPage() {
         hasPaidPlan={hasPaidPlan}
       />
 
-      {/* Page header */}
-      <div className="flex items-start justify-between mb-8">
-        <div>
-          <h1 className="font-semibold" style={{ fontSize: 22, color: "#f0f4f3", letterSpacing: "-0.02em", marginBottom: 4 }}>Overview</h1>
-          <p style={{ fontSize: 13, color: "#5a7268", fontWeight: 400 }}>{today}</p>
-        </div>
-        {customer?.plan && (
+      <PageHeader
+        title="Overview"
+        subtitle={today}
+        action={customer?.plan ? (
           <span
             style={{
               display: "inline-flex",
@@ -203,8 +175,8 @@ export default async function DashboardPage() {
           >
             {customer.plan} plan
           </span>
-        )}
-      </div>
+        ) : undefined}
+      />
 
       {/* Metric cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 mb-8">
@@ -300,36 +272,24 @@ export default async function DashboardPage() {
         </div>
 
         {!verifications || verifications.length === 0 ? (
-          /* Empty state: icon + headline + description + action (DESIGN.md §8) */
-          <div className="flex flex-col items-center justify-center py-16 text-center px-6">
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center mb-4"
-              style={{ backgroundColor: "rgba(255,255,255,0.04)" }}
-            >
+          <EmptyState
+            icon={
               <svg className="w-4 h-4" fill="none" stroke="#5a7268" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
-            </div>
-            <p className="text-base font-medium mb-1" style={{ color: "#a3b3ae" }}>
-              No verifications yet
-            </p>
-            <p className="text-sm mb-4" style={{ color: "#5a7268" }}>
-              Submit your first API request to see results here.
-            </p>
-            <Link
-              href="/dashboard/help"
-              className="inline-flex items-center gap-2 px-4 py-0 rounded-lg text-[13px] font-medium"
-              style={{
-                backgroundColor: "#1d9e75",
-                color: "#050a09",
-                height: 36,
-                lineHeight: "36px",
-                borderRadius: 8,
-              }}
-            >
-              View API docs
-            </Link>
-          </div>
+            }
+            title="No verifications yet"
+            description="Submit your first API request to see results here."
+            action={
+              <Link
+                href="/dashboard/help"
+                className="inline-flex items-center gap-2 text-[13px] font-medium"
+                style={{ backgroundColor: "#1d9e75", color: "#050a09", height: 36, padding: "0 16px", borderRadius: 8 }}
+              >
+                View API docs
+              </Link>
+            }
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[600px]" style={{ borderCollapse: "collapse", fontSize: 14 }}>

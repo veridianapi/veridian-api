@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase-server";
 import SwitchPlanButton from "./SwitchPlanButton";
+import { PageHeader } from "../_components/PageHeader";
 
 const PLANS = [
   {
@@ -91,13 +92,7 @@ export default async function BillingPage() {
 
   return (
     <div>
-      {/* Page header */}
-      <div className="mb-8">
-        <h1 className="font-semibold" style={{ fontSize: 22, color: "#f0f4f3", letterSpacing: "-0.02em", marginBottom: 4 }}>Billing</h1>
-        <p style={{ fontSize: 13, color: "#5a7268", fontWeight: 400 }}>
-          Manage your plan and usage
-        </p>
-      </div>
+      <PageHeader title="Billing" subtitle="Manage your plan and usage" />
 
       {/* Current plan summary card */}
       <div

@@ -34,7 +34,7 @@ export default function AnnouncementBanner() {
       }}
     >
       <p style={{ fontSize: 13, color: "#a3b3ae", margin: 0 }}>
-        🚀 Veridian <span style={{ color: "#1d9e75" }}>v1.0</span> — KYC verification, sanctions
+        Veridian <span style={{ color: "#1d9e75" }}>v1.0</span> — KYC verification, sanctions
         screening, and AML. 14-day free trial, no credit card needed.
       </p>
       <button

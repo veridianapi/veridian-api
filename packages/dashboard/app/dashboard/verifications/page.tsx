@@ -1,35 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase-server";
+import { StatusBadge } from "../_components/StatusBadge";
+import { EmptyState } from "../_components/EmptyState";
 
 const PAGE_SIZE = 20;
-
-// Colors follow DESIGN.md §5 exactly
-function StatusBadge({ status }: { status: string }) {
-  const styleMap: Record<string, React.CSSProperties> = {
-    approved: { backgroundColor: "rgba(22,163,74,0.12)",   color: "#16a34a" },
-    review:   { backgroundColor: "rgba(217,119,6,0.12)",   color: "#d97706" },
-    rejected: { backgroundColor: "rgba(220,38,38,0.12)",   color: "#dc2626" },
-    pending:  { backgroundColor: "rgba(255,255,255,0.06)", color: "#5a7268" },
-  };
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        padding: "3px 8px",
-        borderRadius: 4,
-        fontSize: 11,
-        fontWeight: 500,
-        letterSpacing: "0.02em",
-        textTransform: "capitalize",
-        ...(styleMap[status] ?? { backgroundColor: "rgba(255,255,255,0.06)", color: "#5a7268" }),
-      }}
-    >
-      {status}
-    </span>
-  );
-}
 
 function RiskBar({ score }: { score: number | null }) {
   if (score === null) {
@@ -89,7 +64,9 @@ export default async function VerificationsPage({
       {/* Page header */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="font-semibold" style={{ fontSize: 22, color: "#f0f4f3", letterSpacing: "-0.02em", marginBottom: 4 }}>Verifications</h1>
+          <h1 className="font-semibold" style={{ fontSize: 22, color: "#f0f4f3", letterSpacing: "-0.02em", marginBottom: 4 }}>
+            Verifications
+          </h1>
           <p style={{ fontSize: 13, color: "#5a7268", fontWeight: 400 }}>
             {count ?? 0} total record{(count ?? 0) !== 1 ? "s" : ""}
           </p>
@@ -128,58 +105,34 @@ export default async function VerificationsPage({
         style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.06)" }}
       >
         {queryError ? (
-          /* Error empty state */
-          <div className="flex flex-col items-center justify-center py-20 text-center px-6">
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center mb-4"
-              style={{ backgroundColor: "rgba(220,38,38,0.10)" }}
-            >
+          <EmptyState
+            icon={
               <svg className="w-4 h-4" fill="none" stroke="#dc2626" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
-            </div>
-            <p className="text-base font-medium mb-1" style={{ color: "#a3b3ae" }}>
-              Unable to load verifications
-            </p>
-            <p className="text-sm mb-4" style={{ color: "#5a7268" }}>
-              Please refresh the page. If the problem persists, contact support.
-            </p>
-          </div>
+            }
+            iconBg="rgba(220,38,38,0.10)"
+            title="Unable to load verifications"
+            description="Please refresh the page. If the problem persists, contact support."
+          />
         ) : !verifications || verifications.length === 0 ? (
-          /* Empty state: icon + headline + description + action (DESIGN.md §8) */
-          <div className="flex flex-col items-center justify-center py-20 text-center px-6">
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center mb-4"
-              style={{ backgroundColor: "rgba(255,255,255,0.04)" }}
-            >
+          <EmptyState
+            icon={
               <svg className="w-4 h-4" fill="none" stroke="#5a7268" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
-            </div>
-            <p className="text-base font-medium mb-1" style={{ color: "#a3b3ae" }}>
-              No verifications yet
-            </p>
-            <p className="text-sm mb-4" style={{ color: "#5a7268" }}>
-              Submit your first API request to see results here.
-            </p>
-            <Link
-              href="/dashboard/help"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "0 16px",
-                height: 36,
-                borderRadius: 8,
-                fontSize: 13,
-                fontWeight: 500,
-                backgroundColor: "#1d9e75",
-                color: "#050a09",
-              }}
-            >
-              View API docs
-            </Link>
-          </div>
+            }
+            title="No verifications yet"
+            description="Submit your first API request to see results here."
+            action={
+              <Link
+                href="/dashboard/help"
+                style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "0 16px", height: 36, borderRadius: 8, fontSize: 13, fontWeight: 500, backgroundColor: "#1d9e75", color: "#050a09" }}
+              >
+                View API docs
+              </Link>
+            }
+          />
         ) : (
           <>
             <div className="overflow-x-auto">

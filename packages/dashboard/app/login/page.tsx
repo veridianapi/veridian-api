@@ -149,8 +149,8 @@ export default function LoginPage() {
             </svg>
           </div>
           <h1
-            className="text-2xl font-semibold"
-            style={{ color: "#f0f4f3", letterSpacing: "-0.704px" }}
+            className="font-semibold"
+            style={{ fontSize: 22, color: "#f0f4f3", letterSpacing: "-0.02em" }}
           >
             Veridian
           </h1>
