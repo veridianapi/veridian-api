@@ -8,23 +8,12 @@ import { StatusBadge } from "./_components/StatusBadge";
 import { PageHeader } from "./_components/PageHeader";
 import { EmptyState } from "./_components/EmptyState";
 
-// ─── Risk score ───────────────────────────────────────────────────────────────
+// ─── Risk score inline (table cell) ──────────────────────────────────────────
 function RiskScore({ score }: { score: number | null }) {
-  if (score === null) return <span style={{ color: "#5a7268" }}>—</span>;
-  const color =
-    score >= 70 ? "#dc2626" : score >= 30 ? "#d97706" : "#16a34a";
+  if (score === null) return <span className="vd-risk vd-risk-null">—</span>;
+  const level = score >= 70 ? "high" : score >= 30 ? "medium" : "low";
   return (
-    <span
-      style={{
-        color,
-        fontFamily: "var(--font-mono)",
-        fontSize: 13,
-        fontWeight: 600,
-        fontVariantNumeric: "tabular-nums",
-      }}
-    >
-      {score}
-    </span>
+    <span className={`vd-risk vd-risk-${level}`}>{score}</span>
   );
 }
 
@@ -36,50 +25,21 @@ interface MetricCardProps {
   iconBg: string;
   subtext?: string;
   icon: React.ReactNode;
-  highlightBottom?: boolean;
+  accentBottom?: boolean;
 }
 
-function MetricCard({ label, value, iconColor, iconBg, subtext, icon, highlightBottom }: MetricCardProps) {
+function MetricCard({ label, value, iconColor, iconBg, subtext, icon, accentBottom }: MetricCardProps) {
   return (
     <div
-      className="metric-card card-lift rounded-xl p-6"
-      style={{
-        backgroundColor: "#111916",
-        border: "1px solid rgba(255,255,255,0.06)",
-        borderBottom: highlightBottom ? "2px solid rgba(29,158,117,0.4)" : undefined,
-      }}
+      className="vd-card-metric"
+      style={accentBottom ? { borderBottom: "2px solid rgba(29,158,117,0.4)" } : undefined}
     >
       <div className="flex items-start justify-between">
         <div>
-          <p
-            style={{
-              fontSize: 11,
-              fontWeight: 500,
-              color: "#5a7268",
-              textTransform: "uppercase",
-              letterSpacing: "0.08em",
-              marginBottom: 8,
-            }}
-          >
-            {label}
-          </p>
-          <p
-            style={{
-              fontSize: 32,
-              fontWeight: 600,
-              color: "#f0f4f3",
-              lineHeight: 1.2,
-              fontVariantNumeric: "tabular-nums",
-              letterSpacing: "-0.04em",
-            }}
-          >
-            {value}
-          </p>
-          {subtext && (
-            <p className="text-xs mt-1" style={{ color: "#5a7268" }}>{subtext}</p>
-          )}
+          <p className="vd-metric-label">{label}</p>
+          <p className="vd-metric-value">{value}</p>
+          {subtext && <p className="vd-metric-sub">{subtext}</p>}
         </div>
-        {/* Icon: 36px, 8px radius */}
         <div
           className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
           style={{ backgroundColor: iconBg, color: iconColor }}
@@ -139,16 +99,13 @@ export default async function DashboardPage() {
 
   const paidPlans = ["starter", "growth", "scale"];
   const hasPaidPlan = paidPlans.includes(customer?.plan ?? "");
-
   const hasApiKey = (apiKeyCount ?? 0) > 0;
   const hasVerification = (counts ?? []).length > 0;
 
   return (
     <div>
-      {/* Announcement banner — dismissible, state persisted in localStorage */}
       <AnnouncementBanner />
 
-      {/* Onboarding checklist — shown to new users until dismissed */}
       <OnboardingChecklist
         hasApiKey={hasApiKey}
         hasVerification={hasVerification}
@@ -159,20 +116,7 @@ export default async function DashboardPage() {
         title="Overview"
         subtitle={today}
         action={customer?.plan ? (
-          <span
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              padding: "0px 6px",
-              borderRadius: 9999,
-              fontSize: 11,
-              fontWeight: 510,
-              letterSpacing: "0.02em",
-              backgroundColor: "rgba(29,158,117,0.15)",
-              color: "#1d9e75",
-              textTransform: "capitalize",
-            }}
-          >
+          <span className="vd-badge vd-badge-brand" style={{ textTransform: "capitalize" }}>
             {customer.plan} plan
           </span>
         ) : undefined}
@@ -198,7 +142,7 @@ export default async function DashboardPage() {
           iconColor="#16a34a"
           iconBg="rgba(22,163,74,0.12)"
           subtext="Verified identities"
-          highlightBottom
+          accentBottom
           icon={
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -231,19 +175,10 @@ export default async function DashboardPage() {
         />
       </div>
 
-      {/* Quick actions — hidden once user has ≥1 API key AND ≥1 verification */}
       <QuickActions hasApiKey={hasApiKey} hasVerification={hasVerification} />
 
-      {/* Query error banner */}
       {queryError && (
-        <div
-          className="mb-6 rounded-xl px-5 py-4"
-          style={{
-            backgroundColor: "rgba(220,38,38,0.10)",
-            border: "1px solid rgba(220,38,38,0.25)",
-            borderLeft: "3px solid #dc2626",
-          }}
-        >
+        <div className="vd-alert vd-alert-danger mb-6">
           <p className="text-sm font-medium" style={{ color: "#dc2626" }}>
             Unable to load verification data. Please refresh the page.
           </p>
@@ -251,22 +186,10 @@ export default async function DashboardPage() {
       )}
 
       {/* Recent verifications card */}
-      <div
-        className="card-lift rounded-xl overflow-hidden"
-        style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.06)" }}
-      >
-        <div
-          className="px-6 py-4 flex items-center justify-between"
-          style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}
-        >
-          <h2 className="text-sm font-semibold" style={{ color: "#f0f4f3", letterSpacing: "-0.288px" }}>
-            Recent Verifications
-          </h2>
-          <Link
-            href="/dashboard/verifications"
-            className="text-xs font-medium hover:opacity-80"
-            style={{ color: "#1d9e75" }}
-          >
+      <div className="vd-card-bare">
+        <div className="vd-card-head">
+          <h2 className="vd-card-title">Recent Verifications</h2>
+          <Link href="/dashboard/verifications" className="text-xs font-medium hover:opacity-80" style={{ color: "#1d9e75" }}>
             View all →
           </Link>
         </div>
@@ -274,88 +197,44 @@ export default async function DashboardPage() {
         {!verifications || verifications.length === 0 ? (
           <EmptyState
             icon={
-              <svg className="w-4 h-4" fill="none" stroke="#5a7268" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" fill="none" stroke="#5a7268" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
             }
             title="No verifications yet"
             description="Submit your first API request to see results here."
             action={
-              <Link
-                href="/dashboard/help"
-                className="inline-flex items-center gap-2 text-[13px] font-medium"
-                style={{ backgroundColor: "#1d9e75", color: "#050a09", height: 36, padding: "0 16px", borderRadius: 8 }}
-              >
+              <Link href="/dashboard/help" className="vd-btn vd-btn-primary">
                 View API docs
               </Link>
             }
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[600px]" style={{ borderCollapse: "collapse", fontSize: 14 }}>
+            <table className="vd-table" style={{ minWidth: 600 }}>
               <thead>
                 <tr>
-                  {["ID", "Status", "Risk", "Document", "Created"].map((col) => (
-                    <th
-                      key={col}
-                      className="text-left"
-                      style={{
-                        padding: "12px 16px",
-                        fontSize: 11,
-                        fontWeight: 500,
-                        color: "#5a7268",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.08em",
-                        borderBottom: "1px solid rgba(255,255,255,0.08)",
-                      }}
-                    >
-                      {col}
-                    </th>
-                  ))}
+                  <th>ID</th>
+                  <th>Status</th>
+                  <th>Risk</th>
+                  <th>Document</th>
+                  <th>Created</th>
                 </tr>
               </thead>
               <tbody>
-                {verifications.map((v, idx) => (
-                  <tr
-                    key={v.id}
-                    className="hover:bg-[rgba(255,255,255,0.02)] transition-colors duration-[120ms]"
-                    style={{
-                      borderBottom:
-                        idx < verifications.length - 1
-                          ? "1px solid rgba(255,255,255,0.04)"
-                          : "none",
-                    }}
-                  >
-                    <td style={{ padding: "16px 16px" }}>
-                      <Link
-                        href={`/dashboard/verifications/${v.id}`}
-                        className="hover:underline"
-                        style={{
-                          fontFamily: "var(--font-mono)",
-                          fontSize: 12,
-                          color: "#5a7268",
-                        }}
-                      >
+                {verifications.map((v) => (
+                  <tr key={v.id}>
+                    <td>
+                      <Link href={`/dashboard/verifications/${v.id}`} className="vd-table-id hover:underline">
                         {v.id.slice(0, 8)}…
                       </Link>
                     </td>
-                    <td style={{ padding: "16px 16px" }}>
-                      <StatusBadge status={v.status} />
-                    </td>
-                    <td style={{ padding: "16px 16px" }}>
-                      <RiskScore score={v.risk_score} />
-                    </td>
-                    <td
-                      style={{
-                        padding: "16px 16px",
-                        color: "#a3b3ae",
-                        textTransform: "capitalize",
-                        fontSize: 13,
-                      }}
-                    >
+                    <td><StatusBadge status={v.status} /></td>
+                    <td><RiskScore score={v.risk_score} /></td>
+                    <td style={{ textTransform: "capitalize", fontSize: 13 }}>
                       {v.document_type.replace(/_/g, " ")}
                     </td>
-                    <td style={{ padding: "16px 16px", color: "#a3b3ae", fontSize: 13 }}>
+                    <td style={{ fontSize: 13 }}>
                       {new Date(v.created_at).toLocaleDateString()}
                     </td>
                   </tr>

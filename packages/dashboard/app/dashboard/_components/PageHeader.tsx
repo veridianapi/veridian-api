@@ -9,17 +9,10 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, subtitle, action, className = "" }: PageHeaderProps) {
   return (
-    <div className={`flex items-start justify-between mb-8 ${className}`}>
+    <div className={`vd-page-head ${className}`}>
       <div>
-        <h1
-          className="font-semibold"
-          style={{ fontSize: 22, color: "#f0f4f3", letterSpacing: "-0.02em", marginBottom: subtitle ? 4 : 0 }}
-        >
-          {title}
-        </h1>
-        {subtitle && (
-          <p style={{ fontSize: 13, color: "#5a7268", fontWeight: 400 }}>{subtitle}</p>
-        )}
+        <h1 className="vd-page-head-title">{title}</h1>
+        {subtitle && <p className="vd-page-head-sub">{subtitle}</p>}
       </div>
       {action && <div className="shrink-0">{action}</div>}
     </div>

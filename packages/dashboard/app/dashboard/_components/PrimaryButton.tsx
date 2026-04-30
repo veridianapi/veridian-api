@@ -22,15 +22,8 @@ export function PrimaryButton({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex items-center justify-center gap-2 text-[13px] font-medium hover:opacity-90 active:scale-[0.98] disabled:opacity-50 ${className}`}
-      style={{
-        backgroundColor: "#1d9e75",
-        color: "#050a09",
-        height: 36,
-        padding: "0 16px",
-        borderRadius: 8,
-        ...style,
-      }}
+      className={`vd-btn vd-btn-primary ${className}`}
+      style={style}
     >
       {children}
     </button>

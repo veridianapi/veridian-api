@@ -6,28 +6,28 @@ import { EmptyState } from "../_components/EmptyState";
 
 const PAGE_SIZE = 20;
 
+const FILTER_TABS = [
+  { label: "All",      value: ""         },
+  { label: "Approved", value: "approved" },
+  { label: "Review",   value: "review"   },
+  { label: "Rejected", value: "rejected" },
+] as const;
+
 function RiskBar({ score }: { score: number | null }) {
   if (score === null) {
-    return <span style={{ fontSize: 14, color: "#5a7268" }}>—</span>;
+    return <span className="vd-risk vd-risk-null" style={{ fontSize: 14 }}>—</span>;
   }
-  // DESIGN.md §7: 0-29 = success, 30-69 = warning, 70-100 = danger
-  const color =
-    score >= 70 ? "#dc2626" : score >= 30 ? "#d97706" : "#16a34a";
-
+  const level = score >= 70 ? "high" : score >= 30 ? "medium" : "low";
   return (
     <div className="flex items-center gap-2">
-      <span
-        style={{ fontSize: 13, fontWeight: 600, color, fontVariantNumeric: "tabular-nums", fontFamily: "var(--font-mono)" }}
-      >
-        {score}
-      </span>
-      <div
-        className="w-16 rounded-full overflow-hidden"
-        style={{ height: 4, backgroundColor: "rgba(255,255,255,0.08)" }}
-      >
+      <span className={`vd-risk vd-risk-${level}`}>{score}</span>
+      <div className="vd-progress-track" style={{ width: 64 }}>
         <div
-          className="h-full rounded-full"
-          style={{ width: `${score}%`, backgroundColor: color }}
+          className="vd-progress-fill"
+          style={{
+            width: `${score}%`,
+            backgroundColor: level === "high" ? "#dc2626" : level === "medium" ? "#d97706" : "#16a34a",
+          }}
         />
       </div>
     </div>
@@ -37,9 +37,9 @@ function RiskBar({ score }: { score: number | null }) {
 export default async function VerificationsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; q?: string }>;
+  searchParams: Promise<{ page?: string; q?: string; status?: string }>;
 }) {
-  const { page: pageParam, q } = await searchParams;
+  const { page: pageParam, q, status: statusFilter } = await searchParams;
   const page = Math.max(1, Number(pageParam ?? 1));
   const from = (page - 1) * PAGE_SIZE;
 
@@ -50,29 +50,70 @@ export default async function VerificationsPage({
 
   if (!user) redirect("/login");
 
-  const { data: verifications, count, error: queryError } = await supabase
+  // Main query — filtered by status when a tab is selected
+  let query = supabase
     .from("verifications")
     .select("id, status, risk_score, document_type, created_at", { count: "exact" })
     .eq("customer_id", user!.id)
     .order("created_at", { ascending: false })
     .range(from, from + PAGE_SIZE - 1);
 
+  if (statusFilter) {
+    query = query.eq("status", statusFilter);
+  }
+
+  const { data: verifications, count, error: queryError } = await query;
+
+  // Status counts for tab badges
+  const { data: allStatuses } = await supabase
+    .from("verifications")
+    .select("status")
+    .eq("customer_id", user!.id);
+
+  const statusCounts = (allStatuses ?? []).reduce<Record<string, number>>((acc, r) => {
+    acc[r.status] = (acc[r.status] ?? 0) + 1;
+    return acc;
+  }, {});
+  const totalCount = (allStatuses ?? []).length;
+
   const totalPages = Math.ceil((count ?? 0) / PAGE_SIZE);
+
+  // Build pagination href — preserve status/q filters
+  function pageHref(p: number) {
+    const params = new URLSearchParams();
+    if (p > 1) params.set("page", String(p));
+    if (statusFilter) params.set("status", statusFilter);
+    if (q) params.set("q", q);
+    const qs = params.toString();
+    return `/dashboard/verifications${qs ? `?${qs}` : ""}`;
+  }
+
+  function tabHref(value: string) {
+    const params = new URLSearchParams();
+    if (value) params.set("status", value);
+    if (q) params.set("q", q);
+    const qs = params.toString();
+    return `/dashboard/verifications${qs ? `?${qs}` : ""}`;
+  }
+
+  function tabCount(value: string) {
+    if (!value) return totalCount;
+    return statusCounts[value] ?? 0;
+  }
 
   return (
     <div>
       {/* Page header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+      <div className="vd-page-head">
         <div>
-          <h1 className="font-semibold" style={{ fontSize: 22, color: "#f0f4f3", letterSpacing: "-0.02em", marginBottom: 4 }}>
-            Verifications
-          </h1>
-          <p style={{ fontSize: 13, color: "#5a7268", fontWeight: 400 }}>
-            {count ?? 0} total record{(count ?? 0) !== 1 ? "s" : ""}
+          <h1 className="vd-page-head-title">Verifications</h1>
+          <p className="vd-page-head-sub">
+            {count ?? 0} record{(count ?? 0) !== 1 ? "s" : ""}
+            {statusFilter ? ` · filtered by ${statusFilter}` : ""}
           </p>
         </div>
 
-        {/* Search bar — follows input spec */}
+        {/* Search */}
         <div className="relative w-full sm:w-auto">
           <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
             <svg className="w-4 h-4" fill="none" stroke="#5a7268" viewBox="0 0 24 24">
@@ -80,34 +121,41 @@ export default async function VerificationsPage({
             </svg>
           </div>
           <form method="GET">
+            {statusFilter && <input type="hidden" name="status" value={statusFilter} />}
             <input
               type="text"
               name="q"
               placeholder="Search verifications…"
               defaultValue={q ?? ""}
-              className="pl-9 pr-4 text-sm rounded-lg focus:outline-none focus:ring-2 w-full sm:w-64"
-              style={{
-                backgroundColor: "#0d1211",
-                border: "1px solid rgba(255,255,255,0.08)",
-                color: "#f0f4f3",
-                height: 36,
-                fontFeatureSettings: '"cv01","ss03"',
-                "--tw-ring-color": "#1d9e75",
-              } as React.CSSProperties}
+              className="vd-input vd-input-search w-full sm:w-64"
             />
           </form>
         </div>
       </div>
 
+      {/* Filter tabs */}
+      <nav className="vd-tabs" aria-label="Filter by status">
+        {FILTER_TABS.map(({ label, value }) => {
+          const isActive = (statusFilter ?? "") === value;
+          return (
+            <Link
+              key={value || "all"}
+              href={tabHref(value)}
+              className={`vd-tab${isActive ? " vd-tab-active" : ""}`}
+            >
+              {label}
+              <span className="vd-tab-count">{tabCount(value)}</span>
+            </Link>
+          );
+        })}
+      </nav>
+
       {/* Table card */}
-      <div
-        className="card-lift rounded-xl overflow-hidden"
-        style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.06)" }}
-      >
+      <div className="vd-card-bare">
         {queryError ? (
           <EmptyState
             icon={
-              <svg className="w-4 h-4" fill="none" stroke="#dc2626" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" fill="none" stroke="#dc2626" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
             }
@@ -118,92 +166,58 @@ export default async function VerificationsPage({
         ) : !verifications || verifications.length === 0 ? (
           <EmptyState
             icon={
-              <svg className="w-4 h-4" fill="none" stroke="#5a7268" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" fill="none" stroke="#5a7268" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
             }
-            title="No verifications yet"
-            description="Submit your first API request to see results here."
+            title={statusFilter ? `No ${statusFilter} verifications` : "No verifications yet"}
+            description={
+              statusFilter
+                ? "Try a different filter or clear the selection."
+                : "Submit your first API request to see results here."
+            }
             action={
-              <Link
-                href="/dashboard/help"
-                style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "0 16px", height: 36, borderRadius: 8, fontSize: 13, fontWeight: 500, backgroundColor: "#1d9e75", color: "#050a09" }}
-              >
-                View API docs
-              </Link>
+              statusFilter ? (
+                <Link href="/dashboard/verifications" className="vd-btn vd-btn-secondary">
+                  Clear filter
+                </Link>
+              ) : (
+                <Link href="/dashboard/help" className="vd-btn vd-btn-primary">
+                  View API docs
+                </Link>
+              )
             }
           />
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table
-                className="w-full min-w-[600px]"
-                style={{ borderCollapse: "collapse", fontSize: 14 }}
-              >
+              <table className="vd-table" style={{ minWidth: 600 }}>
                 <thead>
                   <tr>
-                    {["ID", "Status", "Risk Score", "Document Type", "Created"].map((col) => (
-                      <th
-                        key={col}
-                        className="text-left"
-                        style={{
-                          padding: "12px 16px",
-                          fontSize: 11,
-                          fontWeight: 500,
-                          color: "#5a7268",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.08em",
-                          borderBottom: "1px solid rgba(255,255,255,0.08)",
-                        }}
-                      >
-                        {col}
-                      </th>
-                    ))}
+                    <th>ID</th>
+                    <th>Status</th>
+                    <th>Risk Score</th>
+                    <th>Document Type</th>
+                    <th>Created</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {verifications.map((v, idx) => (
-                    <tr
-                      key={v.id}
-                      className="hover:bg-[rgba(255,255,255,0.02)] transition-colors duration-[120ms]"
-                      style={{
-                        borderBottom:
-                          idx < verifications.length - 1
-                            ? "1px solid rgba(255,255,255,0.04)"
-                            : "none",
-                      }}
-                    >
-                      <td style={{ padding: "16px 16px" }}>
+                  {verifications.map((v) => (
+                    <tr key={v.id}>
+                      <td>
                         <Link
                           href={`/dashboard/verifications/${v.id}`}
-                          className="hover:underline"
-                          style={{
-                            fontFamily: "var(--font-mono)",
-                            fontSize: 12,
-                            fontWeight: 500,
-                            color: "#5a7268",
-                          }}
+                          className="vd-table-id hover:underline"
                         >
                           {v.id.slice(0, 8)}…
                         </Link>
                       </td>
-                      <td style={{ padding: "16px 16px" }}>
-                        <StatusBadge status={v.status} />
-                      </td>
-                      <td style={{ padding: "16px 16px" }}>
-                        <RiskBar score={v.risk_score} />
-                      </td>
-                      <td
-                        style={{
-                          padding: "16px 16px",
-                          color: "#a3b3ae",
-                          textTransform: "capitalize",
-                          fontSize: 13,
-                        }}
-                      >
+                      <td><StatusBadge status={v.status} /></td>
+                      <td><RiskBar score={v.risk_score} /></td>
+                      <td style={{ textTransform: "capitalize", fontSize: 13 }}>
                         {v.document_type.replace(/_/g, " ")}
                       </td>
-                      <td style={{ padding: "16px 16px", color: "#a3b3ae", fontSize: 13 }}>
+                      <td style={{ fontSize: 13 }}>
                         {new Date(v.created_at).toLocaleDateString()}
                       </td>
                     </tr>
@@ -212,30 +226,17 @@ export default async function VerificationsPage({
               </table>
             </div>
 
-            {/* Pagination */}
             {totalPages > 1 && (
-              <div
-                className="flex items-center justify-between px-6 py-4"
-                style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}
-              >
+              <div className="vd-pagination">
                 <Link
-                  href={page > 1 ? `/dashboard/verifications?page=${page - 1}` : "#"}
+                  href={pageHref(page - 1)}
                   aria-disabled={page <= 1}
-                  className={`inline-flex items-center gap-2 text-[13px] font-medium rounded-lg ${
-                    page <= 1 ? "cursor-not-allowed pointer-events-none opacity-30" : "hover:opacity-80"
-                  }`}
-                  style={{
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    color: "#a3b3ae",
-                    padding: "0 16px",
-                    height: 36,
-                    borderRadius: 8,
-                  }}
+                  className={`vd-btn vd-btn-secondary${page <= 1 ? " opacity-30 pointer-events-none" : ""}`}
                 >
                   ← Previous
                 </Link>
 
-                <span style={{ fontSize: 14, color: "#a3b3ae" }}>
+                <span className="vd-pagination-info">
                   Page{" "}
                   <span style={{ fontWeight: 500, color: "#f0f4f3" }}>{page}</span>
                   {" "}of{" "}
@@ -243,18 +244,9 @@ export default async function VerificationsPage({
                 </span>
 
                 <Link
-                  href={page < totalPages ? `/dashboard/verifications?page=${page + 1}` : "#"}
+                  href={pageHref(page + 1)}
                   aria-disabled={page >= totalPages}
-                  className={`inline-flex items-center gap-2 text-[13px] font-medium rounded-lg ${
-                    page >= totalPages ? "cursor-not-allowed pointer-events-none opacity-30" : "hover:opacity-80"
-                  }`}
-                  style={{
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    color: "#a3b3ae",
-                    padding: "0 16px",
-                    height: 36,
-                    borderRadius: 8,
-                  }}
+                  className={`vd-btn vd-btn-secondary${page >= totalPages ? " opacity-30 pointer-events-none" : ""}`}
                 >
                   Next →
                 </Link>

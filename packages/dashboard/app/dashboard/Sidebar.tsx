@@ -57,7 +57,7 @@ const NAV = [
   },
 ];
 
-// ─── Profile popup ──────────────────────────────────────────────────────────
+// ─── Profile popup ────────────────────────────────────────────────────────────
 
 interface ProfileMenuProps {
   userEmail: string;
@@ -90,10 +90,7 @@ function ProfileMenu({ userEmail, onClose, onSignOut }: ProfileMenuProps) {
       <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }} />
 
       <div className="py-1.5">
-        <MenuLink
-          href="/dashboard/settings"
-          label="Settings"
-          onClick={onClose}
+        <MenuLink href="/dashboard/settings" label="Settings" onClick={onClose}
           icon={
             <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -101,10 +98,7 @@ function ProfileMenu({ userEmail, onClose, onSignOut }: ProfileMenuProps) {
             </svg>
           }
         />
-        <MenuLink
-          href="/dashboard/help"
-          label="Help"
-          onClick={onClose}
+        <MenuLink href="/dashboard/help" label="Help" onClick={onClose}
           icon={
             <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <circle cx="12" cy="12" r="10" strokeWidth={2} />
@@ -144,7 +138,7 @@ function ProfileMenu({ userEmail, onClose, onSignOut }: ProfileMenuProps) {
   );
 }
 
-// ─── Shared menu item primitives ─────────────────────────────────────────────
+// ─── Shared menu item primitives ──────────────────────────────────────────────
 
 function MenuLink({
   href,
@@ -171,7 +165,16 @@ function MenuLink({
       href={href}
       {...linkProps}
       onClick={onClick}
-      className="flex items-center gap-3 mx-1.5 px-2.5 py-2 rounded-lg text-sm transition-colors text-[#a3b3ae] hover:text-[#f0f4f3] hover:bg-[rgba(255,255,255,0.06)]"
+      className="flex items-center gap-3 mx-1.5 px-2.5 py-2 rounded-lg text-sm"
+      style={{ color: "#a3b3ae", transition: "background var(--transition-fast), color var(--transition-fast)" }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLAnchorElement).style.color = "#f0f4f3";
+        (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "rgba(255,255,255,0.06)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLAnchorElement).style.color = "#a3b3ae";
+        (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "";
+      }}
     >
       {icon}
       {label}
@@ -193,12 +196,22 @@ function MenuButton({
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-3 mx-1.5 px-2.5 py-2 rounded-lg text-sm transition-colors text-[#a3b3ae] ${
-        danger
-          ? "hover:text-[#dc2626] hover:bg-[rgba(153,27,27,0.15)]"
-          : "hover:text-[#f0f4f3] hover:bg-[rgba(255,255,255,0.06)]"
-      }`}
-      style={{ width: "calc(100% - 12px)" }}
+      className="flex items-center gap-3 mx-1.5 px-2.5 py-2 rounded-lg text-sm"
+      style={{
+        color: "#a3b3ae",
+        width: "calc(100% - 12px)",
+        transition: "background var(--transition-fast), color var(--transition-fast)",
+      }}
+      onMouseEnter={(e) => {
+        const el = e.currentTarget as HTMLButtonElement;
+        el.style.color = danger ? "#dc2626" : "#f0f4f3";
+        el.style.backgroundColor = danger ? "rgba(153,27,27,0.15)" : "rgba(255,255,255,0.06)";
+      }}
+      onMouseLeave={(e) => {
+        const el = e.currentTarget as HTMLButtonElement;
+        el.style.color = "#a3b3ae";
+        el.style.backgroundColor = "";
+      }}
     >
       {icon}
       {label}
@@ -238,22 +251,15 @@ function NavItem({
         <Link
           href={href}
           onClick={onClick}
-          className={`flex items-center rounded-lg text-sm font-[510]${
-            !active ? " hover:bg-[rgba(255,255,255,0.03)]" : ""
-          }`}
+          className={`vd-nav-item${active ? " vd-nav-item-active" : ""}`}
           style={{
-            height: 36,
             justifyContent: isCollapsed ? "center" : "flex-start",
+            gap: isCollapsed ? 0 : 10,
             padding: isCollapsed
               ? "0"
               : active
-              ? "8px 12px 8px calc(12px - 2px)"
-              : "8px 12px",
-            gap: isCollapsed ? 0 : 10,
-            backgroundColor: active ? "rgba(29,158,117,0.08)" : undefined,
-            color: active ? "#f0f4f3" : "#a3b3ae",
-            borderLeft: active ? "2px solid #1d9e75" : "2px solid transparent",
-            transition: "background-color var(--transition-fast), color var(--transition-fast)",
+              ? "0 8px 0 6px"
+              : "0 8px",
           }}
         >
           {icon}
@@ -305,7 +311,7 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
     if (stored === "true") setCollapsed(true);
   }, []);
 
-  // On mobile (mobileOpen=true) always show the full sidebar regardless of collapsed state
+  // On mobile (mobileOpen=true) always show full sidebar
   const isCollapsed = collapsed && !mobileOpen;
   const sidebarWidth = isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
 
@@ -360,23 +366,19 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
 
       {/* Sidebar panel */}
       <aside
-        className={`flex flex-col shrink-0 h-screen fixed md:relative inset-y-0 left-0 z-50 md:z-auto overflow-y-auto ${
+        className={`vd-sidebar flex flex-col shrink-0 h-screen fixed md:relative inset-y-0 left-0 z-50 md:z-auto overflow-y-auto ${
           mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
         style={{
           width: sidebarWidth,
-          backgroundColor: "#0a0f0e",
-          borderRight: "1px solid rgba(255,255,255,0.06)",
           transition: "width 200ms ease, transform 200ms ease-in-out",
         }}
       >
-        {/* ── Header: logo only — collapse toggle lives in the nav ────────── */}
+        {/* ── Logo ──────────────────────────────────────────────────────── */}
         <div
           className="shrink-0 flex items-center gap-2 px-3 py-4"
           style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
         >
-          {/* Logo — navigates to /dashboard. flex-1 so it fills all header
-              space safely; on desktop the chevron is in the nav, not here. */}
           <Link
             href="/dashboard"
             className="flex items-center gap-3 min-w-0 flex-1"
@@ -395,7 +397,6 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
                 />
               </svg>
             </div>
-            {/* Text fades out as sidebar collapses */}
             <div
               style={{
                 opacity: isCollapsed ? 0 : 1,
@@ -415,10 +416,12 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
 
           {/* Mobile: close button */}
           <button
-            className="md:hidden flex items-center justify-center w-7 h-7 rounded-md shrink-0 transition-colors hover:bg-[rgba(255,255,255,0.06)]"
+            className="md:hidden flex items-center justify-center w-7 h-7 rounded-md shrink-0"
             style={{ color: "#a3b3ae" }}
             onClick={() => setMobileOpen(false)}
             aria-label="Close menu"
+            onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.backgroundColor = "rgba(255,255,255,0.06)")}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.backgroundColor = "")}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -426,15 +429,10 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
           </button>
         </div>
 
-        {/* ── Navigation ──────────────────────────────────────────────────── */}
+        {/* ── Navigation ────────────────────────────────────────────────── */}
         <nav className="flex-1 px-2 py-5">
           {!isCollapsed && (
-            <p
-              className="px-3 mb-2 text-[10px] font-medium uppercase"
-              style={{ color: "#5a7268", letterSpacing: "0.12em" }}
-            >
-              Navigation
-            </p>
+            <p className="vd-sidebar-section">Navigation</p>
           )}
           <div className="space-y-0.5">
             {NAV.map(({ href, label, icon }) => {
@@ -455,13 +453,12 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
               );
             })}
           </div>
-
         </nav>
 
-        {/* ── Profile footer ──────────────────────────────────────────────── */}
+        {/* ── Profile footer ────────────────────────────────────────────── */}
         <div
           ref={profileRef}
-          className="shrink-0 sticky bottom-0"
+          className="shrink-0"
           style={{
             position: "relative",
             borderTop: "1px solid rgba(255,255,255,0.06)",
@@ -469,6 +466,13 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
             paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))",
           }}
         >
+          {/* Systems status — only shown when expanded */}
+          {!isCollapsed && (
+            <div className="px-4 pt-3 pb-1">
+              <span className="vd-status-dot">All systems operational</span>
+            </div>
+          )}
+
           {profileOpen && (
             <ProfileMenu
               userEmail={userEmail}
@@ -481,7 +485,7 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
             onClick={() => setProfileOpen((o) => !o)}
             className="flex items-center gap-3 w-full text-left"
             style={{
-              padding: isCollapsed ? "12px 0 4px" : "12px 16px 4px",
+              padding: isCollapsed ? "12px 0 4px" : "8px 16px 4px",
               justifyContent: isCollapsed ? "center" : "flex-start",
             }}
             aria-expanded={profileOpen}
@@ -489,23 +493,24 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
           >
             {/* Avatar */}
             <div
-              className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold"
+              className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-semibold"
               style={{ backgroundColor: "#1d9e75", color: "#050a09" }}
             >
               {initials}
             </div>
 
-            {/* Email + chevron — hidden when collapsed */}
+            {/* Email + chevron */}
             {!isCollapsed && (
               <>
                 <p className="text-xs truncate flex-1 text-left" style={{ color: "#5a7268" }}>
                   {userEmail}
                 </p>
                 <svg
-                  className="w-3.5 h-3.5 shrink-0 transition-transform duration-150"
+                  className="w-3.5 h-3.5 shrink-0"
                   style={{
                     color: "#5a7268",
                     transform: profileOpen ? "rotate(180deg)" : "rotate(0deg)",
+                    transition: "transform 150ms ease",
                   }}
                   fill="none"
                   stroke="currentColor"
@@ -519,9 +524,7 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
         </div>
       </aside>
 
-      {/* ── Desktop collapse toggle — Linear-style floating circle ─────────
-          Fixed position so it isn't clipped by the sidebar's overflow-y.
-          Tracks sidebar width with the same 200ms ease transition.        */}
+      {/* Desktop collapse toggle — Linear-style floating circle */}
       <button
         className="hidden md:flex items-center justify-center fixed z-20 rounded-full"
         onClick={toggleCollapsed}

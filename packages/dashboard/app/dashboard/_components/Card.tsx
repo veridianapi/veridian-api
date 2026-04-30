@@ -4,18 +4,13 @@ interface CardProps {
   children: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
+  bare?: boolean;
 }
 
-export function Card({ children, className = "", style }: CardProps) {
+export function Card({ children, className = "", style, bare = false }: CardProps) {
+  const base = bare ? "vd-card-bare" : "vd-card";
   return (
-    <div
-      className={`rounded-xl ${className}`}
-      style={{
-        backgroundColor: "#111916",
-        border: "1px solid rgba(255,255,255,0.06)",
-        ...style,
-      }}
-    >
+    <div className={`${base} ${className}`} style={style}>
       {children}
     </div>
   );

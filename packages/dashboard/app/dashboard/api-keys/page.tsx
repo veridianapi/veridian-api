@@ -137,30 +137,17 @@ export default function ApiKeysPage() {
 
       {/* Error banner */}
       {error && (
-        <div
-          className="mb-6 rounded-xl px-5 py-4"
-          style={{
-            backgroundColor: "rgba(220,38,38,0.10)",
-            border: "1px solid rgba(220,38,38,0.25)",
-            borderLeft: "3px solid #dc2626",
-          }}
-        >
+        <div className="vd-alert vd-alert-danger">
           <p className="text-sm font-medium" style={{ color: "#dc2626" }}>{error}</p>
         </div>
       )}
 
       {/* New key created banner */}
       {createdKey && (
-        <div
-          className="mb-6 rounded-xl p-5"
-          style={{
-            backgroundColor: "rgba(29,158,117,0.10)",
-            border: "1px solid rgba(29,158,117,0.25)",
-          }}
-        >
+        <div className="vd-alert vd-alert-success mb-5">
           <div className="flex items-start gap-3">
             <div
-              className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-1"
+              className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5"
               style={{ backgroundColor: "rgba(29,158,117,0.20)" }}
             >
               <svg className="w-4 h-4" fill="none" stroke="#1d9e75" viewBox="0 0 24 24">
@@ -182,17 +169,10 @@ export default function ApiKeysPage() {
                 >
                   {createdKey}
                 </code>
-                {/* Secondary button */}
                 <button
                   onClick={() => copyToClipboard(createdKey)}
-                  className="shrink-0 inline-flex items-center gap-1.5 text-xs font-medium"
-                  style={{
-                    border: "1px solid rgba(29,158,117,0.30)",
-                    color: "#1d9e75",
-                    height: 36,
-                    padding: "0 12px",
-                    borderRadius: 8,
-                  }}
+                  className="vd-btn vd-btn-secondary vd-btn-sm shrink-0"
+                  style={{ borderColor: "rgba(29,158,117,0.30)", color: "#1d9e75" }}
                 >
                   <CopyIcon />
                   {copied ? "Copied" : "Copy"}
@@ -205,11 +185,8 @@ export default function ApiKeysPage() {
 
       {/* Create new key form */}
       {showForm && (
-        <div
-          className="rounded-xl p-6 mb-5"
-          style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.06)" }}
-        >
-          <h2 className="text-sm font-semibold mb-4" style={{ color: "#f0f4f3" }}>New API Key</h2>
+        <div className="vd-card mb-5">
+          <h2 className="vd-card-title mb-4">New API Key</h2>
           <div className="flex gap-3 flex-wrap sm:flex-nowrap">
             <input
               type="text"
@@ -217,43 +194,19 @@ export default function ApiKeysPage() {
               value={newKeyName}
               onChange={(e) => setNewKeyName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && createKey()}
-              className="flex-1 px-3 text-sm rounded-lg focus:outline-none focus:ring-2 w-full sm:w-auto"
-              style={{
-                backgroundColor: "#0d1211",
-                border: "1px solid rgba(255,255,255,0.08)",
-                color: "#f0f4f3",
-                height: 36,
-                borderRadius: 8,
-                fontFeatureSettings: '"cv01","ss03"',
-                "--tw-ring-color": "#1d9e75",
-              } as React.CSSProperties}
+              className="vd-input flex-1 w-full sm:w-auto"
               autoFocus
             />
             <button
               onClick={createKey}
               disabled={creating || !newKeyName.trim()}
-              className="text-[13px] font-medium disabled:opacity-40 hover:opacity-90"
-              style={{
-                backgroundColor: "#1d9e75",
-                color: "#050a09",
-                height: 36,
-                padding: "0 16px",
-                borderRadius: 8,
-              }}
+              className="vd-btn vd-btn-primary"
             >
               {creating ? "Creating…" : "Create"}
             </button>
             <button
               onClick={() => setShowForm(false)}
-              className="text-[13px] font-medium hover:opacity-80"
-              style={{
-                border: "1px solid rgba(255,255,255,0.10)",
-                color: "#a3b3ae",
-                height: 36,
-                padding: "0 16px",
-                borderRadius: 8,
-                backgroundColor: "transparent",
-              }}
+              className="vd-btn vd-btn-secondary"
             >
               Cancel
             </button>
@@ -262,10 +215,7 @@ export default function ApiKeysPage() {
       )}
 
       {/* Keys list */}
-      <div
-        className="card-lift rounded-xl"
-        style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.06)" }}
-      >
+      <div className="vd-card-bare">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <div className="flex items-center gap-2 text-sm" style={{ color: "#a3b3ae" }}>
@@ -279,7 +229,7 @@ export default function ApiKeysPage() {
         ) : keys.length === 0 ? (
           <EmptyState
             icon={
-              <svg className="w-4 h-4" fill="none" stroke="#5a7268" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" fill="none" stroke="#5a7268" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
               </svg>
             }
@@ -294,8 +244,7 @@ export default function ApiKeysPage() {
                 key={k.id}
                 className="px-6 py-5 flex items-center gap-4"
                 style={{
-                  borderBottom:
-                    i < keys.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
+                  borderBottom: i < keys.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
                 }}
               >
                 {/* Key icon */}
@@ -310,10 +259,16 @@ export default function ApiKeysPage() {
 
                 {/* Key details */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold" style={{ color: "#f0f4f3" }}>{k.name}</p>
+                  <p className="vd-table-primary text-sm">{k.name}</p>
+                  <p
+                    className="mt-0.5"
+                    style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#5a7268" }}
+                  >
+                    vrd_live_••••••••
+                  </p>
                 </div>
 
-                {/* Meta */}
+                {/* Created date */}
                 <div className="hidden sm:flex flex-col items-end text-right shrink-0">
                   <p style={{ fontSize: 13, color: "#a3b3ae" }}>
                     Created {new Date(k.created_at).toLocaleDateString()}
@@ -327,32 +282,15 @@ export default function ApiKeysPage() {
                       <span className="text-xs hidden sm:inline" style={{ color: "#a3b3ae" }}>
                         Revoke this key?
                       </span>
-                      {/* Danger button */}
                       <button
                         onClick={() => revokeKey(k.id)}
-                        className="text-xs font-medium"
-                        style={{
-                          backgroundColor: "rgba(220,38,38,0.12)",
-                          border: "1px solid rgba(220,38,38,0.25)",
-                          color: "#dc2626",
-                          height: 32,
-                          padding: "0 12px",
-                          borderRadius: 8,
-                        }}
+                        className="vd-btn vd-btn-danger vd-btn-sm"
                       >
                         Confirm
                       </button>
                       <button
                         onClick={() => setRevokeConfirm(null)}
-                        className="text-xs font-medium hover:opacity-80"
-                        style={{
-                          border: "1px solid rgba(255,255,255,0.10)",
-                          color: "#a3b3ae",
-                          height: 32,
-                          padding: "0 12px",
-                          borderRadius: 8,
-                          backgroundColor: "transparent",
-                        }}
+                        className="vd-btn vd-btn-secondary vd-btn-sm"
                       >
                         Cancel
                       </button>
@@ -360,7 +298,7 @@ export default function ApiKeysPage() {
                   ) : (
                     <button
                       onClick={() => setRevokeConfirm(k.id)}
-                      className="text-xs font-medium hover:opacity-80"
+                      className="vd-btn vd-btn-ghost vd-btn-sm"
                       style={{ color: "#dc2626" }}
                     >
                       Revoke
