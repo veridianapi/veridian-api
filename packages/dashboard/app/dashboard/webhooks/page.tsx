@@ -529,7 +529,6 @@ export default function WebhooksPage() {
             }
             title="No webhook endpoints yet"
             description="Add an endpoint above to start receiving verification events."
-            py={14}
           />
         ) : (
           <div>
@@ -662,7 +661,6 @@ export default function WebhooksPage() {
             }
             title="No deliveries yet"
             description="Deliveries appear here after verifications trigger your endpoints."
-            py={14}
           />
         ) : (
           <div className="overflow-x-auto">
