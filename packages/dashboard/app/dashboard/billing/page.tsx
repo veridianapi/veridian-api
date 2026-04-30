@@ -85,8 +85,7 @@ export default async function BillingPage() {
   const usagePct = Math.min(100, Math.round((usage / limit) * 100));
 
   // DESIGN.md §7: 0-79=brand, 80-99=warning, 100=danger
-  const usageBarColor =
-    usagePct >= 100 ? "#dc2626" : usagePct >= 80 ? "#d97706" : "#1d9e75";
+  const usageLevel = usagePct >= 100 ? "high" : usagePct >= 80 ? "medium" : "brand";
 
   const currentPlanIdx = PLANS.findIndex((p) => p.id === customer?.plan);
 
@@ -99,7 +98,7 @@ export default async function BillingPage() {
         <div className="flex items-start justify-between mb-5">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <h2 style={{ fontSize: 16, fontWeight: 600, color: "#f0f4f3", textTransform: "capitalize" }}>
+              <h2 className="vd-billing-title">
                 {customer?.plan ?? "Free"} Plan
               </h2>
               {customer?.subscription_status && (
@@ -109,7 +108,7 @@ export default async function BillingPage() {
               )}
             </div>
             {customer?.next_billing_date && (
-              <p style={{ fontSize: 13, color: "#a3b3ae" }}>
+              <p className="vd-billing-date">
                 Next billing:{" "}
                 {new Date(customer.next_billing_date).toLocaleDateString("en-US", {
                   year: "numeric",
@@ -122,7 +121,7 @@ export default async function BillingPage() {
           {currentPlan && (
             <div className="text-right">
               <span className="vd-metric-value">{currentPlan.price}</span>
-              <span className="text-sm" style={{ color: "#a3b3ae" }}>{currentPlan.period}</span>
+              <span className="text-sm vd-billing-period">{currentPlan.period}</span>
             </div>
           )}
         </div>
@@ -130,24 +129,24 @@ export default async function BillingPage() {
         {/* Usage bar */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium" style={{ color: "#a3b3ae" }}>
+            <span className="text-sm font-medium vd-billing-period">
               Verifications this month
             </span>
-            <span className="text-sm" style={{ color: "#f0f4f3", fontWeight: 600 }}>
+            <span className="text-sm vd-text-primary font-semibold">
               {usage.toLocaleString()}{" "}
-              <span style={{ fontWeight: 400, color: "#a3b3ae" }}>
+              <span className="vd-billing-period font-normal">
                 / {limit.toLocaleString()}
               </span>
             </span>
           </div>
           <div className="vd-progress-track">
             <div
-              className="vd-progress-fill"
-              style={{ width: `${usagePct}%`, backgroundColor: usageBarColor }}
+              className={`vd-progress-fill vd-progress-fill-${usageLevel}`}
+              style={{ width: `${usagePct}%` }}
             />
           </div>
           {usagePct >= 80 && (
-            <p className="text-xs mt-2" style={{ color: usagePct >= 100 ? "#dc2626" : "#d97706" }}>
+            <p className={`text-xs mt-2 ${usagePct >= 100 ? "vd-text-danger" : "vd-text-warning"}`}>
               {usagePct >= 100
                 ? "You've reached your monthly limit. Upgrade to restore access."
                 : "You're close to your monthly limit. Upgrade to avoid interruptions."}
@@ -168,23 +167,11 @@ export default async function BillingPage() {
           const card = (
             <div
               key={plan.id}
-              className="vd-card"
-              style={{
-                border: isCurrent
-                  ? "2px solid #1d9e75"
-                  : isMostPopular
-                  ? "1px solid rgba(29,158,117,0.40)"
-                  : undefined,
-                boxShadow: isMostPopular
-                  ? "0 0 0 1px rgba(29,158,117,0.15)"
-                  : undefined,
-              }}
+              className={`vd-card${isCurrent ? " vd-card-current" : isMostPopular ? " vd-card-popular" : ""}`}
             >
               {/* Plan name + current badge */}
               <div className="flex items-center justify-between mb-1">
-                <h3 style={{ fontSize: 14, fontWeight: 600, color: "#f0f4f3" }}>
-                  {plan.name}
-                </h3>
+                <h3 className="vd-plan-title">{plan.name}</h3>
                 {isCurrent && (
                   <span className="vd-badge vd-badge-brand">Current plan</span>
                 )}
@@ -193,16 +180,16 @@ export default async function BillingPage() {
               {/* Price */}
               <div className="mb-1">
                 <span className="vd-metric-value">{plan.price}</span>
-                <span className="text-sm" style={{ color: "#a3b3ae" }}>{plan.period}</span>
+                <span className="text-sm vd-billing-period">{plan.period}</span>
               </div>
 
               {/* Description */}
-              <p className="text-xs mb-5" style={{ color: "#a3b3ae" }}>{plan.description}</p>
+              <p className="vd-plan-desc text-xs mb-5">{plan.description}</p>
 
               {/* Features */}
               <ul className="space-y-2 mb-6">
                 {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2 text-sm" style={{ color: "#a3b3ae" }}>
+                  <li key={feature} className="vd-plan-feature flex items-start gap-2 text-sm">
                     <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="#1d9e75" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
@@ -213,12 +200,7 @@ export default async function BillingPage() {
 
               {/* CTA */}
               {isCurrent ? (
-                <div
-                  className="vd-btn w-full cursor-default select-none opacity-50"
-                  style={{ border: "1px solid rgba(29,158,117,0.30)", color: "#1d9e75", backgroundColor: "transparent" }}
-                >
-                  Current plan
-                </div>
+                <div className="vd-btn-current-plan">Current plan</div>
               ) : (
                 <SwitchPlanButton
                   plan={plan.id}
@@ -231,20 +213,9 @@ export default async function BillingPage() {
 
           if (isMostPopular) {
             return (
-              <div key={plan.id} style={{ position: "relative", paddingTop: 20 }}>
-                <div
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    display: "flex",
-                    justifyContent: "center",
-                  }}
-                >
-                  <span className="vd-badge" style={{ backgroundColor: "#1d9e75", color: "#050a09" }}>
-                    Most popular
-                  </span>
+              <div key={plan.id} className="vd-plan-popular-wrapper">
+                <div className="vd-plan-popular-badge-row">
+                  <span className="vd-badge vd-badge-popular">Most popular</span>
                 </div>
                 {card}
               </div>

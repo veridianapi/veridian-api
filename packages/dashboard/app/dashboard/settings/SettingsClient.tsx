@@ -15,17 +15,10 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div
-      className="rounded-xl p-6"
-      style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.06)" }}
-    >
+    <div className="vd-settings-section">
       <div className="mb-4">
-        <h2 className="text-sm font-semibold" style={{ color: "#f0f4f3" }}>{title}</h2>
-        {description && (
-          <p className="text-xs mt-1" style={{ color: "#5a7268" }}>
-            {description}
-          </p>
-        )}
+        <h2 className="text-sm font-semibold vd-text-primary">{title}</h2>
+        {description && <p className="vd-section-desc text-xs mt-1">{description}</p>}
       </div>
       {children}
     </div>
@@ -99,28 +92,13 @@ export default function SettingsClient({ email }: { email: string }) {
       {/* Account */}
       <Section title="Account" description="Your account details and authentication email">
         <div className="mb-4">
-          <label className="block mb-1" style={{ fontSize: 12, fontWeight: 500, color: "#a3b3ae" }}>
-            Current email
-          </label>
-          <p
-            className="text-sm px-3 py-2 rounded-lg"
-            style={{
-              backgroundColor: "#0d1211",
-              color: "#f0f4f3",
-              border: "1px solid rgba(255,255,255,0.08)",
-            }}
-          >
-            {email}
-          </p>
+          <label className="vd-field-label-block">Current email</label>
+          <p className="vd-field-read text-sm">{email}</p>
         </div>
 
         <form onSubmit={handleEmailUpdate} className="space-y-4">
           <div>
-            <label
-              htmlFor="new-email"
-              className="block mb-1"
-              style={{ fontSize: 12, fontWeight: 500, color: "#a3b3ae" }}
-            >
+            <label htmlFor="new-email" className="vd-field-label-block">
               Update email
             </label>
             <input
@@ -133,60 +111,25 @@ export default function SettingsClient({ email }: { email: string }) {
                 setEmailError(null);
               }}
               placeholder="new@email.com"
-              className="w-full px-3 text-sm rounded-lg focus:outline-none focus:ring-2"
-              style={{
-                backgroundColor: "#0d1211",
-                border: "1px solid rgba(255,255,255,0.08)",
-                color: "#f0f4f3",
-                height: 36,
-                borderRadius: 8,
-                "--tw-ring-color": "#1d9e75",
-              } as React.CSSProperties}
+              className="vd-input w-full focus:ring-2"
             />
           </div>
 
           {emailError && (
-            <p
-              className="text-xs px-3 py-2 rounded-lg"
-              style={{
-                color: "#dc2626",
-                backgroundColor: "rgba(220,38,38,0.12)",
-                border: "1px solid rgba(220,38,38,0.20)",
-                transition: "opacity 150ms",
-                opacity: 1,
-              }}
-            >
-              {emailError}
-            </p>
+            <p className="vd-inline-error text-xs px-3 py-2 rounded-lg">{emailError}</p>
           )}
 
           {emailStatus === "sent" && (
-            <p
-              className="text-xs px-3 py-2 rounded-lg"
-              style={{
-                color: "#16a34a",
-                backgroundColor: "rgba(22,163,74,0.12)",
-                border: "1px solid rgba(22,163,74,0.20)",
-                transition: "opacity 150ms",
-                opacity: 1,
-              }}
-            >
+            <p className="vd-inline-success text-xs px-3 py-2 rounded-lg">
               Confirmation email sent to{" "}
-              <span style={{ fontWeight: 500 }}>{sentToEmail}</span> — check that inbox to complete the change.
+              <span className="font-medium">{sentToEmail}</span> — check that inbox to complete the change.
             </p>
           )}
 
           <button
             type="submit"
             disabled={emailStatus === "sending" || !newEmail.trim()}
-            className="text-[13px] font-medium disabled:opacity-50 hover:opacity-90"
-            style={{
-              backgroundColor: "#1d9e75",
-              color: "#050a09",
-              height: 36,
-              padding: "0 16px",
-              borderRadius: 8,
-            }}
+            className="vd-btn vd-btn-primary disabled:opacity-50"
           >
             {emailStatus === "sending" ? "Sending…" : "Send confirmation"}
           </button>
@@ -196,54 +139,20 @@ export default function SettingsClient({ email }: { email: string }) {
       {/* Security */}
       <Section title="Security" description="Sessions, authentication, and key protection">
         {/* Active sessions */}
-        <div
-          className="flex items-center justify-between gap-4 pb-5 mb-5"
-          style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
-        >
+        <div className="vd-security-divider flex items-center justify-between gap-4 pb-5 mb-5">
           <div>
-            <p className="text-sm font-medium mb-1" style={{ color: "#f0f4f3" }}>
-              Active sessions
-            </p>
-            <p className="text-xs" style={{ color: "#5a7268" }}>
-              Device: Current browser session
-            </p>
-            <p className="text-xs mt-0.5" style={{ color: "#5a7268" }}>
-              Last active: Just now
-            </p>
+            <p className="text-sm font-medium mb-1 vd-text-primary">Active sessions</p>
+            <p className="text-xs vd-text-tertiary">Device: Current browser session</p>
+            <p className="text-xs mt-0.5 vd-text-tertiary">Last active: Just now</p>
             <div className="flex items-center gap-1.5 mt-2">
-              <span
-                style={{
-                  display: "inline-block",
-                  width: 6,
-                  height: 6,
-                  borderRadius: "50%",
-                  backgroundColor: "#16a34a",
-                  flexShrink: 0,
-                }}
-              />
-              <span style={{ fontSize: 12, color: "#16a34a" }}>Active</span>
+              <span className="vd-status-active-dot" />
+              <span className="vd-status-active-label">Active</span>
             </div>
           </div>
           <button
             onClick={handleSignOutOthers}
             disabled={signOutStatus === "loading" || signOutStatus === "done"}
-            className="shrink-0 text-[13px] font-medium disabled:opacity-50"
-            style={{
-              color: "#a3b3ae",
-              border: "1px solid rgba(255,255,255,0.10)",
-              backgroundColor: "transparent",
-              height: 36,
-              padding: "0 16px",
-              borderRadius: 8,
-              cursor: signOutStatus === "done" || signOutStatus === "loading" ? "default" : "pointer",
-            }}
-            onMouseEnter={(e) => {
-              if (signOutStatus === "idle")
-                (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.20)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.10)";
-            }}
+            className="vd-btn-outline shrink-0 disabled:opacity-50"
           >
             {signOutStatus === "loading"
               ? "Signing out…"
@@ -254,78 +163,27 @@ export default function SettingsClient({ email }: { email: string }) {
         </div>
 
         {signOutStatus === "done" && (
-          <p
-            className="text-xs px-3 py-2 rounded-lg -mt-3 mb-5"
-            style={{
-              color: "#16a34a",
-              backgroundColor: "rgba(22,163,74,0.12)",
-              border: "1px solid rgba(22,163,74,0.20)",
-              transition: "opacity 150ms",
-              opacity: 1,
-            }}
-          >
+          <p className="vd-inline-success text-xs px-3 py-2 rounded-lg -mt-3 mb-5">
             All other sessions signed out.
           </p>
         )}
 
         {signOutStatus === "error" && signOutError && (
-          <p
-            className="text-xs px-3 py-2 rounded-lg -mt-3 mb-5"
-            style={{
-              color: "#dc2626",
-              backgroundColor: "rgba(220,38,38,0.12)",
-              border: "1px solid rgba(220,38,38,0.20)",
-              transition: "opacity 150ms",
-              opacity: 1,
-            }}
-          >
+          <p className="vd-inline-error text-xs px-3 py-2 rounded-lg -mt-3 mb-5">
             {signOutError}
           </p>
         )}
 
         {/* Two-factor authentication */}
-        <div
-          className="flex items-center justify-between gap-4 pb-5 mb-5"
-          style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
-        >
+        <div className="vd-security-divider flex items-center justify-between gap-4 pb-5 mb-5">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <p className="text-sm font-medium" style={{ color: "#f0f4f3" }}>
-                Two-factor authentication
-              </p>
-              <span
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  padding: "1px 8px",
-                  borderRadius: 9999,
-                  fontSize: 11,
-                  fontWeight: 500,
-                  backgroundColor: "rgba(217,119,6,0.12)",
-                  color: "#d97706",
-                }}
-              >
-                Not enabled
-              </span>
+              <p className="text-sm font-medium vd-text-primary">Two-factor authentication</p>
+              <span className="vd-badge-warn-sm">Not enabled</span>
             </div>
-            <p className="text-xs" style={{ color: "#5a7268" }}>
-              Add an extra layer of security to your account.
-            </p>
+            <p className="text-xs vd-text-tertiary">Add an extra layer of security to your account.</p>
           </div>
-          <button
-            disabled
-            className="shrink-0 text-[13px] font-medium"
-            style={{
-              color: "#5a7268",
-              border: "1px solid rgba(255,255,255,0.08)",
-              backgroundColor: "transparent",
-              height: 36,
-              padding: "0 16px",
-              borderRadius: 8,
-              cursor: "not-allowed",
-              opacity: 0.6,
-            }}
-          >
+          <button disabled className="vd-btn-disabled-look shrink-0">
             Coming soon
           </button>
         </div>
@@ -334,25 +192,10 @@ export default function SettingsClient({ email }: { email: string }) {
         <div className="flex items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <p className="text-sm font-medium" style={{ color: "#f0f4f3" }}>
-                API key security
-              </p>
-              <span
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  padding: "1px 8px",
-                  borderRadius: 9999,
-                  fontSize: 11,
-                  fontWeight: 500,
-                  backgroundColor: "rgba(22,163,74,0.12)",
-                  color: "#16a34a",
-                }}
-              >
-                Secure
-              </span>
+              <p className="text-sm font-medium vd-text-primary">API key security</p>
+              <span className="vd-badge-ok-sm">Secure</span>
             </div>
-            <p className="text-xs" style={{ color: "#5a7268" }}>
+            <p className="text-xs vd-text-tertiary">
               Your API keys are hashed with SHA-256. Raw keys are shown only once and never stored.
             </p>
           </div>
@@ -363,122 +206,55 @@ export default function SettingsClient({ email }: { email: string }) {
       <Section title="Appearance" description="Customize how the dashboard looks">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-medium mb-1" style={{ color: "#f0f4f3" }}>Theme</p>
-            <p className="text-xs" style={{ color: "#5a7268" }}>Dark (default)</p>
+            <p className="text-sm font-medium mb-1 vd-text-primary">Theme</p>
+            <p className="text-xs vd-text-tertiary">Dark (default)</p>
           </div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "6px 12px",
-              borderRadius: 8,
-              backgroundColor: "rgba(29,158,117,0.10)",
-              border: "1px solid rgba(29,158,117,0.20)",
-            }}
-          >
-            <span
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: "50%",
-                backgroundColor: "#1d9e75",
-                display: "inline-block",
-              }}
-            />
-            <span style={{ fontSize: 13, fontWeight: 500, color: "#1d9e75" }}>Selected</span>
+          <div className="vd-theme-selected">
+            <span className="vd-theme-dot" />
+            <span className="vd-theme-label">Selected</span>
           </div>
         </div>
-        <p className="text-xs mt-4" style={{ color: "#5a7268" }}>
-          More appearance options coming soon.
-        </p>
+        <p className="text-xs mt-4 vd-text-tertiary">More appearance options coming soon.</p>
       </Section>
 
       {/* Danger zone */}
-      <div
-        className="rounded-xl p-6"
-        style={{ backgroundColor: "#111916", border: "1px solid rgba(220,38,38,0.25)" }}
-      >
+      <div className="vd-danger-section">
         <div className="mb-4">
-          <h2 className="text-sm font-semibold" style={{ color: "#dc2626" }}>
-            Danger zone
-          </h2>
-          <p className="text-xs mt-1" style={{ color: "#5a7268" }}>
-            Permanent actions — these cannot be undone.
-          </p>
+          <h2 className="text-sm font-semibold vd-danger-title">Danger zone</h2>
+          <p className="vd-section-desc text-xs mt-1">Permanent actions — these cannot be undone.</p>
         </div>
 
         {deletePhase === "idle" ? (
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-medium" style={{ color: "#f0f4f3" }}>Delete account</p>
-              <p className="text-xs mt-1" style={{ color: "#5a7268" }}>
+              <p className="text-sm font-medium vd-text-primary">Delete account</p>
+              <p className="text-xs mt-1 vd-text-tertiary">
                 Permanently remove your account and all associated data.
               </p>
             </div>
             <button
               onClick={() => setDeletePhase("confirm")}
-              className="shrink-0 text-[13px] font-medium hover:opacity-90"
-              style={{
-                color: "#dc2626",
-                border: "1px solid rgba(220,38,38,0.35)",
-                backgroundColor: "rgba(220,38,38,0.08)",
-                height: 36,
-                padding: "0 16px",
-                borderRadius: 8,
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.backgroundColor = "rgba(220,38,38,0.16)";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.backgroundColor = "rgba(220,38,38,0.08)";
-              }}
+              className="vd-btn vd-btn-danger shrink-0 vd-btn-delete-outline"
             >
               Delete account
             </button>
           </div>
         ) : (
-          <div
-            className="rounded-lg p-4 space-y-3"
-            style={{
-              backgroundColor: "rgba(220,38,38,0.08)",
-              border: "1px solid rgba(220,38,38,0.20)",
-            }}
-          >
-            <p className="text-sm font-medium" style={{ color: "#dc2626" }}>
-              Are you sure? This is permanent.
-            </p>
-            <p className="text-xs" style={{ color: "#5a7268" }}>
+          <div className="vd-danger-confirm rounded-lg p-4 space-y-3">
+            <p className="text-sm font-medium vd-danger-title">Are you sure? This is permanent.</p>
+            <p className="text-xs vd-text-tertiary">
               Your account, API keys, and all data will be deleted immediately. There is no recovery.
             </p>
 
             {deleteError && (
-              <p
-                className="text-xs px-3 py-2 rounded-lg"
-                style={{
-                  color: "#dc2626",
-                  backgroundColor: "rgba(220,38,38,0.12)",
-                  border: "1px solid rgba(220,38,38,0.20)",
-                  transition: "opacity 150ms",
-                  opacity: 1,
-                }}
-              >
-                {deleteError}
-              </p>
+              <p className="vd-inline-error text-xs px-3 py-2 rounded-lg">{deleteError}</p>
             )}
 
             <div className="flex gap-3">
               <button
                 onClick={handleDeleteConfirm}
                 disabled={isPending}
-                className="text-[13px] font-medium disabled:opacity-60 hover:opacity-90"
-                style={{
-                  backgroundColor: "#dc2626",
-                  color: "#f0f4f3",
-                  height: 36,
-                  padding: "0 16px",
-                  borderRadius: 8,
-                }}
+                className="vd-btn vd-btn-delete disabled:opacity-60"
               >
                 {isPending ? "Deleting…" : "Yes, delete my account"}
               </button>
@@ -488,15 +264,7 @@ export default function SettingsClient({ email }: { email: string }) {
                   setDeleteError(null);
                 }}
                 disabled={isPending}
-                className="text-[13px] font-medium disabled:opacity-60 hover:opacity-80"
-                style={{
-                  color: "#a3b3ae",
-                  border: "1px solid rgba(255,255,255,0.10)",
-                  backgroundColor: "transparent",
-                  height: 36,
-                  padding: "0 16px",
-                  borderRadius: 8,
-                }}
+                className="vd-btn vd-btn-secondary disabled:opacity-60"
               >
                 Cancel
               </button>

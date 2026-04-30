@@ -67,27 +67,14 @@ interface ProfileMenuProps {
 
 function ProfileMenu({ userEmail, onClose, onSignOut }: ProfileMenuProps) {
   return (
-    <div
-      style={{
-        position: "absolute",
-        bottom: "calc(100% + 8px)",
-        left: "12px",
-        width: "220px",
-        backgroundColor: "#111916",
-        border: "1px solid rgba(29,158,117,0.30)",
-        borderRadius: "12px",
-        boxShadow: "0 -4px 20px rgba(0,0,0,0.4)",
-        zIndex: 60,
-        overflow: "hidden",
-      }}
-    >
+    <div className="vd-profile-menu">
       <div className="px-4 py-3">
-        <p className="text-xs truncate" style={{ color: "#5a7268" }} title={userEmail}>
+        <p className="text-xs truncate vd-profile-email" title={userEmail}>
           {userEmail}
         </p>
       </div>
 
-      <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }} />
+      <div className="vd-divider" />
 
       <div className="py-1.5">
         <MenuLink href="/dashboard/settings" label="Settings" onClick={onClose}
@@ -120,7 +107,7 @@ function ProfileMenu({ userEmail, onClose, onSignOut }: ProfileMenuProps) {
         />
       </div>
 
-      <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }} />
+      <div className="vd-divider" />
 
       <div className="py-1.5">
         <MenuButton
@@ -165,16 +152,7 @@ function MenuLink({
       href={href}
       {...linkProps}
       onClick={onClick}
-      className="flex items-center gap-3 mx-1.5 px-2.5 py-2 rounded-lg text-sm"
-      style={{ color: "#a3b3ae", transition: "background var(--transition-fast), color var(--transition-fast)" }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLAnchorElement).style.color = "#f0f4f3";
-        (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "rgba(255,255,255,0.06)";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLAnchorElement).style.color = "#a3b3ae";
-        (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "";
-      }}
+      className="vd-menu-link flex items-center gap-3 mx-1.5 px-2.5 py-2 rounded-lg text-sm"
     >
       {icon}
       {label}
@@ -196,22 +174,7 @@ function MenuButton({
   return (
     <button
       onClick={onClick}
-      className="flex items-center gap-3 mx-1.5 px-2.5 py-2 rounded-lg text-sm"
-      style={{
-        color: "#a3b3ae",
-        width: "calc(100% - 12px)",
-        transition: "background var(--transition-fast), color var(--transition-fast)",
-      }}
-      onMouseEnter={(e) => {
-        const el = e.currentTarget as HTMLButtonElement;
-        el.style.color = danger ? "#dc2626" : "#f0f4f3";
-        el.style.backgroundColor = danger ? "rgba(153,27,27,0.15)" : "rgba(255,255,255,0.06)";
-      }}
-      onMouseLeave={(e) => {
-        const el = e.currentTarget as HTMLButtonElement;
-        el.style.color = "#a3b3ae";
-        el.style.backgroundColor = "";
-      }}
+      className={`vd-menu-btn${danger ? " vd-menu-btn-danger" : ""} flex items-center gap-3 mx-1.5 px-2.5 py-2 rounded-lg text-sm`}
     >
       {icon}
       {label}
@@ -251,42 +214,16 @@ function NavItem({
         <Link
           href={href}
           onClick={onClick}
-          className={`vd-nav-item${active ? " vd-nav-item-active" : ""}`}
-          style={{
-            justifyContent: isCollapsed ? "center" : "flex-start",
-            gap: isCollapsed ? 0 : 10,
-            padding: isCollapsed
-              ? "0"
-              : active
-              ? "0 8px 0 6px"
-              : "0 8px",
-          }}
+          className={`vd-nav-item${active ? " vd-nav-item-active" : ""}${isCollapsed ? " vd-nav-item-collapsed" : ""}`}
         >
           {icon}
           {!isCollapsed && label}
         </Link>
       </div>
 
-      {/* Fixed-position tooltip — bypasses sidebar overflow clipping */}
+      {/* Fixed-position tooltip — bypasses sidebar overflow clipping; top is JS-calculated */}
       {tooltipTop !== null && (
-        <div
-          style={{
-            position: "fixed",
-            left: COLLAPSED_WIDTH + 8,
-            top: tooltipTop,
-            transform: "translateY(-50%)",
-            backgroundColor: "#111916",
-            border: "1px solid rgba(255,255,255,0.08)",
-            borderRadius: 6,
-            padding: "4px 8px",
-            fontSize: 12,
-            fontWeight: 500,
-            color: "#f0f4f3",
-            whiteSpace: "nowrap",
-            pointerEvents: "none",
-            zIndex: 200,
-          }}
-        >
+        <div className="vd-nav-tooltip" style={{ top: tooltipTop }}>
           {label}
         </div>
       )}
@@ -302,7 +239,6 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
-  const [toggleHovered, setToggleHovered] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
   // Read persisted collapse state after hydration
@@ -313,7 +249,6 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
 
   // On mobile (mobileOpen=true) always show full sidebar
   const isCollapsed = collapsed && !mobileOpen;
-  const sidebarWidth = isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
 
   function toggleCollapsed() {
     const next = !collapsed;
@@ -346,8 +281,7 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
     <>
       {/* Mobile hamburger */}
       <button
-        className="md:hidden fixed top-3 left-3 z-50 w-10 h-10 flex items-center justify-center rounded-lg"
-        style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.08)" }}
+        className="vd-hamburger md:hidden fixed top-3 left-3 z-50 w-10 h-10 flex items-center justify-center rounded-lg"
         onClick={() => setMobileOpen(true)}
         aria-label="Open menu"
       >
@@ -366,28 +300,18 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
 
       {/* Sidebar panel */}
       <aside
-        className={`vd-sidebar flex flex-col shrink-0 h-screen fixed md:relative inset-y-0 left-0 z-50 md:z-auto overflow-y-auto ${
+        className={`vd-sidebar ${isCollapsed ? "vd-sidebar-collapsed" : "vd-sidebar-expanded"} flex flex-col shrink-0 h-screen fixed md:relative inset-y-0 left-0 z-50 md:z-auto overflow-y-auto ${
           mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
-        style={{
-          width: sidebarWidth,
-          transition: "width 200ms ease, transform 200ms ease-in-out",
-        }}
       >
         {/* ── Logo ──────────────────────────────────────────────────────── */}
-        <div
-          className="shrink-0 flex items-center gap-2 px-3 py-4"
-          style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
-        >
+        <div className="vd-sidebar-logo shrink-0 flex items-center gap-2 px-3 py-4">
           <Link
             href="/dashboard"
             className="flex items-center gap-3 min-w-0 flex-1"
             onClick={() => setMobileOpen(false)}
           >
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-              style={{ backgroundColor: "rgba(29,158,117,0.15)" }}
-            >
+            <div className="vd-logo-icon w-8 h-8 rounded-lg flex items-center justify-center shrink-0">
               <svg className="w-5 h-5" fill="none" stroke="#1d9e75" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
@@ -397,31 +321,17 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
                 />
               </svg>
             </div>
-            <div
-              style={{
-                opacity: isCollapsed ? 0 : 1,
-                transition: "opacity 100ms ease",
-                overflow: "hidden",
-                whiteSpace: "nowrap",
-              }}
-            >
-              <p className="text-sm font-semibold leading-tight" style={{ color: "#f0f4f3" }}>
-                Veridian
-              </p>
-              <p className="text-xs leading-tight" style={{ color: "#5a7268" }}>
-                Compliance
-              </p>
+            <div className={`vd-logo-text${isCollapsed ? " vd-logo-text-hidden" : ""}`}>
+              <p className="vd-logo-name text-sm font-semibold leading-tight">Veridian</p>
+              <p className="vd-logo-sub text-xs leading-tight">Compliance</p>
             </div>
           </Link>
 
           {/* Mobile: close button */}
           <button
-            className="md:hidden flex items-center justify-center w-7 h-7 rounded-md shrink-0"
-            style={{ color: "#a3b3ae" }}
+            className="vd-mobile-close md:hidden flex items-center justify-center w-7 h-7 rounded-md shrink-0"
             onClick={() => setMobileOpen(false)}
             aria-label="Close menu"
-            onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.backgroundColor = "rgba(255,255,255,0.06)")}
-            onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.backgroundColor = "")}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -456,16 +366,7 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
         </nav>
 
         {/* ── Profile footer ────────────────────────────────────────────── */}
-        <div
-          ref={profileRef}
-          className="shrink-0"
-          style={{
-            position: "relative",
-            borderTop: "1px solid rgba(255,255,255,0.06)",
-            backgroundColor: "#0a0f0e",
-            paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))",
-          }}
-        >
+        <div ref={profileRef} className="vd-profile-footer shrink-0">
           {/* Systems status — only shown when expanded */}
           {!isCollapsed && (
             <div className="px-4 pt-3 pb-1">
@@ -483,35 +384,23 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
 
           <button
             onClick={() => setProfileOpen((o) => !o)}
-            className="flex items-center gap-3 w-full text-left"
-            style={{
-              padding: isCollapsed ? "12px 0 4px" : "8px 16px 4px",
-              justifyContent: isCollapsed ? "center" : "flex-start",
-            }}
+            className={`flex items-center gap-3 w-full text-left ${isCollapsed ? "vd-profile-btn-collapsed" : "vd-profile-btn"}`}
             aria-expanded={profileOpen}
             aria-haspopup="true"
           >
             {/* Avatar */}
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-semibold"
-              style={{ backgroundColor: "#1d9e75", color: "#050a09" }}
-            >
+            <div className="vd-avatar w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-semibold">
               {initials}
             </div>
 
             {/* Email + chevron */}
             {!isCollapsed && (
               <>
-                <p className="text-xs truncate flex-1 text-left" style={{ color: "#5a7268" }}>
+                <p className="vd-profile-email text-xs truncate flex-1 text-left">
                   {userEmail}
                 </p>
                 <svg
-                  className="w-3.5 h-3.5 shrink-0"
-                  style={{
-                    color: "#5a7268",
-                    transform: profileOpen ? "rotate(180deg)" : "rotate(0deg)",
-                    transition: "transform 150ms ease",
-                  }}
+                  className={`w-3.5 h-3.5 shrink-0 vd-profile-chevron${profileOpen ? " vd-profile-chevron-open" : ""}`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -526,23 +415,9 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
 
       {/* Desktop collapse toggle — Linear-style floating circle */}
       <button
-        className="hidden md:flex items-center justify-center fixed z-20 rounded-full"
+        className={`vd-collapse-toggle ${isCollapsed ? "vd-collapse-toggle-collapsed" : "vd-collapse-toggle-expanded"} hidden md:flex items-center justify-center fixed z-20 rounded-full`}
         onClick={toggleCollapsed}
-        onMouseEnter={() => setToggleHovered(true)}
-        onMouseLeave={() => setToggleHovered(false)}
         aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        style={{
-          width: 24,
-          height: 24,
-          left: sidebarWidth - 12,
-          top: "50%",
-          transform: "translateY(-50%)",
-          backgroundColor: toggleHovered ? "#1a2b25" : "#111916",
-          border: "1px solid rgba(255,255,255,0.08)",
-          color: "#a3b3ae",
-          cursor: "pointer",
-          transition: "left 200ms ease, background-color 150ms ease",
-        }}
       >
         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path

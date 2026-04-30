@@ -100,23 +100,16 @@ function AccordionItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+    <div className="vd-accordion-item">
       <button
         onClick={() => setOpen((o) => !o)}
         className="flex items-center justify-between w-full px-5 py-4 text-left gap-4"
       >
-        <span
-          className="text-sm font-medium leading-snug"
-          style={{ color: open ? "#f0f4f3" : "#a3b3ae" }}
-        >
+        <span className={`text-sm font-medium leading-snug ${open ? "vd-accordion-q-open" : "vd-accordion-q"}`}>
           {q}
         </span>
         <svg
-          className="w-4 h-4 shrink-0 transition-transform duration-150"
-          style={{
-            color: "#1d9e75",
-            transform: open ? "rotate(180deg)" : "rotate(0deg)",
-          }}
+          className={`w-4 h-4 shrink-0 transition-transform duration-150 vd-accordion-chevron${open ? " vd-accordion-chevron-open" : ""}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -138,15 +131,11 @@ function AccordionItem({ q, a }: { q: string; a: string }) {
               line.startsWith("  ") ||
               line.startsWith("Authorization") ||
               line.startsWith("Content-Type") ? (
-              <p
-                key={i}
-                className="text-xs leading-relaxed"
-                style={{ fontFamily: "var(--font-mono)", color: "#1d9e75" }}
-              >
+              <p key={i} className="vd-accordion-code text-xs leading-relaxed">
                 {line}
               </p>
             ) : (
-              <p key={i} className="text-sm leading-relaxed" style={{ color: "#a3b3ae" }}>
+              <p key={i} className="vd-accordion-text text-sm leading-relaxed">
                 {line}
               </p>
             )
@@ -169,18 +158,10 @@ function Section({
   items: { q: string; a: string }[];
 }) {
   return (
-    <div
-      className="rounded-xl overflow-hidden"
-      style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.06)" }}
-    >
-      <div
-        className="flex items-center gap-2 px-5 py-4"
-        style={{ borderBottom: "1px solid rgba(255,255,255,0.08)", color: "#1d9e75" }}
-      >
+    <div className="vd-section-card">
+      <div className="vd-help-section-header flex items-center gap-2 px-5 py-4">
         {icon}
-        <h2 className="text-sm font-semibold" style={{ color: "#f0f4f3" }}>
-          {title}
-        </h2>
+        <h2 className="vd-section-title">{title}</h2>
       </div>
       {items.map((item) => (
         <AccordionItem key={item.q} q={item.q} a={item.a} />
@@ -224,39 +205,15 @@ function ContactForm() {
 
   if (status === "success") {
     return (
-      <div
-        className="rounded-xl p-6 flex flex-col items-center text-center"
-        style={{ backgroundColor: "#111916", border: "1px solid rgba(29,158,117,0.25)" }}
-      >
-        <div
-          className="w-10 h-10 rounded-full flex items-center justify-center mb-4"
-          style={{ backgroundColor: "rgba(29,158,117,0.12)" }}
-        >
+      <div className="vd-success-card flex flex-col items-center text-center">
+        <div className="vd-success-icon w-10 h-10 rounded-full flex items-center justify-center mb-4">
           <svg className="w-5 h-5" fill="none" stroke="#1d9e75" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <p className="text-base font-medium mb-1" style={{ color: "#f0f4f3" }}>
-          Message sent
-        </p>
-        <p className="text-sm mb-5" style={{ color: "#5a7268" }}>
-          We typically reply within a few hours.
-        </p>
-        <button
-          onClick={() => setStatus("idle")}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            padding: "0 16px",
-            height: 36,
-            borderRadius: 8,
-            fontSize: 13,
-            fontWeight: 500,
-            border: "1px solid rgba(255,255,255,0.10)",
-            color: "#a3b3ae",
-            backgroundColor: "transparent",
-          }}
-        >
+        <p className="text-base font-medium mb-1 vd-text-primary">Message sent</p>
+        <p className="text-sm mb-5 vd-text-tertiary">We typically reply within a few hours.</p>
+        <button onClick={() => setStatus("idle")} className="vd-btn vd-btn-secondary">
           Send another message
         </button>
       </div>
@@ -264,62 +221,28 @@ function ContactForm() {
   }
 
   return (
-    <div
-      className="rounded-xl overflow-hidden"
-      style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.06)" }}
-    >
+    <div className="vd-section-card">
       {/* Card header */}
-      <div
-        className="flex items-center gap-2 px-5 py-4"
-        style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}
-      >
+      <div className="vd-section-header flex items-center gap-2 px-5 py-4">
         <svg className="w-4 h-4 shrink-0" fill="none" stroke="#1d9e75" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
         </svg>
-        <h2 className="text-sm font-semibold" style={{ color: "#f0f4f3" }}>
-          Contact support
-        </h2>
-        <span className="text-xs ml-1" style={{ color: "#5a7268" }}>
-          — we usually reply within a few hours
-        </span>
+        <h2 className="vd-section-title">Contact support</h2>
+        <span className="text-xs ml-1 vd-text-tertiary">— we usually reply within a few hours</span>
       </div>
 
       <form onSubmit={handleSubmit} className="p-5 space-y-4">
         {/* Subject */}
         <div>
-          <label
-            htmlFor="support-subject"
-            style={{
-              display: "block",
-              fontSize: 12,
-              fontWeight: 500,
-              color: "#a3b3ae",
-              marginBottom: 6,
-              letterSpacing: "0.02em",
-            }}
-          >
-            Subject
-          </label>
+          <label htmlFor="support-subject" className="vd-field-label-sm">Subject</label>
           <select
             id="support-subject"
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
-            className="w-full text-sm rounded-lg focus:outline-none focus:ring-2 appearance-none"
-            style={{
-              backgroundColor: "#0d1211",
-              border: "1px solid rgba(255,255,255,0.08)",
-              color: "#f0f4f3",
-              height: 36,
-              padding: "0 12px",
-              borderRadius: 8,
-              fontFeatureSettings: '"cv01","ss03"',
-              "--tw-ring-color": "#1d9e75",
-            } as React.CSSProperties}
+            className="vd-select w-full appearance-none focus:ring-2"
           >
             {SUBJECTS.map((s) => (
-              <option key={s} value={s} style={{ backgroundColor: "#111916" }}>
-                {s}
-              </option>
+              <option key={s} value={s}>{s}</option>
             ))}
           </select>
         </div>
@@ -327,23 +250,10 @@ function ContactForm() {
         {/* Message */}
         <div>
           <div className="flex items-baseline justify-between mb-1.5">
-            <label
-              htmlFor="support-message"
-              style={{
-                fontSize: 12,
-                fontWeight: 500,
-                color: "#a3b3ae",
-                letterSpacing: "0.02em",
-              }}
-            >
+            <label htmlFor="support-message" className="vd-field-label-sm !mb-0">
               Message
             </label>
-            <span
-              style={{
-                fontSize: 11,
-                color: tooShort ? "#d97706" : charCount >= 100 ? "#16a34a" : "#5a7268",
-              }}
-            >
+            <span className={tooShort ? "vd-char-count-warn" : charCount >= 100 ? "vd-char-count-ok" : "vd-char-count-muted"}>
               {charCount}/100 min
             </span>
           </div>
@@ -353,20 +263,10 @@ function ContactForm() {
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Describe your issue or question in detail…"
             rows={5}
-            className="w-full text-sm rounded-lg focus:outline-none focus:ring-2 resize-none"
-            style={{
-              backgroundColor: "#0d1211",
-              border: `1px solid ${tooShort ? "rgba(217,119,6,0.40)" : "rgba(255,255,255,0.08)"}`,
-              color: "#f0f4f3",
-              padding: "10px 12px",
-              borderRadius: 8,
-              fontFeatureSettings: '"cv01","ss03"',
-              lineHeight: 1.5,
-              "--tw-ring-color": "#1d9e75",
-            } as React.CSSProperties}
+            className={`vd-textarea w-full focus:ring-2 resize-none${tooShort ? " vd-textarea-warn" : ""}`}
           />
           {tooShort && (
-            <p className="mt-1.5 text-xs" style={{ color: "#d97706" }}>
+            <p className="mt-1.5 text-xs vd-text-warning">
               Please write at least 100 characters so we can help you effectively.
             </p>
           )}
@@ -374,15 +274,8 @@ function ContactForm() {
 
         {/* Error banner */}
         {status === "error" && (
-          <div
-            className="rounded-lg px-4 py-3"
-            style={{
-              backgroundColor: "rgba(220,38,38,0.10)",
-              border: "1px solid rgba(220,38,38,0.25)",
-              borderLeft: "3px solid #dc2626",
-            }}
-          >
-            <p className="text-sm" style={{ color: "#dc2626" }}>{errorMsg}</p>
+          <div className="vd-alert vd-alert-danger">
+            <p className="text-sm vd-text-danger">{errorMsg}</p>
           </div>
         )}
 
@@ -391,14 +284,7 @@ function ContactForm() {
           <button
             type="submit"
             disabled={!canSubmit}
-            className="inline-flex items-center gap-2 text-[13px] font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 active:scale-[0.98] transition-all"
-            style={{
-              backgroundColor: "#1d9e75",
-              color: "#050a09",
-              height: 36,
-              padding: "0 16px",
-              borderRadius: 8,
-            }}
+            className="vd-btn vd-btn-primary disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {isPending ? (
               <>
@@ -446,8 +332,7 @@ export default function HelpPage() {
       {/* Search */}
       <div className="relative mb-8">
         <svg
-          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
-          style={{ color: "#5a7268" }}
+          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none vd-text-tertiary"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -459,22 +344,12 @@ export default function HelpPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search help articles…"
-          className="w-full pl-10 pr-10 text-sm rounded-lg focus:outline-none focus:ring-2"
-          style={{
-            backgroundColor: "#0d1211",
-            border: "1px solid rgba(255,255,255,0.08)",
-            color: "#f0f4f3",
-            height: 36,
-            borderRadius: 8,
-            fontFeatureSettings: '"cv01","ss03"',
-            "--tw-ring-color": "#1d9e75",
-          } as React.CSSProperties}
+          className="vd-input vd-input-search w-full pr-10 focus:ring-2"
         />
         {search && (
           <button
             onClick={() => setSearch("")}
-            className="absolute right-3 top-1/2 -translate-y-1/2 hover:opacity-80"
-            style={{ color: "#5a7268" }}
+            className="absolute right-3 top-1/2 -translate-y-1/2 hover:opacity-80 vd-text-tertiary"
             aria-label="Clear search"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -497,41 +372,19 @@ export default function HelpPage() {
           ))}
         </div>
       ) : (
-        <div
-          className="rounded-xl px-6 py-16 flex flex-col items-center text-center"
-          style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.06)" }}
-        >
-          <div
-            className="w-8 h-8 rounded-full flex items-center justify-center mb-4"
-            style={{ backgroundColor: "rgba(255,255,255,0.04)" }}
-          >
+        <div className="vd-help-no-results rounded-xl px-6 py-16 flex flex-col items-center text-center">
+          <div className="vd-no-results-icon w-8 h-8 rounded-full flex items-center justify-center mb-4">
             <svg className="w-4 h-4" fill="none" stroke="#5a7268" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
-          <p className="text-base font-medium mb-1" style={{ color: "#a3b3ae" }}>
-            No results found
-          </p>
-          <p className="text-sm mb-4" style={{ color: "#5a7268" }}>
+          <p className="text-base font-medium mb-1 vd-text-secondary">No results found</p>
+          <p className="text-sm mb-4 vd-text-tertiary">
             No articles match{" "}
-            <span style={{ color: "#f0f4f3" }}>&ldquo;{search}&rdquo;</span>
+            <span className="vd-text-primary">&ldquo;{search}&rdquo;</span>
             . Try a different search term.
           </p>
-          <button
-            onClick={() => setSearch("")}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              padding: "0 16px",
-              height: 36,
-              borderRadius: 8,
-              fontSize: 13,
-              fontWeight: 500,
-              border: "1px solid rgba(255,255,255,0.10)",
-              color: "#a3b3ae",
-              backgroundColor: "transparent",
-            }}
-          >
+          <button onClick={() => setSearch("")} className="vd-btn vd-btn-secondary">
             Clear search
           </button>
         </div>

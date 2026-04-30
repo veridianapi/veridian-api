@@ -138,7 +138,7 @@ export default function ApiKeysPage() {
       {/* Error banner */}
       {error && (
         <div className="vd-alert vd-alert-danger">
-          <p className="text-sm font-medium" style={{ color: "#dc2626" }}>{error}</p>
+          <p className="text-sm font-medium vd-text-danger">{error}</p>
         </div>
       )}
 
@@ -146,33 +146,22 @@ export default function ApiKeysPage() {
       {createdKey && (
         <div className="vd-alert vd-alert-success mb-5">
           <div className="flex items-start gap-3">
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5"
-              style={{ backgroundColor: "rgba(29,158,117,0.20)" }}
-            >
+            <div className="vd-icon-brand-sm w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5">
               <svg className="w-4 h-4" fill="none" stroke="#1d9e75" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold mb-2" style={{ color: "#1d9e75" }}>
+              <p className="text-sm font-semibold mb-2 vd-text-brand">
                 Key created — copy it now, it won&apos;t be shown again
               </p>
               <div className="flex items-center gap-2">
-                <code
-                  className="flex-1 text-xs px-3 py-2 rounded-lg break-all min-w-0"
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    backgroundColor: "rgba(29,158,117,0.10)",
-                    color: "#a3b3ae",
-                  }}
-                >
+                <code className="vd-key-code flex-1 text-xs px-3 py-2 rounded-lg break-all min-w-0">
                   {createdKey}
                 </code>
                 <button
                   onClick={() => copyToClipboard(createdKey)}
-                  className="vd-btn vd-btn-secondary vd-btn-sm shrink-0"
-                  style={{ borderColor: "rgba(29,158,117,0.30)", color: "#1d9e75" }}
+                  className="vd-btn vd-btn-secondary vd-btn-sm shrink-0 vd-key-copy-btn"
                 >
                   <CopyIcon />
                   {copied ? "Copied" : "Copy"}
@@ -218,7 +207,7 @@ export default function ApiKeysPage() {
       <div className="vd-card-bare">
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <div className="flex items-center gap-2 text-sm" style={{ color: "#a3b3ae" }}>
+            <div className="flex items-center gap-2 text-sm vd-loading-text">
               <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
@@ -226,8 +215,7 @@ export default function ApiKeysPage() {
               Loading keys…
             </div>
           </div>
-        ) : keys.length === 0 ? (
-          <EmptyState
+        ) : keys.length === 0 ? (          <EmptyState
             icon={
               <svg className="w-5 h-5" fill="none" stroke="#5a7268" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
@@ -238,20 +226,14 @@ export default function ApiKeysPage() {
             action={<PrimaryButton onClick={() => setShowForm(true)}>Create API key</PrimaryButton>}
           />
         ) : (
-          <div>
-            {keys.map((k, i) => (
+          <div className="vd-key-list">
+            {keys.map((k) => (
               <div
                 key={k.id}
                 className="px-6 py-5 flex items-center gap-4"
-                style={{
-                  borderBottom: i < keys.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
-                }}
               >
                 {/* Key icon */}
-                <div
-                  className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: "rgba(29,158,117,0.10)" }}
-                >
+                <div className="vd-icon-brand-xs w-9 h-9 rounded-lg flex items-center justify-center shrink-0">
                   <svg className="w-4 h-4" fill="none" stroke="#1d9e75" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                   </svg>
@@ -260,17 +242,12 @@ export default function ApiKeysPage() {
                 {/* Key details */}
                 <div className="flex-1 min-w-0">
                   <p className="vd-table-primary text-sm">{k.name}</p>
-                  <p
-                    className="mt-0.5"
-                    style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#5a7268" }}
-                  >
-                    vrd_live_••••••••
-                  </p>
+                  <p className="vd-key-mono mt-0.5">vrd_live_••••••••</p>
                 </div>
 
                 {/* Created date */}
                 <div className="hidden sm:flex flex-col items-end text-right shrink-0">
-                  <p style={{ fontSize: 13, color: "#a3b3ae" }}>
+                  <p className="vd-key-date">
                     Created {new Date(k.created_at).toLocaleDateString()}
                   </p>
                 </div>
@@ -279,7 +256,7 @@ export default function ApiKeysPage() {
                 <div className="flex items-center gap-2 shrink-0">
                   {revokeConfirm === k.id ? (
                     <>
-                      <span className="text-xs hidden sm:inline" style={{ color: "#a3b3ae" }}>
+                      <span className="text-xs hidden sm:inline vd-text-secondary">
                         Revoke this key?
                       </span>
                       <button
@@ -298,8 +275,7 @@ export default function ApiKeysPage() {
                   ) : (
                     <button
                       onClick={() => setRevokeConfirm(k.id)}
-                      className="vd-btn vd-btn-ghost vd-btn-sm"
-                      style={{ color: "#dc2626" }}
+                      className="vd-btn vd-btn-ghost vd-btn-sm vd-revoke-btn"
                     >
                       Revoke
                     </button>

@@ -15,19 +15,16 @@ const FILTER_TABS = [
 
 function RiskBar({ score }: { score: number | null }) {
   if (score === null) {
-    return <span className="vd-risk vd-risk-null" style={{ fontSize: 14 }}>—</span>;
+    return <span className="vd-risk vd-risk-null">—</span>;
   }
   const level = score >= 70 ? "high" : score >= 30 ? "medium" : "low";
   return (
     <div className="flex items-center gap-2">
       <span className={`vd-risk vd-risk-${level}`}>{score}</span>
-      <div className="vd-progress-track" style={{ width: 64 }}>
+      <div className="vd-progress-track vd-risk-bar-track">
         <div
-          className="vd-progress-fill"
-          style={{
-            width: `${score}%`,
-            backgroundColor: level === "high" ? "#dc2626" : level === "medium" ? "#d97706" : "#16a34a",
-          }}
+          className={`vd-progress-fill vd-progress-fill-${level}`}
+          style={{ width: `${score}%` }}
         />
       </div>
     </div>
@@ -191,7 +188,7 @@ export default async function VerificationsPage({
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="vd-table" style={{ minWidth: 600 }}>
+              <table className="vd-table">
                 <thead>
                   <tr>
                     <th>ID</th>
@@ -214,10 +211,10 @@ export default async function VerificationsPage({
                       </td>
                       <td><StatusBadge status={v.status} /></td>
                       <td><RiskBar score={v.risk_score} /></td>
-                      <td style={{ textTransform: "capitalize", fontSize: 13 }}>
+                      <td className="vd-td-cap">
                         {v.document_type.replace(/_/g, " ")}
                       </td>
-                      <td style={{ fontSize: 13 }}>
+                      <td className="vd-td-sm">
                         {new Date(v.created_at).toLocaleDateString()}
                       </td>
                     </tr>
@@ -238,9 +235,9 @@ export default async function VerificationsPage({
 
                 <span className="vd-pagination-info">
                   Page{" "}
-                  <span style={{ fontWeight: 500, color: "#f0f4f3" }}>{page}</span>
+                  <span className="vd-pag-num">{page}</span>
                   {" "}of{" "}
-                  <span style={{ fontWeight: 500, color: "#f0f4f3" }}>{totalPages}</span>
+                  <span className="vd-pag-num">{totalPages}</span>
                 </span>
 
                 <Link

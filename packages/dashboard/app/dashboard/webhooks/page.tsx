@@ -29,42 +29,12 @@ interface WebhookDelivery {
 // ── Sub-components ────────────────────────────────────────────────────────────
 
 function EventBadge({ event }: { event: string }) {
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        padding: "2px 6px",
-        borderRadius: 4,
-        fontSize: 10,
-        fontWeight: 500,
-        backgroundColor: "rgba(29,158,117,0.10)",
-        color: "#1d9e75",
-        fontFamily: "var(--font-mono)",
-        letterSpacing: "0.02em",
-        whiteSpace: "nowrap",
-      }}
-    >
-      {event}
-    </span>
-  );
+  return <span className="vd-event-badge">{event}</span>;
 }
 
 function DeliveryStatus({ success, statusCode }: { success: boolean; statusCode: number | null }) {
   return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        padding: "3px 8px",
-        borderRadius: 4,
-        fontSize: 11,
-        fontWeight: 500,
-        fontFamily: "var(--font-mono)",
-        backgroundColor: success ? "rgba(22,163,74,0.12)" : "rgba(220,38,38,0.12)",
-        color: success ? "#16a34a" : "#dc2626",
-      }}
-    >
+    <span className={success ? "vd-delivery-success" : "vd-delivery-fail"}>
       {statusCode ?? (success ? "200" : "failed")}
     </span>
   );
@@ -76,30 +46,9 @@ function Toggle({ enabled, onChange }: { enabled: boolean; onChange: (v: boolean
       onClick={() => onChange(!enabled)}
       aria-checked={enabled}
       role="switch"
-      style={{
-        position: "relative",
-        width: 36,
-        height: 20,
-        borderRadius: 9999,
-        backgroundColor: enabled ? "rgba(29,158,117,0.20)" : "rgba(255,255,255,0.06)",
-        border: `1px solid ${enabled ? "rgba(29,158,117,0.40)" : "rgba(255,255,255,0.12)"}`,
-        cursor: "pointer",
-        flexShrink: 0,
-        transition: "background-color var(--transition-fast), border-color var(--transition-fast)",
-      }}
+      className={`vd-toggle ${enabled ? "vd-toggle-on" : "vd-toggle-off"}`}
     >
-      <span
-        style={{
-          position: "absolute",
-          top: 2,
-          left: enabled ? 16 : 2,
-          width: 14,
-          height: 14,
-          borderRadius: 9999,
-          backgroundColor: enabled ? "#1d9e75" : "#5a7268",
-          transition: "left var(--transition-fast), background-color var(--transition-fast)",
-        }}
-      />
+      <span className={`vd-toggle-knob ${enabled ? "vd-toggle-knob-on" : "vd-toggle-knob-off"}`} />
     </button>
   );
 }
@@ -258,36 +207,16 @@ export default function WebhooksPage() {
 
       {/* Load error */}
       {loadError && (
-        <div
-          className="mb-6 rounded-xl px-5 py-4"
-          style={{
-            backgroundColor: "rgba(220,38,38,0.10)",
-            border: "1px solid rgba(220,38,38,0.25)",
-            borderLeft: "3px solid #dc2626",
-          }}
-        >
-          <p className="text-sm font-medium" style={{ color: "#dc2626" }}>
-            {loadError}
-          </p>
+        <div className="vd-alert vd-alert-danger mb-6">
+          <p className="text-sm font-medium vd-text-danger">{loadError}</p>
         </div>
       )}
 
-      {/* ── Section 1: Create endpoint ──────────────────────────────────────── */}
-
-      {/* Secret shown once — displayed between form and endpoints list */}
+      {/* ── Secret shown once ───────────────────────────────────────────────── */}
       {newSecret && (
-        <div
-          className="mb-5 rounded-xl p-5"
-          style={{
-            backgroundColor: "rgba(217,119,6,0.08)",
-            border: "1px solid rgba(217,119,6,0.30)",
-          }}
-        >
+        <div className="vd-secret-banner mb-5">
           <div className="flex items-start gap-3">
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-              style={{ backgroundColor: "rgba(217,119,6,0.15)" }}
-            >
+            <div className="vd-icon-warning-sm w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
               <svg className="w-4 h-4" fill="none" stroke="#d97706" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
@@ -298,58 +227,26 @@ export default function WebhooksPage() {
               </svg>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold mb-3" style={{ color: "#d97706" }}>
+              <p className="text-sm font-semibold mb-3 vd-text-warning">
                 Save this secret now — it won&apos;t be shown again
               </p>
               <div className="flex items-center gap-2 flex-wrap">
-                <code
-                  className="flex-1 text-xs px-3 py-2 rounded-lg break-all min-w-0"
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    backgroundColor: "rgba(0,0,0,0.3)",
-                    color: "#a8ff78",
-                    border: "1px solid rgba(255,255,255,0.06)",
-                  }}
-                >
+                <code className="vd-secret-code flex-1 break-all min-w-0">
                   {newSecret.secret}
                 </code>
-                <button
-                  onClick={copySecret}
-                  className="shrink-0 inline-flex items-center gap-1.5 text-xs font-medium hover:opacity-80"
-                  style={{
-                    border: "1px solid rgba(217,119,6,0.40)",
-                    color: "#d97706",
-                    height: 36,
-                    padding: "0 12px",
-                    borderRadius: 8,
-                    backgroundColor: "transparent",
-                  }}
-                >
+                <button onClick={copySecret} className="vd-btn-warning-sm shrink-0">
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                   </svg>
                   {secretCopied ? "Copied" : "Copy"}
                 </button>
-                <button
-                  onClick={() => setNewSecret(null)}
-                  className="shrink-0 text-xs font-medium hover:opacity-80"
-                  style={{
-                    border: "1px solid rgba(255,255,255,0.10)",
-                    color: "#a3b3ae",
-                    height: 36,
-                    padding: "0 12px",
-                    borderRadius: 8,
-                    backgroundColor: "transparent",
-                  }}
-                >
+                <button onClick={() => setNewSecret(null)} className="vd-btn-ghost-sm shrink-0">
                   Dismiss
                 </button>
               </div>
-              <p className="mt-2 text-xs" style={{ color: "#a3b3ae" }}>
+              <p className="mt-2 text-xs vd-text-secondary">
                 Use this secret to verify{" "}
-                <span style={{ fontFamily: "var(--font-mono)", color: "#f0f4f3" }}>
-                  X-Veridian-Signature
-                </span>{" "}
+                <span className="vd-mono-brand">X-Veridian-Signature</span>{" "}
                 on incoming requests.
               </p>
             </div>
@@ -357,28 +254,15 @@ export default function WebhooksPage() {
         </div>
       )}
 
-      <div
-        className="rounded-xl p-6 mb-5"
-        style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.06)" }}
-      >
-        <h2 className="text-sm font-semibold mb-5" style={{ color: "#f0f4f3" }}>
-          Add endpoint
-        </h2>
+      {/* ── Section 1: Create endpoint ──────────────────────────────────────── */}
+
+      <div className="vd-section-card-p mb-5">
+        <h2 className="vd-section-title mb-5">Add endpoint</h2>
 
         <form onSubmit={handleCreate}>
           {/* URL input */}
           <div className="mb-4">
-            <label
-              htmlFor="webhook-url"
-              style={{
-                display: "block",
-                fontSize: 12,
-                fontWeight: 500,
-                color: "#a3b3ae",
-                marginBottom: 6,
-                letterSpacing: "0.02em",
-              }}
-            >
+            <label htmlFor="webhook-url" className="vd-field-label-sm">
               Endpoint URL
             </label>
             <input
@@ -388,61 +272,23 @@ export default function WebhooksPage() {
               onChange={(e) => setEndpointUrl(e.target.value)}
               placeholder="https://yourapp.com/webhooks/veridian"
               required
-              className="w-full focus:outline-none focus:ring-2"
-              style={{
-                backgroundColor: "#0d1211",
-                border: "1px solid rgba(255,255,255,0.08)",
-                color: "#f0f4f3",
-                height: 36,
-                padding: "0 12px",
-                borderRadius: 8,
-                fontSize: 14,
-                fontFeatureSettings: '"cv01","ss03"',
-                "--tw-ring-color": "#1d9e75",
-              } as React.CSSProperties}
+              className="vd-input w-full"
             />
           </div>
 
           {/* Events */}
           <div className="mb-5">
-            <p
-              style={{
-                fontSize: 12,
-                fontWeight: 500,
-                color: "#a3b3ae",
-                marginBottom: 10,
-                letterSpacing: "0.02em",
-              }}
-            >
-              Events
-            </p>
+            <p className="vd-field-label-sm">Events</p>
             <div className="flex flex-col gap-2">
               {AVAILABLE_EVENTS.map((event) => (
-                <label
-                  key={event}
-                  className="flex items-center gap-2 cursor-pointer"
-                  style={{ width: "fit-content" }}
-                >
+                <label key={event} className="flex items-center gap-2 cursor-pointer w-fit">
                   <input
                     type="checkbox"
                     checked={selectedEvents.includes(event)}
                     onChange={() => toggleEvent(event)}
-                    style={{
-                      accentColor: "#1d9e75",
-                      width: 14,
-                      height: 14,
-                      cursor: "pointer",
-                    }}
+                    className="vd-checkbox"
                   />
-                  <span
-                    style={{
-                      fontSize: 13,
-                      color: "#a3b3ae",
-                      fontFamily: "var(--font-mono)",
-                    }}
-                  >
-                    {event}
-                  </span>
+                  <span className="vd-event-text">{event}</span>
                 </label>
               ))}
             </div>
@@ -450,30 +296,15 @@ export default function WebhooksPage() {
 
           {/* Error */}
           {createError && (
-            <div
-              className="mb-4 rounded-lg px-4 py-3"
-              style={{
-                backgroundColor: "rgba(220,38,38,0.10)",
-                border: "1px solid rgba(220,38,38,0.25)",
-                borderLeft: "3px solid #dc2626",
-              }}
-            >
-              <p className="text-sm" style={{ color: "#dc2626" }}>{createError}</p>
+            <div className="vd-alert vd-alert-danger mb-4">
+              <p className="text-sm vd-text-danger">{createError}</p>
             </div>
           )}
 
           <button
             type="submit"
             disabled={creating || !endpointUrl.trim() || selectedEvents.length === 0}
-            className="inline-flex items-center gap-2 text-[13px] font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 active:scale-[0.98]"
-            style={{
-              backgroundColor: "#1d9e75",
-              color: "#050a09",
-              height: 36,
-              padding: "0 16px",
-              borderRadius: 8,
-              transition: "150ms ease",
-            }}
+            className="vd-btn vd-btn-primary"
           >
             {creating ? (
               <>
@@ -497,22 +328,14 @@ export default function WebhooksPage() {
 
       {/* ── Section 2: Endpoints list ────────────────────────────────────────── */}
 
-      <div
-        className="rounded-xl overflow-hidden mb-5"
-        style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.06)" }}
-      >
-        <div
-          className="px-6 py-4"
-          style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
-        >
-          <h2 className="text-sm font-semibold" style={{ color: "#f0f4f3" }}>
-            Endpoints
-          </h2>
+      <div className="vd-section-card mb-5">
+        <div className="vd-section-header px-6 py-4">
+          <h2 className="vd-section-title">Endpoints</h2>
         </div>
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="flex items-center gap-2 text-sm" style={{ color: "#a3b3ae" }}>
+            <div className="flex items-center gap-2 text-sm vd-loading-text">
               <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
@@ -532,28 +355,11 @@ export default function WebhooksPage() {
           />
         ) : (
           <div>
-            {endpoints.map((ep, idx) => (
-              <div
-                key={ep.id}
-                className="px-6 py-4 flex items-center gap-4"
-                style={{
-                  borderBottom:
-                    idx < endpoints.length - 1
-                      ? "1px solid rgba(255,255,255,0.04)"
-                      : "none",
-                }}
-              >
+            {endpoints.map((ep) => (
+              <div key={ep.id} className="vd-webhook-row px-6 py-4 flex items-center gap-4">
                 {/* URL + events */}
                 <div className="flex-1 min-w-0">
-                  <p
-                    className="truncate mb-1.5"
-                    style={{
-                      fontSize: 13,
-                      fontWeight: 500,
-                      color: "#f0f4f3",
-                    }}
-                    title={ep.url}
-                  >
+                  <p className="vd-endpoint-url truncate mb-1.5" title={ep.url}>
                     {ep.url}
                   </p>
                   <div className="flex flex-wrap gap-1">
@@ -565,48 +371,27 @@ export default function WebhooksPage() {
 
                 {/* Toggle */}
                 <div className="flex items-center gap-3 shrink-0">
-                  <span style={{ fontSize: 12, color: "#5a7268" }}>
-                    {ep.enabled ? "Enabled" : "Disabled"}
-                  </span>
-                  <Toggle
-                    enabled={ep.enabled}
-                    onChange={(v) => handleToggle(ep.id, v)}
-                  />
+                  <span className="vd-toggle-label">{ep.enabled ? "Enabled" : "Disabled"}</span>
+                  <Toggle enabled={ep.enabled} onChange={(v) => handleToggle(ep.id, v)} />
                 </div>
 
                 {/* Delete */}
                 <div className="shrink-0">
                   {deleteConfirm === ep.id ? (
                     <div className="flex items-center gap-2">
-                      <span className="text-xs hidden sm:inline" style={{ color: "#a3b3ae" }}>
+                      <span className="text-xs hidden sm:inline vd-text-secondary">
                         Delete this endpoint?
                       </span>
                       <button
                         onClick={() => handleDelete(ep.id)}
                         disabled={deleting}
-                        className="text-xs font-medium disabled:opacity-40"
-                        style={{
-                          backgroundColor: "rgba(220,38,38,0.12)",
-                          border: "1px solid rgba(220,38,38,0.25)",
-                          color: "#dc2626",
-                          height: 32,
-                          padding: "0 12px",
-                          borderRadius: 8,
-                        }}
+                        className="vd-btn vd-btn-danger vd-btn-sm"
                       >
                         Confirm
                       </button>
                       <button
                         onClick={() => setDeleteConfirm(null)}
-                        className="text-xs font-medium hover:opacity-80"
-                        style={{
-                          border: "1px solid rgba(255,255,255,0.10)",
-                          color: "#a3b3ae",
-                          height: 32,
-                          padding: "0 12px",
-                          borderRadius: 8,
-                          backgroundColor: "transparent",
-                        }}
+                        className="vd-btn vd-btn-secondary vd-btn-sm"
                       >
                         Cancel
                       </button>
@@ -614,8 +399,7 @@ export default function WebhooksPage() {
                   ) : (
                     <button
                       onClick={() => setDeleteConfirm(ep.id)}
-                      className="text-xs font-medium hover:opacity-80"
-                      style={{ color: "#dc2626" }}
+                      className="vd-btn vd-btn-ghost vd-btn-sm vd-delete-btn"
                     >
                       Delete
                     </button>
@@ -629,22 +413,14 @@ export default function WebhooksPage() {
 
       {/* ── Section 3: Recent deliveries ─────────────────────────────────────── */}
 
-      <div
-        className="rounded-xl overflow-hidden"
-        style={{ backgroundColor: "#111916", border: "1px solid rgba(255,255,255,0.06)" }}
-      >
-        <div
-          className="px-6 py-4"
-          style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
-        >
-          <h2 className="text-sm font-semibold" style={{ color: "#f0f4f3" }}>
-            Recent deliveries
-          </h2>
+      <div className="vd-section-card">
+        <div className="vd-section-header px-6 py-4">
+          <h2 className="vd-section-title">Recent deliveries</h2>
         </div>
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="flex items-center gap-2 text-sm" style={{ color: "#a3b3ae" }}>
+            <div className="flex items-center gap-2 text-sm vd-loading-text">
               <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
@@ -664,78 +440,35 @@ export default function WebhooksPage() {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table
-              className="w-full min-w-[640px]"
-              style={{ borderCollapse: "collapse", fontSize: 14 }}
-            >
+            <table className="vd-deliveries-table">
               <thead>
                 <tr>
                   {["Event", "Status", "Endpoint", "Time"].map((col) => (
-                    <th
-                      key={col}
-                      className="text-left"
-                      style={{
-                        padding: "12px 16px",
-                        fontSize: 11,
-                        fontWeight: 500,
-                        color: "#5a7268",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.08em",
-                        borderBottom: "1px solid rgba(255,255,255,0.08)",
-                      }}
-                    >
-                      {col}
-                    </th>
+                    <th key={col}>{col}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {deliveries.map((d, idx) => {
+                {deliveries.map((d) => {
                   const endpoint = endpointById[d.endpoint_id];
                   return (
-                    <tr
-                      key={d.id}
-                      className="hover:bg-[rgba(255,255,255,0.02)] transition-colors duration-[120ms]"
-                      style={{
-                        borderBottom:
-                          idx < deliveries.length - 1
-                            ? "1px solid rgba(255,255,255,0.04)"
-                            : "none",
-                      }}
-                    >
-                      <td style={{ padding: "16px 16px" }}>
-                        <span
-                          style={{
-                            fontSize: 12,
-                            fontFamily: "var(--font-mono)",
-                            color: "#a3b3ae",
-                          }}
-                        >
-                          {d.event}
-                        </span>
+                    <tr key={d.id} className="vd-delivery-row hover:bg-[rgba(255,255,255,0.02)] transition-colors duration-[120ms]">
+                      <td>
+                        <span className="vd-delivery-event">{d.event}</span>
                       </td>
-                      <td style={{ padding: "16px 16px" }}>
+                      <td>
                         <DeliveryStatus success={d.success} statusCode={d.status_code} />
                       </td>
-                      <td
-                        style={{
-                          padding: "16px 16px",
-                          maxWidth: 280,
-                        }}
-                      >
-                        <span
-                          className="block truncate"
-                          title={endpoint?.url ?? d.endpoint_id}
-                          style={{ fontSize: 13, color: "#a3b3ae" }}
-                        >
+                      <td className="vd-delivery-endpoint">
+                        <span className="block truncate" title={endpoint?.url ?? d.endpoint_id}>
                           {endpoint?.url ?? (
-                            <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#5a7268" }}>
+                            <span className="vd-delivery-id-mono">
                               {d.endpoint_id.slice(0, 8)}…
                             </span>
                           )}
                         </span>
                       </td>
-                      <td style={{ padding: "16px 16px", color: "#5a7268", fontSize: 13, whiteSpace: "nowrap" }}>
+                      <td className="vd-delivery-time">
                         {new Date(d.attempted_at).toLocaleString()}
                       </td>
                     </tr>
