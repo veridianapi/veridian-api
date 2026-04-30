@@ -623,3 +623,61 @@
   font-size: 14px;
   color: var(--text-secondary);
 }
+
+/* ── Metric card icon variants ───────────────────────────────────────────── */
+.vd-metric-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.vd-metric-icon-brand   { background: rgba(29,158,117,0.12); color: #1d9e75; }
+.vd-metric-icon-success { background: rgba(22,163,74,0.12);  color: #16a34a; }
+.vd-metric-icon-warning { background: rgba(217,119,6,0.12);  color: #d97706; }
+.vd-metric-icon-danger  { background: rgba(220,38,38,0.12);  color: #dc2626; }
+
+/* Approved card gets a green bottom accent */
+.vd-card-metric-accent {
+  border-bottom: 2px solid rgba(29,158,117,0.4);
+}
+
+/* ── Text colour utilities ───────────────────────────────────────────────── */
+.vd-text-danger  { color: var(--danger); }
+.vd-text-warning { color: var(--warning); }
+.vd-text-success { color: var(--success); }
+.vd-text-brand   { color: var(--brand); }
+.vd-text-primary { color: var(--text-primary); }
+.vd-text-secondary { color: var(--text-secondary); }
+.vd-text-tertiary  { color: var(--text-tertiary); }
+
+/* ── Link ────────────────────────────────────────────────────────────────── */
+.vd-link {
+  color: var(--text-link);
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: opacity var(--transition-fast);
+}
+.vd-link:hover { opacity: 0.8; }
+
+/* ── Table cell modifiers ────────────────────────────────────────────────── */
+/* Use on <td> when the cell holds secondary/caption-size text */
+.vd-td-sm {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.vd-td-cap {
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-transform: capitalize;
+}
+
+/* Ensures horizontal scroll works on narrow viewports */
+.vd-table { min-width: 600px; }
+
+/* ── Badge capitalize (already set in .vd-badge, kept for reference) ────── */
+/* .vd-badge already includes text-transform: capitalize */

@@ -8,42 +8,35 @@ import { StatusBadge } from "./_components/StatusBadge";
 import { PageHeader } from "./_components/PageHeader";
 import { EmptyState } from "./_components/EmptyState";
 
-// ─── Risk score inline (table cell) ──────────────────────────────────────────
+// ─── Risk score (table cell) ──────────────────────────────────────────────────
 function RiskScore({ score }: { score: number | null }) {
   if (score === null) return <span className="vd-risk vd-risk-null">—</span>;
   const level = score >= 70 ? "high" : score >= 30 ? "medium" : "low";
-  return (
-    <span className={`vd-risk vd-risk-${level}`}>{score}</span>
-  );
+  return <span className={`vd-risk vd-risk-${level}`}>{score}</span>;
 }
 
 // ─── Metric card ─────────────────────────────────────────────────────────────
+type MetricVariant = "brand" | "success" | "warning" | "danger";
+
 interface MetricCardProps {
   label: string;
   value: number;
-  iconColor: string;
-  iconBg: string;
+  variant: MetricVariant;
   subtext?: string;
   icon: React.ReactNode;
-  accentBottom?: boolean;
+  accent?: boolean;
 }
 
-function MetricCard({ label, value, iconColor, iconBg, subtext, icon, accentBottom }: MetricCardProps) {
+function MetricCard({ label, value, variant, subtext, icon, accent }: MetricCardProps) {
   return (
-    <div
-      className="vd-card-metric"
-      style={accentBottom ? { borderBottom: "2px solid rgba(29,158,117,0.4)" } : undefined}
-    >
+    <div className={`vd-card-metric${accent ? " vd-card-metric-accent" : ""}`}>
       <div className="flex items-start justify-between">
         <div>
           <p className="vd-metric-label">{label}</p>
           <p className="vd-metric-value">{value}</p>
           {subtext && <p className="vd-metric-sub">{subtext}</p>}
         </div>
-        <div
-          className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-          style={{ backgroundColor: iconBg, color: iconColor }}
-        >
+        <div className={`vd-metric-icon vd-metric-icon-${variant}`}>
           {icon}
         </div>
       </div>
@@ -116,7 +109,7 @@ export default async function DashboardPage() {
         title="Overview"
         subtitle={today}
         action={customer?.plan ? (
-          <span className="vd-badge vd-badge-brand" style={{ textTransform: "capitalize" }}>
+          <span className="vd-badge vd-badge-brand">
             {customer.plan} plan
           </span>
         ) : undefined}
@@ -127,8 +120,7 @@ export default async function DashboardPage() {
         <MetricCard
           label="Total"
           value={(counts ?? []).length}
-          iconColor="#1d9e75"
-          iconBg="rgba(29,158,117,0.12)"
+          variant="brand"
           subtext="All time"
           icon={
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -139,10 +131,9 @@ export default async function DashboardPage() {
         <MetricCard
           label="Approved"
           value={tally.approved ?? 0}
-          iconColor="#16a34a"
-          iconBg="rgba(22,163,74,0.12)"
+          variant="success"
           subtext="Verified identities"
-          accentBottom
+          accent
           icon={
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -152,8 +143,7 @@ export default async function DashboardPage() {
         <MetricCard
           label="Under Review"
           value={tally.review ?? 0}
-          iconColor="#d97706"
-          iconBg="rgba(217,119,6,0.12)"
+          variant="warning"
           subtext="Needs attention"
           icon={
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -164,8 +154,7 @@ export default async function DashboardPage() {
         <MetricCard
           label="Rejected"
           value={tally.rejected ?? 0}
-          iconColor="#dc2626"
-          iconBg="rgba(220,38,38,0.12)"
+          variant="danger"
           subtext="Failed checks"
           icon={
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -179,7 +168,7 @@ export default async function DashboardPage() {
 
       {queryError && (
         <div className="vd-alert vd-alert-danger mb-6">
-          <p className="text-sm font-medium" style={{ color: "#dc2626" }}>
+          <p className="text-sm font-medium vd-text-danger">
             Unable to load verification data. Please refresh the page.
           </p>
         </div>
@@ -189,7 +178,7 @@ export default async function DashboardPage() {
       <div className="vd-card-bare">
         <div className="vd-card-head">
           <h2 className="vd-card-title">Recent Verifications</h2>
-          <Link href="/dashboard/verifications" className="text-xs font-medium hover:opacity-80" style={{ color: "#1d9e75" }}>
+          <Link href="/dashboard/verifications" className="vd-link">
             View all →
           </Link>
         </div>
@@ -197,7 +186,7 @@ export default async function DashboardPage() {
         {!verifications || verifications.length === 0 ? (
           <EmptyState
             icon={
-              <svg className="w-5 h-5" fill="none" stroke="#5a7268" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
             }
@@ -211,7 +200,7 @@ export default async function DashboardPage() {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="vd-table" style={{ minWidth: 600 }}>
+            <table className="vd-table">
               <thead>
                 <tr>
                   <th>ID</th>
@@ -225,16 +214,19 @@ export default async function DashboardPage() {
                 {verifications.map((v) => (
                   <tr key={v.id}>
                     <td>
-                      <Link href={`/dashboard/verifications/${v.id}`} className="vd-table-id hover:underline">
+                      <Link
+                        href={`/dashboard/verifications/${v.id}`}
+                        className="vd-table-id hover:underline"
+                      >
                         {v.id.slice(0, 8)}…
                       </Link>
                     </td>
                     <td><StatusBadge status={v.status} /></td>
                     <td><RiskScore score={v.risk_score} /></td>
-                    <td style={{ textTransform: "capitalize", fontSize: 13 }}>
+                    <td className="vd-td-cap">
                       {v.document_type.replace(/_/g, " ")}
                     </td>
-                    <td style={{ fontSize: 13 }}>
+                    <td className="vd-td-sm">
                       {new Date(v.created_at).toLocaleDateString()}
                     </td>
                   </tr>
