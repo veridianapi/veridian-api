@@ -4,13 +4,11 @@ import { useState, useTransition } from "react";
 import { sendSupportEmail } from "./actions";
 import { PageHeader } from "../_components/PageHeader";
 
-// ─── Data ──────────────────────────────────────────────────────────────────
-
 const SECTIONS = [
   {
     title: "Getting started",
     icon: (
-      <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-4 h-4 shrink-0 text-[#64748b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
       </svg>
     ),
@@ -36,7 +34,7 @@ const SECTIONS = [
   {
     title: "API reference",
     icon: (
-      <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-4 h-4 shrink-0 text-[#64748b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
       </svg>
     ),
@@ -62,7 +60,7 @@ const SECTIONS = [
   {
     title: "Account & billing",
     icon: (
-      <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-4 h-4 shrink-0 text-[#64748b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
       </svg>
     ),
@@ -87,57 +85,37 @@ const SECTIONS = [
   },
 ];
 
-const SUBJECTS = [
-  "Technical issue",
-  "Billing question",
-  "Feature request",
-  "Other",
-];
-
-// ─── Accordion item ──────────────────────────────────────────────────────────
+const SUBJECTS = ["Technical issue", "Billing question", "Feature request", "Other"];
 
 function AccordionItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
-
   return (
-    <div className="vd-accordion-item">
+    <div className="border-b border-white/[0.06] last:border-0">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center justify-between w-full px-5 py-4 text-left gap-4"
+        className="flex items-center justify-between w-full px-5 py-4 text-left gap-4 hover:bg-white/[0.02] transition-colors"
       >
-        <span className={`text-sm font-medium leading-snug ${open ? "vd-accordion-q-open" : "vd-accordion-q"}`}>
+        <span className={`text-sm font-medium leading-snug ${open ? "text-[#f8fafc]" : "text-[#94a3b8]"}`}>
           {q}
         </span>
         <svg
-          className={`w-4 h-4 shrink-0 transition-transform duration-150 vd-accordion-chevron${open ? " vd-accordion-chevron-open" : ""}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
+          className={`w-4 h-4 shrink-0 text-[#64748b] transition-transform duration-150 ${open ? "rotate-180" : ""}`}
+          fill="none" stroke="currentColor" viewBox="0 0 24 24"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
-
       {open && (
         <div className="px-5 pb-5">
           {a.split("\n").map((line, i) =>
             line === "" ? (
               <div key={i} className="h-2" />
-            ) : line.startsWith("•") ||
-              line.startsWith("POST") ||
-              line.startsWith("GET") ||
-              line.startsWith("{") ||
-              line.startsWith("}") ||
-              line.startsWith("  ") ||
-              line.startsWith("Authorization") ||
-              line.startsWith("Content-Type") ? (
-              <p key={i} className="vd-accordion-code text-xs leading-relaxed">
-                {line}
-              </p>
+            ) : line.startsWith("•") || line.startsWith("POST") || line.startsWith("GET") ||
+               line.startsWith("{") || line.startsWith("}") || line.startsWith("  ") ||
+               line.startsWith("Authorization") || line.startsWith("Content-Type") ? (
+              <p key={i} className="font-mono text-xs text-[#a8ff78] leading-relaxed">{line}</p>
             ) : (
-              <p key={i} className="vd-accordion-text text-sm leading-relaxed">
-                {line}
-              </p>
+              <p key={i} className="text-sm text-[#94a3b8] leading-relaxed">{line}</p>
             )
           )}
         </div>
@@ -146,31 +124,17 @@ function AccordionItem({ q, a }: { q: string; a: string }) {
   );
 }
 
-// ─── Section ─────────────────────────────────────────────────────────────────
-
-function Section({
-  title,
-  icon,
-  items,
-}: {
-  title: string;
-  icon: React.ReactNode;
-  items: { q: string; a: string }[];
-}) {
+function Section({ title, icon, items }: { title: string; icon: React.ReactNode; items: { q: string; a: string }[] }) {
   return (
-    <div className="vd-section-card">
-      <div className="vd-help-section-header flex items-center gap-2 px-5 py-4">
+    <div className="bg-white/[0.03] border border-white/[0.08] rounded-xl overflow-hidden">
+      <div className="flex items-center gap-2 px-5 py-4 border-b border-white/[0.06]">
         {icon}
-        <h2 className="vd-section-title">{title}</h2>
+        <h2 className="text-sm font-semibold text-[#f8fafc]">{title}</h2>
       </div>
-      {items.map((item) => (
-        <AccordionItem key={item.q} q={item.q} a={item.a} />
-      ))}
+      {items.map((item) => <AccordionItem key={item.q} q={item.q} a={item.a} />)}
     </div>
   );
 }
-
-// ─── Contact form ─────────────────────────────────────────────────────────────
 
 function ContactForm() {
   const [subject, setSubject] = useState(SUBJECTS[0]);
@@ -183,37 +147,32 @@ function ContactForm() {
   const tooShort = charCount > 0 && charCount < 100;
   const canSubmit = charCount >= 100 && !isPending;
 
+  const inputCls = "bg-[#0d1211] border border-white/[0.08] rounded-lg h-9 px-3 text-sm text-[#f8fafc] placeholder:text-[#64748b] focus:border-[#1d9e75] focus:outline-none focus:ring-2 focus:ring-[#1d9e75]/15 transition-colors w-full";
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSubmit) return;
-
     setStatus("idle");
     setErrorMsg("");
-
     startTransition(async () => {
       const result = await sendSupportEmail({ subject, message });
-      if (result.ok) {
-        setStatus("success");
-        setMessage("");
-        setSubject(SUBJECTS[0]);
-      } else {
-        setStatus("error");
-        setErrorMsg(result.error);
-      }
+      if (result.ok) { setStatus("success"); setMessage(""); setSubject(SUBJECTS[0]); }
+      else { setStatus("error"); setErrorMsg(result.error); }
     });
   }
 
   if (status === "success") {
     return (
-      <div className="vd-success-card flex flex-col items-center text-center">
-        <div className="vd-success-icon w-10 h-10 rounded-full flex items-center justify-center mb-4">
-          <svg className="w-5 h-5" fill="none" stroke="#1d9e75" viewBox="0 0 24 24">
+      <div className="bg-white/[0.03] border border-white/[0.08] rounded-xl p-10 flex flex-col items-center text-center">
+        <div className="w-10 h-10 rounded-full bg-[#10b981]/[0.12] flex items-center justify-center mb-4">
+          <svg className="w-5 h-5" fill="none" stroke="#10b981" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <p className="text-base font-medium mb-1 vd-text-primary">Message sent</p>
-        <p className="text-sm mb-5 vd-text-tertiary">We typically reply within a few hours.</p>
-        <button onClick={() => setStatus("idle")} className="vd-btn vd-btn-secondary">
+        <p className="text-base font-medium text-[#f8fafc] mb-1">Message sent</p>
+        <p className="text-sm text-[#64748b] mb-5">We typically reply within a few hours.</p>
+        <button onClick={() => setStatus("idle")}
+          className="inline-flex items-center h-9 px-4 border border-white/10 text-[#94a3b8] text-[13px] font-medium rounded-lg hover:border-white/20 hover:text-[#f8fafc] transition-colors">
           Send another message
         </button>
       </div>
@@ -221,86 +180,54 @@ function ContactForm() {
   }
 
   return (
-    <div className="vd-section-card">
-      {/* Card header */}
-      <div className="vd-section-header flex items-center gap-2 px-5 py-4">
-        <svg className="w-4 h-4 shrink-0" fill="none" stroke="#1d9e75" viewBox="0 0 24 24">
+    <div className="bg-white/[0.03] border border-white/[0.08] rounded-xl overflow-hidden">
+      <div className="flex items-center gap-2 px-5 py-4 border-b border-white/[0.06]">
+        <svg className="w-4 h-4 shrink-0 text-[#1d9e75]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
         </svg>
-        <h2 className="vd-section-title">Contact support</h2>
-        <span className="text-xs ml-1 vd-text-tertiary">— we usually reply within a few hours</span>
+        <h2 className="text-sm font-semibold text-[#f8fafc]">Contact support</h2>
+        <span className="text-xs text-[#64748b]">— we usually reply within a few hours</span>
       </div>
 
       <form onSubmit={handleSubmit} className="p-5 space-y-4">
-        {/* Subject */}
         <div>
-          <label htmlFor="support-subject" className="vd-field-label-sm">Subject</label>
-          <select
-            id="support-subject"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-            className="vd-select w-full appearance-none focus:ring-2"
-          >
-            {SUBJECTS.map((s) => (
-              <option key={s} value={s}>{s}</option>
-            ))}
+          <label htmlFor="support-subject" className="block text-xs font-medium text-[#64748b] mb-1.5">Subject</label>
+          <select id="support-subject" value={subject} onChange={(e) => setSubject(e.target.value)}
+            className={`${inputCls} appearance-none`}>
+            {SUBJECTS.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
 
-        {/* Message */}
         <div>
           <div className="flex items-baseline justify-between mb-1.5">
-            <label htmlFor="support-message" className="vd-field-label-sm !mb-0">
-              Message
-            </label>
-            <span className={tooShort ? "vd-char-count-warn" : charCount >= 100 ? "vd-char-count-ok" : "vd-char-count-muted"}>
+            <label htmlFor="support-message" className="text-xs font-medium text-[#64748b]">Message</label>
+            <span className={`text-xs ${tooShort ? "text-[#ef4444]" : charCount >= 100 ? "text-[#10b981]" : "text-[#64748b]"}`}>
               {charCount}/100 min
             </span>
           </div>
           <textarea
-            id="support-message"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Describe your issue or question in detail…"
-            rows={5}
-            className={`vd-textarea w-full focus:ring-2 resize-none${tooShort ? " vd-textarea-warn" : ""}`}
+            id="support-message" value={message} onChange={(e) => setMessage(e.target.value)}
+            placeholder="Describe your issue or question in detail…" rows={5}
+            className={`bg-[#0d1211] border rounded-lg px-3 py-2.5 text-sm text-[#f8fafc] placeholder:text-[#64748b] focus:outline-none focus:ring-2 focus:ring-[#1d9e75]/15 transition-colors w-full resize-none ${tooShort ? "border-[#ef4444]/[0.50] focus:border-[#ef4444]" : "border-white/[0.08] focus:border-[#1d9e75]"}`}
           />
           {tooShort && (
-            <p className="mt-1.5 text-xs vd-text-warning">
-              Please write at least 100 characters so we can help you effectively.
-            </p>
+            <p className="mt-1.5 text-xs text-[#f59e0b]">Please write at least 100 characters so we can help you effectively.</p>
           )}
         </div>
 
-        {/* Error banner */}
         {status === "error" && (
-          <div className="vd-alert vd-alert-danger">
-            <p className="text-sm vd-text-danger">{errorMsg}</p>
+          <div className="p-3 rounded-lg bg-[#ef4444]/[0.08] border-l-[3px] border-[#ef4444]">
+            <p className="text-sm text-[#ef4444]">{errorMsg}</p>
           </div>
         )}
 
-        {/* Submit */}
         <div className="flex justify-end pt-1">
-          <button
-            type="submit"
-            disabled={!canSubmit}
-            className="vd-btn vd-btn-primary disabled:opacity-40 disabled:cursor-not-allowed"
-          >
+          <button type="submit" disabled={!canSubmit}
+            className="inline-flex items-center gap-2 h-9 px-4 bg-[#1d9e75] text-[#050a09] text-[13px] font-medium rounded-lg hover:bg-[#22c55e] transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
             {isPending ? (
-              <>
-                <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-                Sending…
-              </>
+              <><svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>Sending…</>
             ) : (
-              <>
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                </svg>
-                Send message
-              </>
+              <><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>Send message</>
             )}
           </button>
         </div>
@@ -309,49 +236,31 @@ function ContactForm() {
   );
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
-
 export default function HelpPage() {
   const [search, setSearch] = useState("");
 
   const filtered = search.trim()
-    ? SECTIONS.map((s) => ({
-        ...s,
-        items: s.items.filter(
-          (item) =>
-            item.q.toLowerCase().includes(search.toLowerCase()) ||
-            item.a.toLowerCase().includes(search.toLowerCase())
-        ),
-      })).filter((s) => s.items.length > 0)
+    ? SECTIONS.map((s) => ({ ...s, items: s.items.filter((item) => item.q.toLowerCase().includes(search.toLowerCase()) || item.a.toLowerCase().includes(search.toLowerCase())) })).filter((s) => s.items.length > 0)
     : SECTIONS;
 
   return (
     <div className="max-w-2xl">
       <PageHeader title="How can we help?" subtitle="Guides, API reference, and answers to common questions." />
 
-      {/* Search */}
       <div className="relative mb-8">
-        <svg
-          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none vd-text-tertiary"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
+        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none text-[#64748b]"
+          fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          type="text" value={search} onChange={(e) => setSearch(e.target.value)}
           placeholder="Search help articles…"
-          className="vd-input vd-input-search w-full pr-10 focus:ring-2"
+          className="bg-[#0d1211] border border-white/[0.08] rounded-lg h-9 pl-9 pr-10 text-sm text-[#f8fafc] placeholder:text-[#64748b] focus:border-[#1d9e75] focus:outline-none focus:ring-2 focus:ring-[#1d9e75]/15 transition-colors w-full"
         />
         {search && (
-          <button
-            onClick={() => setSearch("")}
-            className="absolute right-3 top-1/2 -translate-y-1/2 hover:opacity-80 vd-text-tertiary"
-            aria-label="Clear search"
-          >
+          <button onClick={() => setSearch("")}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#64748b] hover:text-[#94a3b8] transition-colors"
+            aria-label="Clear search">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -359,38 +268,30 @@ export default function HelpPage() {
         )}
       </div>
 
-      {/* Sections or empty state */}
       {filtered.length > 0 ? (
         <div className="space-y-4">
           {filtered.map((section) => (
-            <Section
-              key={section.title}
-              title={section.title}
-              icon={section.icon}
-              items={section.items}
-            />
+            <Section key={section.title} title={section.title} icon={section.icon} items={section.items} />
           ))}
         </div>
       ) : (
-        <div className="vd-help-no-results rounded-xl px-6 py-16 flex flex-col items-center text-center">
-          <div className="vd-no-results-icon w-8 h-8 rounded-full flex items-center justify-center mb-4">
-            <svg className="w-4 h-4" fill="none" stroke="#5a7268" viewBox="0 0 24 24">
+        <div className="bg-white/[0.03] border border-white/[0.08] rounded-xl px-6 py-16 flex flex-col items-center text-center">
+          <div className="w-8 h-8 rounded-full bg-white/[0.04] flex items-center justify-center mb-4">
+            <svg className="w-4 h-4 text-[#64748b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
-          <p className="text-base font-medium mb-1 vd-text-secondary">No results found</p>
-          <p className="text-sm mb-4 vd-text-tertiary">
-            No articles match{" "}
-            <span className="vd-text-primary">&ldquo;{search}&rdquo;</span>
-            . Try a different search term.
+          <p className="text-base font-medium text-[#94a3b8] mb-1">No results found</p>
+          <p className="text-sm text-[#64748b] mb-4">
+            No articles match <span className="text-[#f8fafc]">&ldquo;{search}&rdquo;</span>. Try a different search term.
           </p>
-          <button onClick={() => setSearch("")} className="vd-btn vd-btn-secondary">
+          <button onClick={() => setSearch("")}
+            className="inline-flex items-center h-9 px-4 border border-white/10 text-[#94a3b8] text-[13px] font-medium rounded-lg hover:border-white/20 hover:text-[#f8fafc] transition-colors">
             Clear search
           </button>
         </div>
       )}
 
-      {/* Contact form */}
       <div className="mt-6">
         <ContactForm />
       </div>

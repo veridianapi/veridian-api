@@ -6,7 +6,6 @@ interface PrimaryButtonProps {
   disabled?: boolean;
   type?: "button" | "submit" | "reset";
   className?: string;
-  style?: React.CSSProperties;
 }
 
 export function PrimaryButton({
@@ -15,15 +14,13 @@ export function PrimaryButton({
   disabled,
   type = "button",
   className = "",
-  style,
 }: PrimaryButtonProps) {
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`vd-btn vd-btn-primary ${className}`}
-      style={style}
+      className={`inline-flex items-center gap-2 h-9 px-4 bg-[#1d9e75] text-[#050a09] text-[13px] font-medium rounded-lg hover:bg-[#22c55e] transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${className}`}
     >
       {children}
     </button>

@@ -20,22 +20,13 @@ export default function SwitchPlanButton({ plan, label, isUpgrade }: Props) {
       const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
+      if (!token) throw new Error("Not authenticated — please sign in again");
 
-      if (!token) {
-        throw new Error("Not authenticated — please sign in again");
-      }
-
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/v1/billing/checkout`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ plan }),
-        }
-      );
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/billing/checkout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ plan }),
+      });
 
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
@@ -55,29 +46,15 @@ export default function SwitchPlanButton({ plan, label, isUpgrade }: Props) {
       <button
         onClick={handleClick}
         disabled={loading}
-        className="w-full text-[13px] font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90"
-        style={
+        className={`w-full h-9 text-[13px] font-medium rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
           isUpgrade
-            ? {
-                backgroundColor: "#1d9e75",
-                color: "#050a09",
-                height: 36,
-                borderRadius: 8,
-              }
-            : {
-                border: "1px solid rgba(255,255,255,0.10)",
-                color: "#a3b3ae",
-                backgroundColor: "transparent",
-                height: 36,
-                borderRadius: 8,
-              }
-        }
+            ? "bg-[#1d9e75] text-[#050a09] hover:bg-[#22c55e]"
+            : "border border-white/10 text-[#94a3b8] hover:border-white/20 hover:text-[#f8fafc]"
+        }`}
       >
         {loading ? "Loading…" : label}
       </button>
-      {error && (
-        <p className="mt-2 text-xs" style={{ color: "#dc2626" }}>{error}</p>
-      )}
+      {error && <p className="mt-2 text-xs text-[#ef4444]">{error}</p>}
     </div>
   );
 }
