@@ -2,6 +2,21 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase-server";
 import { VerificationsTable } from "./_components/VerificationsTable";
+import { RangeSelector } from "./RangeSelector";
+
+const RANGE_MS: Record<string, number> = {
+  "24h": 24 * 60 * 60 * 1000,
+  "7d":  7  * 24 * 60 * 60 * 1000,
+  "30d": 30 * 24 * 60 * 60 * 1000,
+  "90d": 90 * 24 * 60 * 60 * 1000,
+};
+
+const RANGE_LABELS: Record<string, string> = {
+  "24h": "last 24 hours",
+  "7d":  "last 7 days",
+  "30d": "last 30 days",
+  "90d": "last 90 days",
+};
 
 const SPARKLINES = {
   total:    "0,12 10,11 20,13 30,9 40,10 50,7 60,8 70,5 80,6 90,4 100,3",
@@ -48,7 +63,15 @@ function MetricCard({
   );
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ range?: string }>;
+}) {
+  const { range: rangeParam } = await searchParams;
+  const range = rangeParam && RANGE_MS[rangeParam] ? rangeParam : "7d";
+  const cutoff = new Date(Date.now() - RANGE_MS[range]).toISOString();
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
@@ -61,9 +84,14 @@ export default async function DashboardPage() {
       .from("verifications")
       .select("id, status, risk_score, document_type, created_at")
       .eq("customer_id", user.id)
+      .gte("created_at", cutoff)
       .order("created_at", { ascending: false })
       .limit(8),
-    supabase.from("verifications").select("status").eq("customer_id", user.id),
+    supabase
+      .from("verifications")
+      .select("status")
+      .eq("customer_id", user.id)
+      .gte("created_at", cutoff),
   ]);
 
   const tally = (allStatuses ?? []).reduce<Record<string, number>>((acc, r) => {
@@ -91,17 +119,10 @@ export default async function DashboardPage() {
       <div className="flex items-end justify-between mb-[22px]">
         <div>
           <h1 className="text-[22px] font-semibold tracking-[-0.022em] text-[#f0f4f3] mb-1">Overview</h1>
-          <p className="text-[12px] text-[#5a7268]">{today} &middot; all time &middot; UTC</p>
+          <p className="text-[12px] text-[#5a7268]">{today} &middot; {RANGE_LABELS[range]} &middot; UTC</p>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="flex border border-white/[0.06] rounded-[5px] overflow-hidden">
-            {(["24H", "7D", "30D", "90D"] as const).map((seg, i) => (
-              <span key={seg}
-                className={`px-[10px] py-1 text-[11px] font-mono cursor-pointer border-r border-white/[0.06] last:border-0 ${i === 1 ? "bg-white/[0.04] text-[#f0f4f3]" : "text-[#5a7268] hover:text-[#a3b3ae]"}`}>
-                {seg}
-              </span>
-            ))}
-          </div>
+          <RangeSelector selected={range} />
           <button className="h-7 px-[11px] flex items-center gap-1.5 border border-white/[0.06] rounded-[5px] text-[12px] font-medium text-[#a3b3ae] hover:bg-white/[0.03] hover:text-[#f0f4f3] hover:border-white/10 transition-colors">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>
@@ -171,7 +192,7 @@ export default async function DashboardPage() {
           <div className="flex items-center px-4 py-[10px] border-t border-white/[0.06] font-mono text-[11px] text-[#5a7268] gap-[14px]">
             <span>{"Showing 1–" + rowCount}</span>
             <span className="opacity-50">&middot;</span>
-            <span>All time</span>
+            <span>{RANGE_LABELS[range]}</span>
             <Link href="/dashboard/verifications"
               className="ml-auto flex items-center gap-1 text-[#a3b3ae] font-sans text-[12px] hover:text-[#f0f4f3] transition-colors">
               View all verifications

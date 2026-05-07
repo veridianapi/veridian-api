@@ -91,9 +91,9 @@ export function VerificationsTable({ verifications }: { verifications: Verificat
                 <td className="px-4 py-[10px]">
                   <span className="inline-block w-3 h-3 border border-white/10 rounded-[3px]" />
                 </td>
-                <td className="px-4 py-[10px] font-mono text-[12px] text-[#a3b3ae] whitespace-nowrap">
+                <td className="px-4 py-[10px] font-mono text-[12px] text-[#5a7268] whitespace-nowrap">
                   <Link href={`/dashboard/verifications/${v.id}`} className="hover:text-[#f0f4f3] transition-colors">
-                    {v.id.length > 14 ? v.id.slice(0, 14) + "…" : v.id}
+                    {v.id.slice(0, 8)}...
                   </Link>
                 </td>
                 <td className="px-4 py-[10px]">
