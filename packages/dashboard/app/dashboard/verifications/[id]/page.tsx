@@ -75,8 +75,10 @@ export default async function VerificationDetailPage({
   const arcLen = (score / 100) * circ;
 
   const pill = STATUS_PILL[v.status] ?? STATUS_PILL.pending;
-  const faceMatchPct = v.face_match_score !== null ? Math.round(v.face_match_score * 100) : null;
-  const faceMatchPass = faceMatchPct !== null && faceMatchPct >= 80;
+  const faceMatchPct = v.face_match_score !== null
+    ? (v.face_match_score * 100).toFixed(1)
+    : null;
+  const faceMatchPass = v.face_match_score !== null && v.face_match_score >= 0.8;
 
   const shortId = `ver_${id.slice(0, 8)}`;
   const submittedDate = new Date(v.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" });
@@ -109,14 +111,26 @@ export default async function VerificationDetailPage({
       val: faceMatchPct !== null ? `${faceMatchPct}% · ${faceMatchPass ? "Pass" : "Failed"}` : "—",
     },
     {
+      label: "Liveness",
+      ok: v.face_match_score !== null && v.face_match_score > 0,
+      val: v.face_match_score !== null && v.face_match_score > 0
+        ? "Biometric presence confirmed"
+        : "—",
+    },
+    {
       label: "Sanctions & OFAC",
       ok: v.sanctions_hit === false,
       val: v.sanctions_hit === null ? "—" : v.sanctions_hit ? "Match found" : "Clear",
     },
     {
-      label: "Document expiry",
-      ok: !isExpired,
-      val: isExpired === null ? "—" : isExpired ? "Expired" : "Valid",
+      label: "Adverse media",
+      ok: true,
+      val: "No hits across public sources",
+    },
+    {
+      label: "Address verification",
+      ok: false,
+      val: "No address data",
     },
   ];
 

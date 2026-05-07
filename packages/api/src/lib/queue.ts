@@ -22,6 +22,11 @@ function getQueue(): Queue {
     tls: { rejectUnauthorized: false },
     maxRetriesPerRequest: null,
     enableReadyCheck: false,
+    retryStrategy: (times) => Math.min(times * 500, 5000),
+    reconnectOnError: (err) => err.message.includes("READONLY"),
+    connectTimeout: 10000,
+    keepAlive: 10000,
+    lazyConnect: false,
   });
 
   queueInstance = new Queue("verifications", { connection });

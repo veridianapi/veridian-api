@@ -45,51 +45,42 @@ interface ExtractedFields {
   nationality: string | null;
 }
 
-const FIELD_ALIASES: Record<keyof ExtractedFields, string[]> = {
-  full_name: ["full name", "name", "surname"],
-  date_of_birth: ["date of birth", "dob", "birth date"],
-  document_number: ["document number", "passport no", "licence no", "id number"],
-  expiry_date: ["expiry date", "expiry", "date of expiry", "valid until"],
-  nationality: ["nationality", "country"],
+// Patterns used for KV field matching (substring, case-insensitive)
+const FIELD_PATTERNS: Record<keyof ExtractedFields, string[]> = {
+  full_name:       ["full name", "surname", "given", "name"],
+  date_of_birth:   ["birth", "dob", "born"],
+  document_number: ["document number", "doc no", "passport no", "licence no", "id number", "number", "no."],
+  expiry_date:     ["expir", "valid until", "validity"],
+  nationality:     ["national"],
 };
 
 function extractFields(blocks: Block[]): ExtractedFields {
-  const keyBlocks = blocks.filter(
-    (b) => b.BlockType === "KEY_VALUE_SET" && b.EntityTypes?.includes("KEY")
-  );
   const blockMap = new Map(blocks.map((b) => [b.Id!, b]));
 
-  function getText(ids: string[] | undefined): string {
+  // WORD blocks carry text directly on .Text — traversing their Relationships is wrong.
+  function wordsText(ids: string[] | undefined): string {
     if (!ids) return "";
     return ids
-      .map((id) => blockMap.get(id))
-      .filter(Boolean)
-      .flatMap((b) => b!.Relationships ?? [])
-      .filter((r) => r.Type === "CHILD")
-      .flatMap((r) => r.Ids ?? [])
       .map((id) => blockMap.get(id)?.Text ?? "")
+      .filter(Boolean)
       .join(" ")
       .trim();
   }
 
-  const kvPairs: Array<{ key: string; value: string }> = keyBlocks.map((kb) => {
-    const valueId = (kb.Relationships ?? [])
-      .find((r) => r.Type === "VALUE")
-      ?.Ids?.[0];
+  // Build key→value pairs from KEY_VALUE_SET blocks
+  const kvPairs: Array<{ key: string; value: string }> = [];
+  for (const block of blocks) {
+    if (block.BlockType !== "KEY_VALUE_SET" || !block.EntityTypes?.includes("KEY")) continue;
+    const childIds  = (block.Relationships ?? []).find((r) => r.Type === "CHILD")?.Ids;
+    const valueId   = (block.Relationships ?? []).find((r) => r.Type === "VALUE")?.Ids?.[0];
     const valueBlock = valueId ? blockMap.get(valueId) : undefined;
-    return {
-      key: getText(
-        (kb.Relationships ?? [])
-          .find((r) => r.Type === "CHILD")
-          ?.Ids
-      ).toLowerCase(),
-      value: getText(
-        (valueBlock?.Relationships ?? [])
-          .find((r) => r.Type === "CHILD")
-          ?.Ids
-      ),
-    };
-  });
+    const valueChildIds = (valueBlock?.Relationships ?? []).find((r) => r.Type === "CHILD")?.Ids;
+    const key   = wordsText(childIds).toLowerCase();
+    const value = wordsText(valueChildIds);
+    if (key) kvPairs.push({ key, value });
+  }
+
+  console.log(`[textract] ${kvPairs.length} KV pairs:`, kvPairs.map((p) => `"${p.key}" → "${p.value}"`).join(", "));
 
   const result: ExtractedFields = {
     full_name: null,
@@ -100,11 +91,85 @@ function extractFields(blocks: Block[]): ExtractedFields {
   };
 
   for (const field of Object.keys(result) as Array<keyof ExtractedFields>) {
-    const aliases = FIELD_ALIASES[field];
-    const match = kvPairs.find(({ key }) =>
-      aliases.some((alias) => key.includes(alias))
-    );
-    if (match) result[field] = match.value || null;
+    const patterns = FIELD_PATTERNS[field];
+    const match = kvPairs.find(({ key }) => patterns.some((p) => key.includes(p)));
+    if (match?.value) result[field] = match.value;
+  }
+
+  // MRZ fallback for any fields still null
+  const mrzResult = extractFromMRZ(blocks);
+  console.log("[textract] MRZ fallback:", mrzResult);
+  for (const field of Object.keys(result) as Array<keyof ExtractedFields>) {
+    if (!result[field] && mrzResult[field as keyof ExtractedFields]) {
+      result[field] = mrzResult[field as keyof ExtractedFields]!;
+    }
+  }
+
+  return result;
+}
+
+// Parse a 6-digit MRZ date (YYMMDD) into ISO format (YYYY-MM-DD)
+function parseMRZDate(yymmdd: string, isDOB: boolean): string | null {
+  if (!/^\d{6}$/.test(yymmdd)) return null;
+  const yy = parseInt(yymmdd.slice(0, 2), 10);
+  const mm = yymmdd.slice(2, 4);
+  const dd = yymmdd.slice(4, 6);
+  let year: number;
+  if (isDOB) {
+    // If yy > current 2-digit year + 1, person was born last century
+    const currentYY = new Date().getFullYear() % 100;
+    year = yy > currentYY + 1 ? 1900 + yy : 2000 + yy;
+  } else {
+    year = 2000 + yy; // Expiry dates on valid documents are always in the 2000s
+  }
+  return `${year}-${mm}-${dd}`;
+}
+
+function extractFromMRZ(blocks: Block[]): Partial<ExtractedFields> {
+  // LINE blocks may carry MRZ text; strip spaces since OCR sometimes inserts them
+  const lines = blocks
+    .filter((b) => b.BlockType === "LINE" && b.Text)
+    .map((b) => b.Text!.replace(/\s+/g, "").toUpperCase());
+
+  const result: Partial<ExtractedFields> = {};
+
+  // TD3 — passport: 2 × 44 chars
+  const td3L1 = lines.find((l) => l.length === 44 && l[0] === "P");
+  const td3L2 = lines.find((l) => l.length === 44 && l !== td3L1 && /^[A-Z0-9<]{44}$/.test(l));
+
+  if (td3L1) {
+    // Name: positions 5-43, surname<<given (< = space within segment)
+    const [surnameRaw, ...givenParts] = td3L1.slice(5).split("<<");
+    const surname = surnameRaw.replace(/</g, " ").trim();
+    const given   = givenParts.join(" ").replace(/</g, " ").trim();
+    if (surname) result.full_name = given ? `${given} ${surname}` : surname;
+  }
+
+  if (td3L2) {
+    // Document number: 0-8, strip filler <
+    const docNum = td3L2.slice(0, 9).replace(/</g, "").trim();
+    if (docNum) result.document_number = docNum;
+    // Nationality: 10-12 (ISO 3166-1 alpha-3)
+    const nat = td3L2.slice(10, 13).replace(/</g, "").trim();
+    if (nat) result.nationality = nat;
+    // DOB: 13-18 YYMMDD
+    result.date_of_birth = parseMRZDate(td3L2.slice(13, 19), true);
+    // Expiry: 21-26 YYMMDD (position 20 is sex)
+    result.expiry_date = parseMRZDate(td3L2.slice(21, 27), false);
+  }
+
+  // TD1 — national ID / driving licence: 3 × 30 chars
+  if (!td3L2) {
+    const td1 = lines.filter((l) => l.length === 30 && /^[A-Z0-9<]{30}$/.test(l));
+    if (td1.length >= 2) {
+      const [l1, l2] = td1;
+      const docNum = l1.slice(5, 14).replace(/</g, "").trim();
+      if (docNum) result.document_number = docNum;
+      const nat = l1.slice(2, 5).replace(/</g, "").trim();
+      if (nat) result.nationality = nat;
+      result.date_of_birth = parseMRZDate(l2.slice(0, 6), true);
+      result.expiry_date   = parseMRZDate(l2.slice(8, 14), false);
+    }
   }
 
   return result;
@@ -301,6 +366,11 @@ const connection = new Redis(redisUrl, {
   tls: { rejectUnauthorized: false },
   maxRetriesPerRequest: null,
   enableReadyCheck: false,
+  retryStrategy: (times) => Math.min(times * 500, 5000),
+  reconnectOnError: (err) => err.message.includes("READONLY"),
+  connectTimeout: 10000,
+  keepAlive: 10000,
+  lazyConnect: false,
 });
 
 async function processVerification(
