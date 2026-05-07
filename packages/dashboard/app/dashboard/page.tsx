@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase-server";
 import { VerificationsTable } from "./_components/VerificationsTable";
 import { RangeSelector } from "./RangeSelector";
+import { UpdatedAgo } from "./UpdatedAgo";
 
 const RANGE_MS: Record<string, number> = {
   "24h": 24 * 60 * 60 * 1000,
@@ -70,7 +71,9 @@ export default async function DashboardPage({
 }) {
   const { range: rangeParam } = await searchParams;
   const range = rangeParam && RANGE_MS[rangeParam] ? rangeParam : "7d";
-  const cutoff = new Date(Date.now() - RANGE_MS[range]).toISOString();
+  const now = Date.now();
+  const cutoff = new Date(now - RANGE_MS[range]).toISOString();
+  const prevCutoff = new Date(now - 2 * RANGE_MS[range]).toISOString();
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -79,6 +82,7 @@ export default async function DashboardPage({
   const [
     { data: verifications, error: verificationsError },
     { data: allStatuses },
+    { count: prevCount },
   ] = await Promise.all([
     supabase
       .from("verifications")
@@ -92,6 +96,12 @@ export default async function DashboardPage({
       .select("status")
       .eq("customer_id", user.id)
       .gte("created_at", cutoff),
+    supabase
+      .from("verifications")
+      .select("id", { count: "exact", head: true })
+      .eq("customer_id", user.id)
+      .gte("created_at", prevCutoff)
+      .lt("created_at", cutoff),
   ]);
 
   const tally = (allStatuses ?? []).reduce<Record<string, number>>((acc, r) => {
@@ -105,6 +115,13 @@ export default async function DashboardPage({
 
   const passRate = total > 0 ? ((approved / total) * 100).toFixed(1) : "0.0";
   const blockRate = total > 0 ? ((rejected / total) * 100).toFixed(1) : "0.0";
+
+  const prevTotal = prevCount ?? 0;
+  const totalDeltaPct = prevTotal > 0 ? Math.round(((total - prevTotal) / prevTotal) * 100) : null;
+  const totalDeltaStr = totalDeltaPct !== null
+    ? `${totalDeltaPct >= 0 ? "+" : ""}${totalDeltaPct}% · ${prevTotal} prev`
+    : `${prevTotal} prev`;
+  const totalDeltaColor = totalDeltaPct !== null && totalDeltaPct >= 0 ? "#1d9e75" : "#c4564a";
 
   const today = new Date().toLocaleDateString("en-US", {
     month: "long", day: "numeric", year: "numeric",
@@ -141,7 +158,7 @@ export default async function DashboardPage({
 
       {/* Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-7">
-        <MetricCard dot="bg-[#5a7268]" label="Total"        value={total}       delta={total + " verifications"}    sparkKey="total"    sparkColor="#5a7268" />
+        <MetricCard dot="bg-[#5a7268]" label="Total"        value={total}       delta={totalDeltaStr}               deltaColor={totalDeltaColor} sparkKey="total"    sparkColor="#5a7268" />
         <MetricCard dot="bg-[#1d9e75]" label="Approved"     value={approved}    delta={passRate + "% pass rate"}    deltaColor="#1d9e75" sparkKey="approved"  sparkColor="#1d9e75" />
         <MetricCard dot="bg-[#d4a24a]" label="Under review" value={underReview} delta="needs attention"             sparkKey="review"   sparkColor="#d4a24a" />
         <MetricCard dot="bg-[#c4564a]" label="Rejected"     value={rejected}    delta={blockRate + "% block rate"}  deltaColor="#c4564a" sparkKey="rejected"  sparkColor="#c4564a" />
@@ -192,7 +209,7 @@ export default async function DashboardPage({
           <div className="flex items-center px-4 py-[10px] border-t border-white/[0.06] font-mono text-[11px] text-[#5a7268] gap-[14px]">
             <span>{"Showing 1–" + rowCount}</span>
             <span className="opacity-50">&middot;</span>
-            <span>{RANGE_LABELS[range]}</span>
+            <UpdatedAgo />
             <Link href="/dashboard/verifications"
               className="ml-auto flex items-center gap-1 text-[#a3b3ae] font-sans text-[12px] hover:text-[#f0f4f3] transition-colors">
               View all verifications

@@ -28,6 +28,8 @@ export default function Topbar() {
       <div className="flex items-center gap-2 text-[12px] text-[#5a7268]">
         <span>Veridian</span>
         <span className="opacity-50">/</span>
+        <span>Compliance</span>
+        <span className="opacity-50">/</span>
         <span className="text-[#a3b3ae]">{label}</span>
       </div>
 

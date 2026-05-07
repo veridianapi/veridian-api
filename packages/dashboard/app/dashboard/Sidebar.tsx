@@ -68,6 +68,16 @@ const PRIMARY_NAV = [
 
 const WORKSPACE_NAV = [
   {
+    href: "/dashboard/team",
+    label: "Team",
+    icon: (
+      <svg className="w-[14px] h-[14px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="9" cy="7" r="4"/><path d="M3 21v-1a6 6 0 0 1 12 0v1"/>
+        <path d="M16 3.5a4 4 0 0 1 0 7"/><path d="M22 21v-1a6 6 0 0 0-3-5.2"/>
+      </svg>
+    ),
+  },
+  {
     href: "/dashboard/settings",
     label: "Settings",
     icon: (
@@ -79,7 +89,7 @@ const WORKSPACE_NAV = [
   },
 ];
 
-export default function Sidebar({ userEmail }: { userEmail: string }) {
+export default function Sidebar({ userEmail, verificationCount = 0 }: { userEmail: string; verificationCount?: number }) {
   const pathname = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -133,6 +143,9 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
             >
               <span className={`shrink-0 ${active ? "text-[#f0f4f3]" : "text-[#5a7268]"}`}>{icon}</span>
               {label}
+              {label === "Verifications" && verificationCount > 0 && (
+                <span className="ml-auto font-mono text-[11px] text-[#5a7268]">{verificationCount}</span>
+              )}
             </Link>
           );
         })}
