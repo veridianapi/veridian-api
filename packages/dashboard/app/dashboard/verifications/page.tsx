@@ -48,11 +48,44 @@ function riskBand(score: number): "low" | "mid" | "high" {
 
 function docLabel(docType: string): string {
   const map: Record<string, string> = {
-    passport:        "PASSPORT",
-    driving_licence: "DRV_LIC",
-    national_id:     "NATL_ID",
+    passport:         "PASSPORT",
+    driving_licence:  "DRIVERS LICENSE",
+    national_id:      "NATIONAL ID",
+    residence_permit: "RESIDENCE PERMIT",
+    DRV_LIC:          "DRIVERS LICENSE",
+    NATL_ID:          "NATIONAL ID",
   };
-  return map[docType] ?? docType.toUpperCase().slice(0, 8);
+  return map[docType] ?? docType.toUpperCase();
+}
+
+const NATIONALITY_CODE: Record<string, string> = {
+  swedish:    "SE", swedish_citizen: "SE",
+  indian:     "IN",
+  italian:    "IT",
+  american:   "US",
+  dutch:      "NL",
+  egyptian:   "EG",
+  french:     "FR",
+  colombian:  "CO",
+  german:     "DE",
+  british:    "GB",
+  nigerian:   "NG",
+  japanese:   "JP",
+  ethiopian:  "ET",
+  kenyan:     "KE",
+  ghanaian:   "GH",
+};
+
+function nationalityToCode(nat: string | null): string | null {
+  if (!nat) return null;
+  const key = nat.trim().toLowerCase();
+  return NATIONALITY_CODE[key] ?? (nat.trim().length >= 2 ? nat.trim().slice(0, 2).toUpperCase() : null);
+}
+
+function flagEmoji(code: string): string {
+  return code.toUpperCase().replace(/./g, (c) =>
+    String.fromCodePoint(0x1F1E6 - 65 + c.charCodeAt(0))
+  );
 }
 
 function initials(name: string): string {
@@ -325,7 +358,7 @@ export default async function VerificationsPage({
                       </td>
                       <td className="px-4 py-[10px] font-mono text-[12px] text-[#5a7268] whitespace-nowrap">
                         <Link href={`/dashboard/verifications/${v.id}`} className="hover:text-[#f0f4f3] transition-colors">
-                          {v.id.slice(0, 14)}…
+                          ver_{v.id.slice(0, 8)}…
                         </Link>
                       </td>
                       <td className="px-4 py-[10px]">
@@ -365,7 +398,11 @@ export default async function VerificationsPage({
                         </span>
                       </td>
                       <td className="px-4 py-[10px] font-mono text-[12px] text-[#a3b3ae]">
-                        {v.nationality ?? <span className="text-[#5a7268]">—</span>}
+                        {(() => {
+                          const code = nationalityToCode(v.nationality);
+                          if (!code) return <span className="text-[#5a7268]">—</span>;
+                          return <span className="inline-flex items-center gap-1.5">{flagEmoji(code)} {code}</span>;
+                        })()}
                       </td>
                       <td className="px-4 py-[10px] text-[12px] text-[#5a7268] whitespace-nowrap">
                         {new Date(v.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
@@ -401,36 +438,24 @@ export default async function VerificationsPage({
             <span className="font-mono text-[11px] text-[#5a7268]"><UpdatedAgo /></span>
 
             {totalPages > 1 && (
-              <div className="ml-auto inline-flex items-center gap-1">
+              <div className="ml-auto inline-flex items-center gap-2">
                 <Link
                   href={pageHref(page - 1)}
                   aria-disabled={page <= 1}
-                  className={`h-6 min-w-[24px] px-2 inline-flex items-center justify-center gap-1 border border-white/[0.06] rounded-[4px] text-[#a3b3ae] text-[12px] font-medium hover:border-white/10 hover:text-[#f0f4f3] hover:bg-white/[0.02] transition-colors${page <= 1 ? " opacity-50 pointer-events-none" : ""}`}
+                  className={`h-6 px-[10px] inline-flex items-center justify-center gap-1 border border-white/[0.06] rounded-[4px] text-[#a3b3ae] text-[12px] font-medium hover:border-white/10 hover:text-[#f0f4f3] hover:bg-white/[0.02] transition-colors${page <= 1 ? " opacity-50 pointer-events-none" : ""}`}
                 >
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="m15 18-6-6 6-6"/>
                   </svg>
                   Prev
                 </Link>
-                {Array.from({ length: totalPages }, (_, i) => i + 1)
-                  .slice(Math.max(0, page - 3), Math.min(totalPages, page + 2))
-                  .map((p) => (
-                    <Link
-                      key={p}
-                      href={pageHref(p)}
-                      className={`h-6 min-w-[24px] px-2 inline-flex items-center justify-center border rounded-[4px] text-[12px] font-medium transition-colors${
-                        p === page
-                          ? " text-[#f0f4f3] border-white/10 bg-white/[0.04]"
-                          : " text-[#a3b3ae] border-white/[0.06] hover:border-white/10 hover:text-[#f0f4f3] hover:bg-white/[0.02]"
-                      }`}
-                    >
-                      {p}
-                    </Link>
-                  ))}
+                <span className="font-mono text-[11px] text-[#5a7268]">
+                  Page <span className="text-[#f0f4f3]">{page}</span> / <span className="text-[#f0f4f3]">{totalPages}</span>
+                </span>
                 <Link
                   href={pageHref(page + 1)}
                   aria-disabled={page >= totalPages}
-                  className={`h-6 min-w-[24px] px-2 inline-flex items-center justify-center gap-1 border border-white/[0.06] rounded-[4px] text-[#a3b3ae] text-[12px] font-medium hover:border-white/10 hover:text-[#f0f4f3] hover:bg-white/[0.02] transition-colors${page >= totalPages ? " opacity-50 pointer-events-none" : ""}`}
+                  className={`h-6 px-[10px] inline-flex items-center justify-center gap-1 border border-white/[0.06] rounded-[4px] text-[#a3b3ae] text-[12px] font-medium hover:border-white/10 hover:text-[#f0f4f3] hover:bg-white/[0.02] transition-colors${page >= totalPages ? " opacity-50 pointer-events-none" : ""}`}
                 >
                   Next
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

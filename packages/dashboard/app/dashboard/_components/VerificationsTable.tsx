@@ -49,11 +49,14 @@ function timeAgo(dateStr: string): string {
 
 function docLabel(docType: string): string {
   const map: Record<string, string> = {
-    passport:        "PASSPORT",
-    driving_licence: "DRV_LIC",
-    national_id:     "NATL_ID",
+    passport:          "PASSPORT",
+    driving_licence:   "DRIVERS LICENSE",
+    national_id:       "NATIONAL ID",
+    residence_permit:  "RESIDENCE PERMIT",
+    DRV_LIC:           "DRIVERS LICENSE",
+    NATL_ID:           "NATIONAL ID",
   };
-  return map[docType] ?? docType.toUpperCase().slice(0, 8);
+  return map[docType] ?? docType.toUpperCase();
 }
 
 const EASE: Easing = "easeOut";
@@ -101,7 +104,7 @@ export function VerificationsTable({ verifications }: { verifications: Verificat
                 </td>
                 <td className="px-4 py-[10px] font-mono text-[12px] text-[#5a7268] whitespace-nowrap">
                   <Link href={`/dashboard/verifications/${v.id}`} className="hover:text-[#f0f4f3] transition-colors">
-                    {v.id.slice(0, 8)}...
+                    ver_{v.id.slice(0, 8)}…
                   </Link>
                 </td>
                 <td className="px-4 py-[10px]">
