@@ -5,12 +5,21 @@ import { useRouter } from "next/navigation";
 const RANGES = ["24H", "7D", "30D", "90D"] as const;
 type Range = typeof RANGES[number];
 
-export function RangeSelector({ selected }: { selected: string }) {
+export function RangeSelector({
+  selected,
+  basePath = "/dashboard",
+  extraParams,
+}: {
+  selected: string;
+  basePath?: string;
+  extraParams?: Record<string, string>;
+}) {
   const router = useRouter();
   const active = selected.toUpperCase() as Range;
 
   function select(range: Range) {
-    router.replace(`/dashboard?range=${range.toLowerCase()}`, { scroll: false });
+    const params = new URLSearchParams({ range: range.toLowerCase(), ...extraParams });
+    router.replace(`${basePath}?${params.toString()}`, { scroll: false });
   }
 
   return (
