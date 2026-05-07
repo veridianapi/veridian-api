@@ -12,16 +12,24 @@ const PAGE_LABELS: Record<string, string> = {
   "/dashboard/help": "Help",
 };
 
-function getLabel(pathname: string): string {
-  if (PAGE_LABELS[pathname]) return PAGE_LABELS[pathname];
-  // Dynamic routes like /dashboard/verifications/[id]
+function getBreadcrumbs(pathname: string): Array<{ label: string; mono?: boolean }> {
+  // /dashboard/verifications/[uuid]
+  const detailMatch = pathname.match(/^\/dashboard\/verifications\/([^/]+)$/);
+  if (detailMatch) {
+    const id = detailMatch[1];
+    return [
+      { label: "Verifications" },
+      { label: `ver_${id.slice(0, 8)}…`, mono: true },
+    ];
+  }
+  if (PAGE_LABELS[pathname]) return [{ label: PAGE_LABELS[pathname] }];
   const match = Object.entries(PAGE_LABELS).find(([key]) => pathname.startsWith(key + "/"));
-  return match ? match[1] : "Dashboard";
+  return [{ label: match ? match[1] : "Dashboard" }];
 }
 
 export default function Topbar() {
   const pathname = usePathname();
-  const label = getLabel(pathname);
+  const crumbs = getBreadcrumbs(pathname);
 
   return (
     <header className="h-11 shrink-0 flex items-center border-b border-white/[0.06] px-6 gap-[14px] bg-[#050a09]">
@@ -29,8 +37,12 @@ export default function Topbar() {
         <span>Veridian</span>
         <span className="opacity-50">/</span>
         <span>Compliance</span>
-        <span className="opacity-50">/</span>
-        <span className="text-[#a3b3ae]">{label}</span>
+        {crumbs.map((c, i) => (
+          <span key={i} className="contents">
+            <span className="opacity-50">/</span>
+            <span className={`${i === crumbs.length - 1 ? "text-[#a3b3ae]" : ""} ${c.mono ? "font-mono text-[11px]" : ""}`}>{c.label}</span>
+          </span>
+        ))}
       </div>
 
       <div className="ml-auto flex items-center gap-1.5">
