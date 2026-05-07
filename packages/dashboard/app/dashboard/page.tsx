@@ -86,7 +86,7 @@ export default async function DashboardPage({
   ] = await Promise.all([
     supabase
       .from("verifications")
-      .select("id, status, risk_score, document_type, created_at")
+      .select("id, status, risk_score, document_type, created_at, full_name, applicant_email")
       .eq("customer_id", user.id)
       .gte("created_at", cutoff)
       .order("created_at", { ascending: false })

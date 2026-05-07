@@ -16,7 +16,8 @@ const VerificationSchema = z.object({
   selfie: z.string().min(1, "selfie is required"),
   document_type: z.enum(["passport", "driving_licence", "national_id"]),
   webhook_url: z.string().url().optional(),
-   metadata: z.record(z.string(), z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
+  applicant_email: z.string().email().optional(),
 });
 
 type VerificationBody = z.infer<typeof VerificationSchema>;
@@ -71,6 +72,7 @@ export async function verificationRoutes(app: FastifyInstance): Promise<void> {
             sanctions_hit: false,
             webhook_url: body.webhook_url ?? null,
             metadata: body.metadata ?? null,
+            applicant_email: body.applicant_email ?? null,
             s3_prefix: prefix,
             is_sandbox: true,
             processed_at: new Date().toISOString(),
@@ -109,6 +111,7 @@ export async function verificationRoutes(app: FastifyInstance): Promise<void> {
           status: "pending",
           webhook_url: body.webhook_url ?? null,
           metadata: body.metadata ?? null,
+          applicant_email: body.applicant_email ?? null,
           s3_prefix: prefix,
           is_sandbox: false,
         });

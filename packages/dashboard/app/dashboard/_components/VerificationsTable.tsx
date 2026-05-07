@@ -9,6 +9,14 @@ interface Verification {
   risk_score: number | null;
   document_type: string;
   created_at: string;
+  full_name: string | null;
+  applicant_email: string | null;
+}
+
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
 const STATUS_META: Record<string, { dot: string; label: string; text: string }> = {
@@ -67,7 +75,7 @@ export function VerificationsTable({ verifications }: { verifications: Verificat
             <th className="w-7 px-4 py-2 border-b border-white/[0.06] bg-white/[0.012]">
               <span className="inline-block w-3 h-3 border border-white/10 rounded-[3px]" />
             </th>
-            {["ID", "Status", "Risk", "Document", "Created", ""].map((col) => (
+            {["ID", "Name", "Status", "Risk", "Document", "Created", ""].map((col) => (
               <th key={col} className="text-left text-[11px] font-medium text-[#5a7268] px-4 py-2 border-b border-white/[0.06] bg-white/[0.012] whitespace-nowrap">
                 {col}
               </th>
@@ -95,6 +103,23 @@ export function VerificationsTable({ verifications }: { verifications: Verificat
                   <Link href={`/dashboard/verifications/${v.id}`} className="hover:text-[#f0f4f3] transition-colors">
                     {v.id.slice(0, 8)}...
                   </Link>
+                </td>
+                <td className="px-4 py-[10px]">
+                  {v.full_name ? (
+                    <div className="flex items-center gap-[10px]">
+                      <div className="w-5 h-5 rounded-full bg-[#1d2926] flex items-center justify-center shrink-0 font-mono text-[10px] text-[#a3b3ae]">
+                        {initials(v.full_name)}
+                      </div>
+                      <div className="leading-[1.25]">
+                        <div className="text-[12.5px] font-medium text-[#f0f4f3]">{v.full_name}</div>
+                        {v.applicant_email && (
+                          <div className="text-[11px] text-[#5a7268]">{v.applicant_email}</div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <span className="text-[#5a7268] text-[12px]">—</span>
+                  )}
                 </td>
                 <td className="px-4 py-[10px]">
                   <span className={`inline-flex items-center gap-2 ${s.text}`}>

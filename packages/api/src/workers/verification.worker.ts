@@ -368,7 +368,7 @@ async function processVerification(
     });
     const status = statusFromScore(riskScore);
 
-    // 6. Persist results — include document keys and sandbox flag
+    // 6. Persist results — applicant_email is intentionally omitted to preserve the value set at creation
     const { error: updateError } = await supabase
       .from("verifications")
       .update({
