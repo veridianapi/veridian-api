@@ -83,6 +83,9 @@ export async function authenticate(
     .eq("is_active", true)
     .single();
 
+  console.log('[AUTH DEBUG] Supabase query result:', JSON.stringify(data));
+  console.log('[AUTH DEBUG] Supabase error:', JSON.stringify(error));
+
   if (error || !data) {
     reply.status(401).send({ error: "Invalid API key" });
     return;
