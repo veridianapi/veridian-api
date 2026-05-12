@@ -73,6 +73,8 @@ export async function authenticate(
 
   // API key path — hash and look up in api_keys table
   const hashedKey = createHash("sha256").update(token).digest("hex");
+  console.log('[AUTH DEBUG] Token prefix:', token.slice(0, 20));
+  console.log('[AUTH DEBUG] Computed hash:', hashedKey);
 
   const { data, error } = await supabase
     .from("api_keys")
